@@ -1,101 +1,91 @@
 import { useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  Pressable,
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-} from "react-native";
+import { KeyboardAvoidingView, Platform, Text, TextInput, View } from "react-native";
 import { useRouter } from "expo-router";
-import { supabase } from "../../lib/supabase";
+import { useAuth } from "../_layout";
+import { Button, ErrorText, Screen, Subtitle, Title } from "../../components/ui";
+import { isDemoMode, signIn } from "../../lib/data";
 
 export default function LoginScreen() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const { refresh } = useAuth();
+
+  const [email, setEmail] = useState(isDemoMode() ? "demo@strength.app" : "");
+  const [password, setPassword] = useState(isDemoMode() ? "demo1234" : "");
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   async function handleLogin() {
-    setError("");
+    setError(null);
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
-      password,
-    });
-    setLoading(false);
-
-    if (error) {
-      setError(error.message);
-      return;
+    try {
+      const result = await signIn(email.trim(), password);
+      refresh();
+      router.replace(result.onboardingCompleted ? "/dashboard" : "/questionnaire");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Connexion impossible.");
+    } finally {
+      setLoading(false);
     }
-
-    router.replace("/");
   }
 
   return (
     <KeyboardAvoidingView
-      className="flex-1 bg-white"
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      className="flex-1"
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <View className="flex-1 justify-center px-8">
-        <Text className="text-3xl font-bold text-center mb-2">
-          Strength App
-        </Text>
-        <Text className="text-base text-gray-500 text-center mb-10">
-          Programme sportif personnalisé
-        </Text>
+      <Screen center>
+        <View className="items-center mb-10">
+          <Text className="text-5xl mb-3">🏋️</Text>
+          <Title>Strength App</Title>
+          <Subtitle>Votre programme sportif personnalisé</Subtitle>
+        </View>
 
-        {error ? (
-          <Text className="text-red-500 text-sm text-center mb-4">
-            {error}
-          </Text>
-        ) : null}
+        <ErrorText message={error} />
 
         <TextInput
-          className="border border-gray-300 rounded-xl px-4 py-3 text-base mb-4"
+          className="border border-slate-300 bg-white rounded-xl px-4 py-3.5 text-base mb-3"
           placeholder="Email"
+          placeholderTextColor="#94a3b8"
           value={email}
           onChangeText={setEmail}
           autoCapitalize="none"
+          autoComplete="email"
           keyboardType="email-address"
-          textContentType="emailAddress"
+          inputMode="email"
         />
 
         <TextInput
-          className="border border-gray-300 rounded-xl px-4 py-3 text-base mb-6"
+          className="border border-slate-300 bg-white rounded-xl px-4 py-3.5 text-base mb-5"
           placeholder="Mot de passe"
+          placeholderTextColor="#94a3b8"
           value={password}
           onChangeText={setPassword}
           secureTextEntry
-          textContentType="password"
+          autoComplete="current-password"
+          onSubmitEditing={handleLogin}
         />
 
-        <Pressable
-          className="bg-[#1565C0] rounded-xl py-4 items-center mb-4"
-          onPress={handleLogin}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text className="text-white text-base font-semibold">
-              Se connecter
-            </Text>
-          )}
-        </Pressable>
+        <View className="gap-3">
+          <Button
+            label="Se connecter"
+            onPress={handleLogin}
+            loading={loading}
+            disabled={!email || !password}
+          />
+          <Button
+            label="Créer un compte"
+            variant="secondary"
+            onPress={() => router.push("/signup")}
+          />
+        </View>
 
-        <Pressable
-          className="border-2 border-[#1565C0] rounded-xl py-4 items-center"
-          onPress={() => router.push("/(auth)/signup")}
-        >
-          <Text className="text-[#1565C0] text-base font-semibold">
-            Créer un compte
+        {isDemoMode() ? (
+          <Text className="text-xs text-slate-400 text-center mt-6 leading-4">
+            Mode démo : n'importe quel email/mot de passe fonctionne.{"\n"}
+            Aucune donnée n'est envoyée.
           </Text>
-        </Pressable>
-      </View>
+        ) : null}
+      </Screen>
     </KeyboardAvoidingView>
   );
 }

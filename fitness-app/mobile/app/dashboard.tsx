@@ -1,244 +1,252 @@
-import { useEffect, useState, useCallback } from "react";
-import {
-  View,
-  Text,
-  Pressable,
-  ScrollView,
-  ActivityIndicator,
-  Alert,
-  RefreshControl,
-} from "react-native";
+import { useCallback, useEffect, useState } from "react";
+import { Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
+import { useFocusEffect, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useSession } from "./_layout";
-import { supabase } from "../lib/supabase";
+import { useAuth } from "./_layout";
+import {
+  Button,
+  Card,
+  ErrorText,
+  Label,
+  Loading,
+  Pill,
+  Stat,
+  Title,
+} from "../components/ui";
+import { fetchDashboard, signOut, startSession } from "../lib/data";
+import type { DashboardData } from "../lib/types";
 
-const PROTOCOL_SCHEDULE: Record<string, string[]> = {
-  upper_lower: ["upper", "lower", "upper", "lower"],
-  full_body: ["full_body", "full_body", "full_body"],
-  push_pull: ["push", "pull", "push", "pull"],
-  push_pull_legs: ["push", "pull", "legs", "push", "pull", "legs"],
-};
-
-const FOCUS_LABELS: Record<string, string> = {
-  upper: "Upper Body",
-  lower: "Lower Body",
-  full_body: "Full Body",
-  push: "Push",
-  pull: "Pull",
-  legs: "Legs",
-};
-
-interface UserProgram {
-  id: string;
-  program_id: string;
-  protocol: string;
-  current_week: number;
-  total_sessions_completed: number;
-  programs: {
-    name: string;
-    icon: string;
-    color: string;
-    duration_weeks: number | null;
-    is_continuous: boolean;
-  };
-  program_phases: {
-    name: string;
-    phase_number: number;
-  };
-}
-
-function computeStreak(dates: (string | null)[]): number {
-  const uniqueDays = [
-    ...new Set(
-      dates
-        .filter((d): d is string => d !== null)
-        .map((d) => new Date(d).toISOString().split("T")[0]),
-    ),
-  ].sort((a, b) => b.localeCompare(a));
-
-  if (uniqueDays.length === 0) return 0;
-
-  const today = new Date().toISOString().split("T")[0];
-  if (uniqueDays[0] !== today) {
-    const yesterday = new Date(Date.now() - 86400000)
-      .toISOString()
-      .split("T")[0];
-    if (uniqueDays[0] !== yesterday) return 0;
-  }
-
-  let streak = 1;
-  for (let i = 1; i < uniqueDays.length; i++) {
-    const prev = new Date(uniqueDays[i - 1]).getTime();
-    const curr = new Date(uniqueDays[i]).getTime();
-    if (prev - curr === 86400000) {
-      streak++;
-    } else {
-      break;
-    }
-  }
-  return streak;
-}
+/** energy_level pilote le volume et la charge côté moteur (Pydantic : 1..5). */
+const ENERGY_LEVELS = [
+  { value: 1, icon: "🪫", label: "Épuisé" },
+  { value: 2, icon: "😮‍💨", label: "Fatigué" },
+  { value: 3, icon: "🙂", label: "Normal" },
+  { value: 4, icon: "💪", label: "En forme" },
+  { value: 5, icon: "🔥", label: "Au top" },
+];
 
 export default function DashboardScreen() {
-  const { session } = useSession();
-  const [userProgram, setUserProgram] = useState<UserProgram | null>(null);
-  const [streak, setStreak] = useState(0);
+  const router = useRouter();
+  const { userId, isLoading: authLoading, refresh } = useAuth();
+
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [energy, setEnergy] = useState(3);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [starting, setStarting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const fetchData = useCallback(async () => {
-    if (!session) return;
-
-    const { data: up } = await supabase
-      .from("user_programs")
-      .select(
-        "id, program_id, protocol, current_week, total_sessions_completed, programs(name, icon, color, duration_weeks, is_continuous), program_phases(name, phase_number)",
-      )
-      .eq("user_id", session.user.id)
-      .eq("status", "active")
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .single();
-
-    if (up) setUserProgram(up as unknown as UserProgram);
-
-    const { data: completedSessions } = await supabase
-      .from("sessions")
-      .select("completed_at")
-      .eq("user_id", session.user.id)
-      .eq("status", "completed")
-      .order("completed_at", { ascending: false });
-
-    if (completedSessions) {
-      setStreak(computeStreak(completedSessions.map((s) => s.completed_at)));
+  const load = useCallback(async () => {
+    if (!userId) return;
+    try {
+      setData(await fetchDashboard(userId, new Date()));
+      setError(null);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Chargement impossible.");
     }
-  }, [session]);
+  }, [userId]);
 
   useEffect(() => {
-    fetchData().finally(() => setLoading(false));
-  }, [fetchData]);
+    if (authLoading) return;
+    if (!userId) {
+      router.replace("/login");
+      return;
+    }
+    load().finally(() => setLoading(false));
+  }, [userId, authLoading, load, router]);
 
-  const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    await fetchData();
-    setRefreshing(false);
-  }, [fetchData]);
+  // Recharge au retour de l'écran séance pour refléter la séance terminée.
+  useFocusEffect(
+    useCallback(() => {
+      if (!loading) load();
+    }, [load, loading]),
+  );
 
-  if (loading) {
-    return (
-      <View className="flex-1 items-center justify-center bg-white">
-        <ActivityIndicator size="large" color="#1565C0" />
-      </View>
-    );
+  async function handleStart() {
+    if (!data || !userId) return;
+    setError(null);
+    setStarting(true);
+    try {
+      const workout = await startSession(userId, data, energy);
+      router.push({
+        pathname: "/session",
+        params: { sessionId: workout.session_id },
+      });
+    } catch (e) {
+      setError(
+        e instanceof Error
+          ? `Génération impossible — ${e.message}`
+          : "Génération impossible.",
+      );
+    } finally {
+      setStarting(false);
+    }
   }
 
-  if (!userProgram) {
+  async function handleSignOut() {
+    await signOut();
+    refresh();
+    router.replace("/login");
+  }
+
+  if (loading || authLoading) return <Loading label="Chargement de votre programme…" />;
+
+  if (!data) {
     return (
-      <SafeAreaView className="flex-1 bg-white justify-center items-center px-8">
-        <Text className="text-xl font-bold mb-2">Aucun programme actif</Text>
-        <Text className="text-gray-500 text-center">
+      <SafeAreaView className="flex-1 bg-slate-50 items-center justify-center px-8">
+        <Text className="text-5xl mb-4">🎯</Text>
+        <Title>Aucun programme actif</Title>
+        <Text className="text-sm text-slate-500 text-center mt-2 mb-6">
           Complétez le questionnaire pour recevoir votre programme personnalisé.
         </Text>
+        <View className="w-full max-w-[320px] gap-3">
+          <Button
+            label="Faire le questionnaire"
+            onPress={() => router.replace("/questionnaire")}
+          />
+          <Button label="Se déconnecter" variant="ghost" onPress={handleSignOut} />
+        </View>
       </SafeAreaView>
     );
   }
 
-  const schedule =
-    PROTOCOL_SCHEDULE[userProgram.protocol] ?? ["full_body"];
-  const nextFocus =
-    schedule[userProgram.total_sessions_completed % schedule.length];
-  const sessionLabel = FOCUS_LABELS[nextFocus] ?? nextFocus;
-  const programColor = userProgram.programs?.color ?? "#1565C0";
+  const { program, phase, userProgram, nextSession, streak, completedCount } = data;
+  const tint = program.color ?? "#1565C0";
+  const totalWeeks = program.duration_weeks;
+  const progress = totalWeeks ? Math.min(1, userProgram.current_week / totalWeeks) : null;
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
+    <SafeAreaView className="flex-1 bg-slate-50">
       <ScrollView
-        className="flex-1"
-        contentContainerStyle={{ padding: 24 }}
+        contentContainerStyle={{ paddingVertical: 24, paddingBottom: 40 }}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={async () => {
+              setRefreshing(true);
+              await load();
+              setRefreshing(false);
+            }}
+          />
         }
       >
-        <Text className="text-2xl font-bold mb-1">Mon programme</Text>
-        <Text className="text-sm text-gray-500 mb-6">
-          Bienvenue dans votre espace
-        </Text>
-
-        {/* Programme card */}
-        <View
-          className="rounded-2xl p-5 mb-4"
-          style={{ backgroundColor: programColor + "15" }}
-        >
-          <View className="flex-row items-center mb-3">
-            <Text className="text-2xl mr-2">
-              {userProgram.programs?.icon}
-            </Text>
+        <View className="w-full max-w-[520px] mx-auto px-6">
+          <View className="flex-row justify-between items-start mb-6">
             <View className="flex-1">
-              <Text className="text-lg font-bold">
-                {userProgram.programs?.name}
-              </Text>
-              <Text className="text-sm text-gray-600">
-                {userProgram.program_phases?.name}
-              </Text>
+              <Label>Mon programme</Label>
+              <Title>{program.name}</Title>
             </View>
+            <Pressable onPress={handleSignOut} className="p-2 -mr-2">
+              <Text className="text-xs text-slate-400">Déconnexion</Text>
+            </Pressable>
           </View>
 
-          <View className="flex-row gap-4">
-            <View className="bg-white/80 rounded-lg px-3 py-2 flex-1">
-              <Text className="text-xs text-gray-500">Phase</Text>
-              <Text className="text-sm font-semibold">
-                {userProgram.program_phases?.phase_number ?? 1}
+          <ErrorText message={error} />
+
+          {/* Programme + phase */}
+          <Card tint={tint} className="mb-4">
+            <View className="flex-row items-center mb-4">
+              <Text className="text-3xl mr-3">{program.icon}</Text>
+              <View className="flex-1">
+                <Text className="text-base font-bold text-slate-900">
+                  {phase?.name ?? program.tagline ?? program.name}
+                </Text>
+                {phase?.objective ? (
+                  <Text className="text-xs text-slate-600 mt-0.5">
+                    {phase.objective}
+                  </Text>
+                ) : null}
+              </View>
+            </View>
+
+            <View className="flex-row flex-wrap gap-2">
+              <Pill label="Phase" value={phase?.phase_number ?? 1} />
+              <Pill
+                label="Semaine"
+                value={totalWeeks ? `${userProgram.current_week}/${totalWeeks}` : userProgram.current_week}
+              />
+              <Pill label="Protocole" value={nextSession.protocol.replace(/_/g, " ")} />
+            </View>
+
+            {progress !== null ? (
+              <View className="h-1.5 bg-white/60 rounded-full overflow-hidden mt-4">
+                <View
+                  className="h-full rounded-full"
+                  style={{ width: `${progress * 100}%`, backgroundColor: tint }}
+                />
+              </View>
+            ) : null}
+          </Card>
+
+          {/* Prochaine séance */}
+          <Card className="mb-4">
+            <Label>Prochaine séance</Label>
+            <View className="flex-row items-baseline mt-2 mb-1">
+              <Text className="text-xl font-bold text-slate-900">
+                {nextSession.session_label}
+              </Text>
+              <Text className="text-xs text-slate-400 ml-2">
+                jour {nextSession.day_number}
               </Text>
             </View>
-            <View className="bg-white/80 rounded-lg px-3 py-2 flex-1">
-              <Text className="text-xs text-gray-500">Semaine</Text>
-              <Text className="text-sm font-semibold">
-                {userProgram.current_week}
-              </Text>
-            </View>
-          </View>
-        </View>
-
-        {/* Next session card */}
-        <View className="bg-white rounded-2xl p-5 mb-4 border border-gray-100">
-          <Text className="text-xs text-gray-500 uppercase tracking-wide mb-2">
-            Prochaine séance
-          </Text>
-          <Text className="text-lg font-bold mb-1">{sessionLabel}</Text>
-          <Text className="text-sm text-gray-500 capitalize">{nextFocus}</Text>
-        </View>
-
-        {/* Stats row */}
-        <View className="flex-row gap-3 mb-6">
-          <View className="flex-1 bg-white rounded-2xl p-4 border border-gray-100 items-center">
-            <Text className="text-3xl mb-1">🔥</Text>
-            <Text className="text-2xl font-bold">{streak}</Text>
-            <Text className="text-xs text-gray-500">Streak</Text>
-          </View>
-          <View className="flex-1 bg-white rounded-2xl p-4 border border-gray-100 items-center">
-            <Text className="text-3xl mb-1">✅</Text>
-            <Text className="text-2xl font-bold">
-              {userProgram.total_sessions_completed}
+            <Text className="text-sm text-slate-500 mb-4">
+              Focus : {nextSession.focus.replace(/_/g, " ")}
             </Text>
-            <Text className="text-xs text-gray-500">Complétées</Text>
-          </View>
-        </View>
 
-        {/* Start session button */}
-        <Pressable
-          className="rounded-xl py-4 items-center"
-          style={{ backgroundColor: programColor }}
-          onPress={() =>
-            Alert.alert(
-              "Bientôt disponible",
-              "Session player — à venir en S6",
-            )
-          }
-        >
-          <Text className="text-white text-base font-bold">
-            Démarrer la séance
-          </Text>
-        </Pressable>
+            <Label>Niveau d'énergie</Label>
+            <View className="flex-row gap-2 mt-2">
+              {ENERGY_LEVELS.map((level) => {
+                const active = energy === level.value;
+                return (
+                  <Pressable
+                    key={level.value}
+                    onPress={() => setEnergy(level.value)}
+                    accessibilityRole="radio"
+                    accessibilityState={{ checked: active }}
+                    accessibilityLabel={level.label}
+                    className={`flex-1 items-center py-2 rounded-xl border-2 ${
+                      active ? "border-blue-600 bg-blue-50" : "border-slate-200"
+                    }`}
+                  >
+                    <Text className="text-lg">{level.icon}</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+            <Text className="text-[11px] text-slate-400 mt-2">
+              {ENERGY_LEVELS.find((l) => l.value === energy)?.label} — ajuste le
+              volume et la charge de la séance.
+            </Text>
+          </Card>
+
+          {/* Stats */}
+          <View className="flex-row gap-3 mb-5">
+            <Stat icon="🔥" value={streak} caption="Jours d'affilée" />
+            <Stat icon="✅" value={completedCount} caption="Séances faites" />
+            <Stat
+              icon="📅"
+              value={`${program.frequency_per_week_min}×`}
+              caption="Par semaine"
+            />
+          </View>
+
+          <Button
+            label="Démarrer la séance"
+            onPress={handleStart}
+            loading={starting}
+            color={tint}
+          />
+
+          {completedCount > 0 ? (
+            <View className="mt-3">
+              <Button
+                label="Donner mon feedback sur le programme"
+                variant="ghost"
+                onPress={() => router.push("/feedback")}
+              />
+            </View>
+          ) : null}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );

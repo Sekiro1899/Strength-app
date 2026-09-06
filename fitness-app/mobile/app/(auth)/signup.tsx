@@ -1,109 +1,90 @@
 import { useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  Pressable,
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-} from "react-native";
+import { KeyboardAvoidingView, Platform, Text, TextInput, View } from "react-native";
 import { useRouter } from "expo-router";
-import { supabase } from "../../lib/supabase";
+import { useAuth } from "../_layout";
+import { Button, ErrorText, Screen, Subtitle, Title } from "../../components/ui";
+import { signUp } from "../../lib/data";
+
+const MIN_PASSWORD = 6;
 
 export default function SignupScreen() {
   const router = useRouter();
+  const { refresh } = useAuth();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const tooShort = password.length > 0 && password.length < MIN_PASSWORD;
+
   async function handleSignup() {
-    setError("");
+    setError(null);
     setLoading(true);
-    const { data, error } = await supabase.auth.signUp({
-      email: email.trim(),
-      password,
-    });
-    setLoading(false);
-
-    if (error) {
-      setError(error.message);
-      return;
+    try {
+      await signUp(email.trim(), password);
+      refresh();
+      router.replace("/questionnaire");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Inscription impossible.");
+    } finally {
+      setLoading(false);
     }
-
-    if (data.user) {
-      await supabase.from("users").upsert({
-        id: data.user.id,
-        email: data.user.email,
-        onboarding_completed: false,
-      });
-    }
-
-    router.replace("/questionnaire");
   }
 
   return (
     <KeyboardAvoidingView
-      className="flex-1 bg-white"
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      className="flex-1"
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <View className="flex-1 justify-center px-8">
-        <Text className="text-3xl font-bold text-center mb-2">
-          Créer un compte
-        </Text>
-        <Text className="text-base text-gray-500 text-center mb-10">
-          Commencez votre programme personnalisé
-        </Text>
+      <Screen center>
+        <View className="items-center mb-10">
+          <Text className="text-5xl mb-3">🎯</Text>
+          <Title>Créer un compte</Title>
+          <Subtitle>9 questions et votre programme est prêt</Subtitle>
+        </View>
 
-        {error ? (
-          <Text className="text-red-500 text-sm text-center mb-4">
-            {error}
-          </Text>
-        ) : null}
+        <ErrorText message={error} />
 
         <TextInput
-          className="border border-gray-300 rounded-xl px-4 py-3 text-base mb-4"
+          className="border border-slate-300 bg-white rounded-xl px-4 py-3.5 text-base mb-3"
           placeholder="Email"
+          placeholderTextColor="#94a3b8"
           value={email}
           onChangeText={setEmail}
           autoCapitalize="none"
+          autoComplete="email"
           keyboardType="email-address"
-          textContentType="emailAddress"
+          inputMode="email"
         />
 
         <TextInput
-          className="border border-gray-300 rounded-xl px-4 py-3 text-base mb-6"
-          placeholder="Mot de passe (min. 6 caractères)"
+          className="border border-slate-300 bg-white rounded-xl px-4 py-3.5 text-base"
+          placeholder={`Mot de passe (min. ${MIN_PASSWORD} caractères)`}
+          placeholderTextColor="#94a3b8"
           value={password}
           onChangeText={setPassword}
           secureTextEntry
-          textContentType="newPassword"
+          autoComplete="new-password"
         />
+        <Text className="text-xs h-5 mt-1 mb-4 text-red-600">
+          {tooShort ? `Minimum ${MIN_PASSWORD} caractères.` : ""}
+        </Text>
 
-        <Pressable
-          className="bg-[#1565C0] rounded-xl py-4 items-center mb-4"
-          onPress={handleSignup}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text className="text-white text-base font-semibold">
-              S'inscrire
-            </Text>
-          )}
-        </Pressable>
-
-        <Pressable
-          className="py-4 items-center"
-          onPress={() => router.back()}
-        >
-          <Text className="text-[#1565C0] text-base">
-            Déjà un compte ? Se connecter
-          </Text>
-        </Pressable>
-      </View>
+        <View className="gap-3">
+          <Button
+            label="S'inscrire"
+            onPress={handleSignup}
+            loading={loading}
+            disabled={!email || password.length < MIN_PASSWORD}
+          />
+          <Button
+            label="J'ai déjà un compte"
+            variant="ghost"
+            onPress={() => router.replace("/login")}
+          />
+        </View>
+      </Screen>
     </KeyboardAvoidingView>
   );
 }

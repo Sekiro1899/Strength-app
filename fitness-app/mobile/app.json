@@ -1,11 +1,26 @@
 {
   "expo": {
-    "name": "Fitness App",
+    "name": "Strength App",
     "slug": "fitness-app",
     "version": "0.1.0",
     "orientation": "portrait",
     "scheme": "fitness-app",
-    "platforms": ["ios", "android"],
-    "plugins": ["expo-router", "expo-secure-store"]
+    "userInterfaceStyle": "light",
+    "platforms": ["ios", "android", "web"],
+    "plugins": ["expo-router", "expo-secure-store"],
+    "web": {
+      "bundler": "metro",
+      "output": "single"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "app.strength.fitness"
+    },
+    "android": {
+      "package": "app.strength.fitness",
+      "adaptiveIcon": {
+        "backgroundColor": "#1565C0"
+      }
+    }
   }
 }

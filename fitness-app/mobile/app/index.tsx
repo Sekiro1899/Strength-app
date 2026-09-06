@@ -1,40 +1,47 @@
-import { useEffect, useState } from "react";
-import { View, ActivityIndicator } from "react-native";
-import { useRouter } from "expo-router";
-import { useSession } from "./_layout";
-import { supabase } from "../lib/supabase";
+import { useEffect } from "react";
+import { useRootNavigationState, useRouter } from "expo-router";
+import { useAuth } from "./_layout";
+import { Loading } from "../components/ui";
+import { getCurrentUser } from "../lib/data";
 
+/**
+ * Aiguillage d'entrée — décide où atterrir selon l'état du compte :
+ *   pas de session          → /login
+ *   onboarding non terminé  → /questionnaire
+ *   sinon                   → /dashboard
+ */
 export default function IndexScreen() {
-  const { session, isLoading } = useSession();
+  const { userId, isLoading } = useAuth();
   const router = useRouter();
-  const [checking, setChecking] = useState(true);
+
+  // En mode démo l'état d'auth est disponible dès le premier rendu : sans ce
+  // garde-fou, la redirection partirait avant que le Stack racine soit monté
+  // ("Attempted to navigate before mounting the Root Layout component").
+  const rootState = useRootNavigationState();
+  const navigatorReady = Boolean(rootState?.key);
 
   useEffect(() => {
-    if (isLoading) return;
+    if (!navigatorReady || isLoading) return;
 
-    if (!session) {
-      router.replace("/(auth)/login");
+    if (!userId) {
+      router.replace("/login");
       return;
     }
 
-    supabase
-      .from("users")
-      .select("onboarding_completed")
-      .eq("id", session.user.id)
-      .single()
-      .then(({ data }) => {
-        if (data?.onboarding_completed) {
-          router.replace("/dashboard");
-        } else {
-          router.replace("/questionnaire");
-        }
-        setChecking(false);
+    let active = true;
+    getCurrentUser(userId)
+      .then((user) => {
+        if (!active) return;
+        router.replace(user?.onboarding_completed ? "/dashboard" : "/questionnaire");
+      })
+      .catch(() => {
+        if (active) router.replace("/questionnaire");
       });
-  }, [session, isLoading]);
 
-  return (
-    <View className="flex-1 items-center justify-center bg-white">
-      <ActivityIndicator size="large" color="#1565C0" />
-    </View>
-  );
+    return () => {
+      active = false;
+    };
+  }, [navigatorReady, userId, isLoading, router]);
+
+  return <Loading />;
 }

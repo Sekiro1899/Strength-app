@@ -1,145 +1,178 @@
 import { useEffect, useState } from "react";
-import { View, Text, Pressable, ActivityIndicator } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { supabase } from "../lib/supabase";
+import { Text, View } from "react-native";
+import { useRouter } from "expo-router";
+import { useAuth } from "./_layout";
+import {
+  Button,
+  Card,
+  ErrorText,
+  Label,
+  Loading,
+  Pill,
+  Screen,
+} from "../components/ui";
+import { fetchOnboardingResult } from "../lib/data";
+import { TIEBREAK_ORDER } from "../lib/scoring";
+import type { OnboardingResult, PersonaCode } from "../lib/types";
 
-interface PersonaData {
-  name: string;
-  tagline: string;
-  description: string;
-  icon: string;
-  color: string;
-}
-
-interface ProgramData {
-  name: string;
-  tagline: string;
-  duration_weeks: number | null;
-  is_continuous: boolean;
-  frequency_per_week_min: number;
-  frequency_per_week_max: number;
-  session_duration_min: number;
-  session_duration_max: number;
-}
+const PERSONA_LABELS: Record<PersonaCode, string> = {
+  SMB: "Summer Muscle Builder",
+  BF: "Brut Force",
+  AW: "Athlete Wannabe",
+  CR: "Corporate Rusher",
+  SAV: "Savage",
+};
 
 export default function OnboardingResultScreen() {
-  const { personaId } = useLocalSearchParams<{ personaId: string }>();
   const router = useRouter();
+  const { userId, isLoading: authLoading } = useAuth();
 
-  const [persona, setPersona] = useState<PersonaData | null>(null);
-  const [program, setProgram] = useState<ProgramData | null>(null);
+  const [result, setResult] = useState<OnboardingResult | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function fetchData() {
-      const { data: p } = await supabase
-        .from("personas")
-        .select("name, tagline, description, icon, color, primary_program_id")
-        .eq("id", personaId)
-        .single();
-
-      if (p) {
-        setPersona(p as PersonaData);
-
-        const { data: prog } = await supabase
-          .from("programs")
-          .select(
-            "name, tagline, duration_weeks, is_continuous, frequency_per_week_min, frequency_per_week_max, session_duration_min, session_duration_max",
-          )
-          .eq("id", p.primary_program_id)
-          .single();
-
-        if (prog) setProgram(prog);
-      }
-      setLoading(false);
+    if (authLoading) return;
+    if (!userId) {
+      router.replace("/login");
+      return;
     }
-    fetchData();
-  }, [personaId]);
 
-  if (loading || !persona || !program) {
+    let active = true;
+    fetchOnboardingResult(userId)
+      .then((r) => active && setResult(r))
+      .catch((e) => active && setError(e.message))
+      .finally(() => active && setLoading(false));
+
+    return () => {
+      active = false;
+    };
+  }, [userId, authLoading, router]);
+
+  if (loading || authLoading) return <Loading label="Calcul de votre profil…" />;
+
+  if (!result) {
     return (
-      <View className="flex-1 items-center justify-center bg-white">
-        <ActivityIndicator size="large" color="#1565C0" />
-      </View>
+      <Screen center>
+        <ErrorText message={error ?? "Profil introuvable."} />
+        <Button label="Refaire le questionnaire" onPress={() => router.replace("/questionnaire")} />
+      </Screen>
     );
   }
 
-  const durationLabel = program.is_continuous
-    ? "Programme continu"
+  const { persona, program, scores } = result;
+  const tint = persona.color ?? "#1565C0";
+  const maxScore = Math.max(...Object.values(scores), 1);
+
+  const duration = program.is_continuous
+    ? "En continu"
     : `${program.duration_weeks} semaines`;
-
-  const frequencyLabel =
+  const frequency =
     program.frequency_per_week_min === program.frequency_per_week_max
-      ? `${program.frequency_per_week_min}x / semaine`
-      : `${program.frequency_per_week_min}-${program.frequency_per_week_max}x / semaine`;
-
-  const durationSessionLabel =
+      ? `${program.frequency_per_week_min}×/sem`
+      : `${program.frequency_per_week_min}–${program.frequency_per_week_max}×/sem`;
+  const sessionLength =
     program.session_duration_min === program.session_duration_max
       ? `${program.session_duration_min} min`
-      : `${program.session_duration_min}-${program.session_duration_max} min`;
+      : `${program.session_duration_min}–${program.session_duration_max} min`;
 
   return (
-    <View className="flex-1 bg-white justify-center px-8">
-      <View className="items-center mb-8">
+    <Screen
+      footer={
+        <Button
+          label="Démarrer mon programme"
+          onPress={() => router.replace("/dashboard")}
+          color={tint}
+        />
+      }
+    >
+      <View className="items-center mb-6">
+        <Label>Votre profil</Label>
         <View
-          className="w-24 h-24 rounded-full items-center justify-center mb-4"
-          style={{ backgroundColor: persona.color + "20" }}
+          className="w-24 h-24 rounded-full items-center justify-center my-4"
+          style={{ backgroundColor: `${tint}1F` }}
         >
           <Text className="text-5xl">{persona.icon}</Text>
         </View>
-        <Text className="text-2xl font-bold text-center mb-1">
+        <Text className="text-2xl font-bold text-center text-slate-900">
           {persona.name}
         </Text>
-        <Text className="text-base text-gray-500 text-center mb-4">
-          {persona.tagline}
-        </Text>
-        <Text className="text-sm text-gray-600 text-center leading-5 px-4">
-          {persona.description}
-        </Text>
-      </View>
-
-      <View
-        className="rounded-2xl p-5 mb-10"
-        style={{ backgroundColor: persona.color + "10" }}
-      >
-        <Text
-          className="text-lg font-bold mb-3"
-          style={{ color: persona.color }}
-        >
-          Votre programme
-        </Text>
-        <Text className="text-base font-semibold mb-1">{program.name}</Text>
-        {program.tagline ? (
-          <Text className="text-sm text-gray-500 mb-3">{program.tagline}</Text>
+        {persona.tagline ? (
+          <Text className="text-sm text-slate-500 text-center mt-1">
+            {persona.tagline}
+          </Text>
         ) : null}
-
-        <View className="flex-row flex-wrap gap-2">
-          <View className="bg-white rounded-lg px-3 py-2">
-            <Text className="text-xs text-gray-500">Durée</Text>
-            <Text className="text-sm font-semibold">{durationLabel}</Text>
-          </View>
-          <View className="bg-white rounded-lg px-3 py-2">
-            <Text className="text-xs text-gray-500">Fréquence</Text>
-            <Text className="text-sm font-semibold">{frequencyLabel}</Text>
-          </View>
-          <View className="bg-white rounded-lg px-3 py-2">
-            <Text className="text-xs text-gray-500">Séance</Text>
-            <Text className="text-sm font-semibold">
-              {durationSessionLabel}
-            </Text>
-          </View>
-        </View>
       </View>
 
-      <Pressable
-        className="rounded-xl py-4 items-center"
-        style={{ backgroundColor: persona.color }}
-        onPress={() => router.replace("/dashboard")}
-      >
-        <Text className="text-white text-base font-bold">
-          Démarrer mon programme
+      {persona.description ? (
+        <Card className="mb-4">
+          <Text className="text-sm text-slate-700 leading-5">
+            {persona.description}
+          </Text>
+        </Card>
+      ) : null}
+
+      <Card tint={tint} className="mb-4">
+        <Label>Programme assigné</Label>
+        <View className="flex-row items-center mt-2 mb-1">
+          <Text className="text-2xl mr-2">{program.icon}</Text>
+          <Text className="text-lg font-bold text-slate-900 flex-1">
+            {program.name}
+          </Text>
+        </View>
+        {program.tagline ? (
+          <Text className="text-sm text-slate-600 mb-4">{program.tagline}</Text>
+        ) : null}
+        <View className="flex-row flex-wrap gap-2">
+          <Pill label="Durée" value={duration} />
+          <Pill label="Fréquence" value={frequency} />
+          <Pill label="Séance" value={sessionLength} />
+        </View>
+      </Card>
+
+      {/* Le détail du score rend l'attribution lisible — utile pour itérer
+          sur la pondération du questionnaire. */}
+      <Card>
+        <Label>Détail du scoring</Label>
+        <View className="mt-3 gap-2">
+          {TIEBREAK_ORDER.map((code) => {
+            const value = scores[code];
+            const isWinner = code === persona.code;
+            const width = Math.max(0, (value / maxScore) * 100);
+            return (
+              <View key={code} className="flex-row items-center">
+                <Text
+                  className={`w-11 text-[11px] ${
+                    isWinner ? "font-bold text-slate-900" : "text-slate-400"
+                  }`}
+                >
+                  {code}
+                </Text>
+                <View className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden mx-2">
+                  <View
+                    className="h-full rounded-full"
+                    style={{
+                      width: `${width}%`,
+                      backgroundColor: isWinner ? tint : "#cbd5e1",
+                    }}
+                  />
+                </View>
+                <Text
+                  className={`w-7 text-right text-[11px] ${
+                    isWinner ? "font-bold text-slate-900" : "text-slate-400"
+                  }`}
+                >
+                  {value}
+                </Text>
+              </View>
+            );
+          })}
+        </View>
+        <Text className="text-[11px] text-slate-400 mt-3 leading-4">
+          {PERSONA_LABELS[persona.code]} l'emporte. Égalité départagée dans
+          l'ordre CR › SMB › AW › BF › SAV.
         </Text>
-      </Pressable>
-    </View>
+      </Card>
+    </Screen>
   );
 }

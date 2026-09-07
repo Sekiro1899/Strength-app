@@ -1,40 +1,20 @@
-import { useEffect, useState } from "react";
-import { View, ActivityIndicator } from "react-native";
-import { useRouter } from "expo-router";
-import { useSession } from "./_layout";
-import { supabase } from "../lib/supabase";
+import { View, ActivityIndicator, StyleSheet } from "react-native";
 
 export default function IndexScreen() {
-  const { session, isLoading } = useSession();
-  const router = useRouter();
-  const [checking, setChecking] = useState(true);
-
-  useEffect(() => {
-    if (isLoading) return;
-
-    if (!session) {
-      router.replace("/(auth)/login");
-      return;
-    }
-
-    supabase
-      .from("users")
-      .select("onboarding_completed")
-      .eq("id", session.user.id)
-      .single()
-      .then(({ data }) => {
-        if (data?.onboarding_completed) {
-          router.replace("/dashboard");
-        } else {
-          router.replace("/questionnaire");
-        }
-        setChecking(false);
-      });
-  }, [session, isLoading]);
-
+  // Le routing est géré par _layout.tsx selon l'état d'auth.
+  // Cet écran sert de splash/loading pendant la vérification.
   return (
-    <View className="flex-1 items-center justify-center bg-white">
+    <View style={styles.container}>
       <ActivityIndicator size="large" color="#1565C0" />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#fff",
+  },
+});

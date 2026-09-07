@@ -1,100 +1,63 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import {
   View,
   Text,
   Pressable,
+  StyleSheet,
   ScrollView,
   ActivityIndicator,
   Alert,
-  RefreshControl,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useSession } from "./_layout";
+import { useRouter } from "expo-router";
 import { supabase } from "../lib/supabase";
-
-const PROTOCOL_SCHEDULE: Record<string, string[]> = {
-  upper_lower: ["upper", "lower", "upper", "lower"],
-  full_body: ["full_body", "full_body", "full_body"],
-  push_pull: ["push", "pull", "push", "pull"],
-  push_pull_legs: ["push", "pull", "legs", "push", "pull", "legs"],
-};
-
-const FOCUS_LABELS: Record<string, string> = {
-  upper: "Upper Body",
-  lower: "Lower Body",
-  full_body: "Full Body",
-  push: "Push",
-  pull: "Pull",
-  legs: "Legs",
-};
+import { generateWorkout } from "../lib/api";
 
 interface UserProgram {
   id: string;
   program_id: string;
+  persona_id: string;
   protocol: string;
+  current_phase_id: string | null;
   current_week: number;
-  total_sessions_completed: number;
-  programs: {
-    name: string;
-    icon: string;
-    color: string;
-    duration_weeks: number | null;
-    is_continuous: boolean;
-  };
-  program_phases: {
-    name: string;
-    phase_number: number;
-  };
+  programs: { name: string; tagline: string; icon: string; color: string };
 }
 
-function computeStreak(dates: (string | null)[]): number {
-  const uniqueDays = [
-    ...new Set(
-      dates
-        .filter((d): d is string => d !== null)
-        .map((d) => new Date(d).toISOString().split("T")[0]),
-    ),
-  ].sort((a, b) => b.localeCompare(a));
-
-  if (uniqueDays.length === 0) return 0;
-
-  const today = new Date().toISOString().split("T")[0];
-  if (uniqueDays[0] !== today) {
-    const yesterday = new Date(Date.now() - 86400000)
-      .toISOString()
-      .split("T")[0];
-    if (uniqueDays[0] !== yesterday) return 0;
-  }
-
-  let streak = 1;
-  for (let i = 1; i < uniqueDays.length; i++) {
-    const prev = new Date(uniqueDays[i - 1]).getTime();
-    const curr = new Date(uniqueDays[i]).getTime();
-    if (prev - curr === 86400000) {
-      streak++;
-    } else {
-      break;
-    }
-  }
-  return streak;
+interface Session {
+  id: string;
+  session_label: string;
+  focus: string;
+  protocol: string;
+  week_number: number;
+  day_number: number;
+  status: string;
+  warmup_block: any[];
+  main_block: any[];
+  core_block: any[];
+  finisher_block: any[];
 }
 
 export default function DashboardScreen() {
-  const { session } = useSession();
+  const router = useRouter();
   const [userProgram, setUserProgram] = useState<UserProgram | null>(null);
-  const [streak, setStreak] = useState(0);
+  const [latestSession, setLatestSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
+  const [generating, setGenerating] = useState(false);
 
-  const fetchData = useCallback(async () => {
-    if (!session) return;
+  useEffect(() => {
+    loadData();
+  }, []);
 
+  const loadData = async () => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return;
+
+    // Charger le programme actif
     const { data: up } = await supabase
       .from("user_programs")
-      .select(
-        "id, program_id, protocol, current_week, total_sessions_completed, programs(name, icon, color, duration_weeks, is_continuous), program_phases(name, phase_number)",
-      )
-      .eq("user_id", session.user.id)
+      .select("id, program_id, persona_id, protocol, current_phase_id, current_week, programs(name, tagline, icon, color)")
+      .eq("user_id", user.id)
       .eq("status", "active")
       .order("created_at", { ascending: false })
       .limit(1)
@@ -102,144 +65,198 @@ export default function DashboardScreen() {
 
     if (up) setUserProgram(up as unknown as UserProgram);
 
-    const { data: completedSessions } = await supabase
+    // Charger la dernière séance
+    const { data: sess } = await supabase
       .from("sessions")
-      .select("completed_at")
-      .eq("user_id", session.user.id)
-      .eq("status", "completed")
-      .order("completed_at", { ascending: false });
+      .select("id, session_label, focus, protocol, week_number, day_number, status, warmup_block, main_block, core_block, finisher_block")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .single();
 
-    if (completedSessions) {
-      setStreak(computeStreak(completedSessions.map((s) => s.completed_at)));
+    if (sess) setLatestSession(sess as Session);
+
+    setLoading(false);
+  };
+
+  const handleGenerateNext = async () => {
+    if (!userProgram) return;
+    setGenerating(true);
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Non authentifie");
+
+      const nextDay = latestSession ? latestSession.day_number + 1 : 1;
+
+      await generateWorkout({
+        user_id: user.id,
+        user_program_id: userProgram.id,
+        persona_id: userProgram.persona_id,
+        program_id: userProgram.program_id,
+        phase_id: userProgram.current_phase_id || undefined,
+        week_number: userProgram.current_week,
+        day_number: nextDay,
+        energy_level: 3,
+      });
+
+      await loadData();
+    } catch (err: any) {
+      Alert.alert("Erreur", err.message);
+    } finally {
+      setGenerating(false);
     }
-  }, [session]);
+  };
 
-  useEffect(() => {
-    fetchData().finally(() => setLoading(false));
-  }, [fetchData]);
-
-  const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    await fetchData();
-    setRefreshing(false);
-  }, [fetchData]);
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+  };
 
   if (loading) {
     return (
-      <View className="flex-1 items-center justify-center bg-white">
+      <View style={styles.centered}>
         <ActivityIndicator size="large" color="#1565C0" />
       </View>
     );
   }
 
-  if (!userProgram) {
-    return (
-      <SafeAreaView className="flex-1 bg-white justify-center items-center px-8">
-        <Text className="text-xl font-bold mb-2">Aucun programme actif</Text>
-        <Text className="text-gray-500 text-center">
-          Complétez le questionnaire pour recevoir votre programme personnalisé.
-        </Text>
-      </SafeAreaView>
-    );
-  }
-
-  const schedule =
-    PROTOCOL_SCHEDULE[userProgram.protocol] ?? ["full_body"];
-  const nextFocus =
-    schedule[userProgram.total_sessions_completed % schedule.length];
-  const sessionLabel = FOCUS_LABELS[nextFocus] ?? nextFocus;
-  const programColor = userProgram.programs?.color ?? "#1565C0";
+  const totalExercises = latestSession
+    ? (latestSession.warmup_block?.length ?? 0) +
+      (latestSession.main_block?.length ?? 0) +
+      (latestSession.core_block?.length ?? 0) +
+      (latestSession.finisher_block?.length ?? 0)
+    : 0;
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      <ScrollView
-        className="flex-1"
-        contentContainerStyle={{ padding: 24 }}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
+    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      {/* Programme actif */}
+      {userProgram && (
+        <View style={styles.programCard}>
+          <Text style={styles.programIcon}>{userProgram.programs?.icon}</Text>
+          <Text style={styles.programName}>{userProgram.programs?.name}</Text>
+          <Text style={styles.programTagline}>{userProgram.programs?.tagline}</Text>
+          <Text style={styles.programMeta}>
+            Semaine {userProgram.current_week} | Protocole : {userProgram.protocol || "auto"}
+          </Text>
+        </View>
+      )}
+
+      {/* Dernière séance */}
+      {latestSession && (
+        <View style={styles.sessionCard}>
+          <Text style={styles.sectionTitle}>Derniere seance</Text>
+          <Text style={styles.sessionLabel}>{latestSession.session_label}</Text>
+          <Text style={styles.sessionMeta}>
+            Semaine {latestSession.week_number} | Jour {latestSession.day_number} | {totalExercises} exercices
+          </Text>
+          <Text style={styles.sessionStatus}>
+            Statut : {latestSession.status}
+          </Text>
+
+          {/* Blocs résumés */}
+          <View style={styles.blocksContainer}>
+            <BlockSummary label="Warmup" count={latestSession.warmup_block?.length ?? 0} />
+            <BlockSummary label="Main" count={latestSession.main_block?.length ?? 0} />
+            <BlockSummary label="Core" count={latestSession.core_block?.length ?? 0} />
+            <BlockSummary label="Finisher" count={latestSession.finisher_block?.length ?? 0} />
+          </View>
+        </View>
+      )}
+
+      {/* Actions */}
+      <Pressable
+        style={[styles.button, generating && styles.buttonDisabled]}
+        onPress={handleGenerateNext}
+        disabled={generating}
       >
-        <Text className="text-2xl font-bold mb-1">Mon programme</Text>
-        <Text className="text-sm text-gray-500 mb-6">
-          Bienvenue dans votre espace
-        </Text>
+        {generating ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.buttonText}>Generer la seance suivante</Text>
+        )}
+      </Pressable>
 
-        {/* Programme card */}
-        <View
-          className="rounded-2xl p-5 mb-4"
-          style={{ backgroundColor: programColor + "15" }}
-        >
-          <View className="flex-row items-center mb-3">
-            <Text className="text-2xl mr-2">
-              {userProgram.programs?.icon}
-            </Text>
-            <View className="flex-1">
-              <Text className="text-lg font-bold">
-                {userProgram.programs?.name}
-              </Text>
-              <Text className="text-sm text-gray-600">
-                {userProgram.program_phases?.name}
-              </Text>
-            </View>
-          </View>
-
-          <View className="flex-row gap-4">
-            <View className="bg-white/80 rounded-lg px-3 py-2 flex-1">
-              <Text className="text-xs text-gray-500">Phase</Text>
-              <Text className="text-sm font-semibold">
-                {userProgram.program_phases?.phase_number ?? 1}
-              </Text>
-            </View>
-            <View className="bg-white/80 rounded-lg px-3 py-2 flex-1">
-              <Text className="text-xs text-gray-500">Semaine</Text>
-              <Text className="text-sm font-semibold">
-                {userProgram.current_week}
-              </Text>
-            </View>
-          </View>
-        </View>
-
-        {/* Next session card */}
-        <View className="bg-white rounded-2xl p-5 mb-4 border border-gray-100">
-          <Text className="text-xs text-gray-500 uppercase tracking-wide mb-2">
-            Prochaine séance
-          </Text>
-          <Text className="text-lg font-bold mb-1">{sessionLabel}</Text>
-          <Text className="text-sm text-gray-500 capitalize">{nextFocus}</Text>
-        </View>
-
-        {/* Stats row */}
-        <View className="flex-row gap-3 mb-6">
-          <View className="flex-1 bg-white rounded-2xl p-4 border border-gray-100 items-center">
-            <Text className="text-3xl mb-1">🔥</Text>
-            <Text className="text-2xl font-bold">{streak}</Text>
-            <Text className="text-xs text-gray-500">Streak</Text>
-          </View>
-          <View className="flex-1 bg-white rounded-2xl p-4 border border-gray-100 items-center">
-            <Text className="text-3xl mb-1">✅</Text>
-            <Text className="text-2xl font-bold">
-              {userProgram.total_sessions_completed}
-            </Text>
-            <Text className="text-xs text-gray-500">Complétées</Text>
-          </View>
-        </View>
-
-        {/* Start session button */}
-        <Pressable
-          className="rounded-xl py-4 items-center"
-          style={{ backgroundColor: programColor }}
-          onPress={() =>
-            Alert.alert(
-              "Bientôt disponible",
-              "Session player — à venir en S6",
-            )
-          }
-        >
-          <Text className="text-white text-base font-bold">
-            Démarrer la séance
-          </Text>
-        </Pressable>
-      </ScrollView>
-    </SafeAreaView>
+      <Pressable style={styles.logoutButton} onPress={handleLogout}>
+        <Text style={styles.logoutText}>Se deconnecter</Text>
+      </Pressable>
+    </ScrollView>
   );
 }
+
+function BlockSummary({ label, count }: { label: string; count: number }) {
+  return (
+    <View style={styles.blockChip}>
+      <Text style={styles.blockLabel}>{label}</Text>
+      <Text style={styles.blockCount}>{count}</Text>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: "#f5f5f5" },
+  content: { padding: 16, paddingBottom: 40 },
+  centered: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f5f5f5",
+  },
+  programCard: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 20,
+    alignItems: "center",
+    marginBottom: 16,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  programIcon: { fontSize: 40, marginBottom: 8 },
+  programName: { fontSize: 20, fontWeight: "bold", marginBottom: 4 },
+  programTagline: { fontSize: 14, color: "#666", textAlign: "center", marginBottom: 8 },
+  programMeta: { fontSize: 13, color: "#999" },
+  sessionCard: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  sectionTitle: { fontSize: 13, color: "#999", fontWeight: "600", marginBottom: 8, textTransform: "uppercase" },
+  sessionLabel: { fontSize: 18, fontWeight: "bold", marginBottom: 4 },
+  sessionMeta: { fontSize: 14, color: "#555", marginBottom: 4 },
+  sessionStatus: { fontSize: 13, color: "#1565C0", marginBottom: 12 },
+  blocksContainer: { flexDirection: "row", gap: 8 },
+  blockChip: {
+    flex: 1,
+    backgroundColor: "#E3F2FD",
+    borderRadius: 8,
+    padding: 8,
+    alignItems: "center",
+  },
+  blockLabel: { fontSize: 11, color: "#1565C0", fontWeight: "600" },
+  blockCount: { fontSize: 16, fontWeight: "bold", color: "#0D47A1" },
+  button: {
+    backgroundColor: "#1565C0",
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  buttonDisabled: { opacity: 0.6 },
+  buttonText: { color: "#fff", fontSize: 16, fontWeight: "600" },
+  logoutButton: {
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#ddd",
+  },
+  logoutText: { color: "#999", fontSize: 14 },
+});

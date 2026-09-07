@@ -1,145 +1,171 @@
 import { useEffect, useState } from "react";
-import { View, Text, Pressable, ActivityIndicator } from "react-native";
+import {
+  View,
+  Text,
+  Pressable,
+  StyleSheet,
+  ActivityIndicator,
+  Alert,
+  ScrollView,
+} from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { supabase } from "../lib/supabase";
+import { generateWorkout } from "../lib/api";
 
-interface PersonaData {
-  name: string;
-  tagline: string;
-  description: string;
-  icon: string;
-  color: string;
-}
-
-interface ProgramData {
-  name: string;
-  tagline: string;
-  duration_weeks: number | null;
-  is_continuous: boolean;
-  frequency_per_week_min: number;
-  frequency_per_week_max: number;
-  session_duration_min: number;
-  session_duration_max: number;
-}
+const PERSONA_INFO: Record<string, { name: string; icon: string; color: string }> = {
+  SMB: { name: "Summer Muscle Builder", icon: "💪", color: "#E91E8C" },
+  BF: { name: "Brut Force", icon: "🏋️", color: "#B71C1C" },
+  AW: { name: "Athlete Wannabe", icon: "⚡", color: "#1565C0" },
+  CR: { name: "Corporate Rusher", icon: "⏱️", color: "#2E7D32" },
+  SAV: { name: "Savage", icon: "🔥", color: "#6A1B9A" },
+};
 
 export default function OnboardingResultScreen() {
-  const { personaId } = useLocalSearchParams<{ personaId: string }>();
   const router = useRouter();
+  const params = useLocalSearchParams<{
+    persona_id: string;
+    persona_code: string;
+    program_id: string;
+    phase_id: string;
+    protocol: string;
+    user_program_id: string;
+  }>();
 
-  const [persona, setPersona] = useState<PersonaData | null>(null);
-  const [program, setProgram] = useState<ProgramData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [generatingWorkout, setGeneratingWorkout] = useState(false);
+  const [sessionGenerated, setSessionGenerated] = useState(false);
 
-  useEffect(() => {
-    async function fetchData() {
-      const { data: p } = await supabase
-        .from("personas")
-        .select("name, tagline, description, icon, color, primary_program_id")
-        .eq("id", personaId)
-        .single();
+  const info = PERSONA_INFO[params.persona_code] || PERSONA_INFO.SMB;
 
-      if (p) {
-        setPersona(p as PersonaData);
+  const handleGenerateFirstSession = async () => {
+    setGeneratingWorkout(true);
 
-        const { data: prog } = await supabase
-          .from("programs")
-          .select(
-            "name, tagline, duration_weeks, is_continuous, frequency_per_week_min, frequency_per_week_max, session_duration_min, session_duration_max",
-          )
-          .eq("id", p.primary_program_id)
-          .single();
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Non authentifie");
 
-        if (prog) setProgram(prog);
-      }
-      setLoading(false);
+      await generateWorkout({
+        user_id: user.id,
+        user_program_id: params.user_program_id,
+        persona_id: params.persona_id,
+        program_id: params.program_id,
+        phase_id: params.phase_id || undefined,
+        week_number: 1,
+        day_number: 1,
+        energy_level: 3,
+      });
+
+      setSessionGenerated(true);
+    } catch (err: any) {
+      Alert.alert("Erreur", err.message || "Impossible de generer la seance");
+    } finally {
+      setGeneratingWorkout(false);
     }
-    fetchData();
-  }, [personaId]);
-
-  if (loading || !persona || !program) {
-    return (
-      <View className="flex-1 items-center justify-center bg-white">
-        <ActivityIndicator size="large" color="#1565C0" />
-      </View>
-    );
-  }
-
-  const durationLabel = program.is_continuous
-    ? "Programme continu"
-    : `${program.duration_weeks} semaines`;
-
-  const frequencyLabel =
-    program.frequency_per_week_min === program.frequency_per_week_max
-      ? `${program.frequency_per_week_min}x / semaine`
-      : `${program.frequency_per_week_min}-${program.frequency_per_week_max}x / semaine`;
-
-  const durationSessionLabel =
-    program.session_duration_min === program.session_duration_max
-      ? `${program.session_duration_min} min`
-      : `${program.session_duration_min}-${program.session_duration_max} min`;
+  };
 
   return (
-    <View className="flex-1 bg-white justify-center px-8">
-      <View className="items-center mb-8">
-        <View
-          className="w-24 h-24 rounded-full items-center justify-center mb-4"
-          style={{ backgroundColor: persona.color + "20" }}
-        >
-          <Text className="text-5xl">{persona.icon}</Text>
-        </View>
-        <Text className="text-2xl font-bold text-center mb-1">
-          {persona.name}
-        </Text>
-        <Text className="text-base text-gray-500 text-center mb-4">
-          {persona.tagline}
-        </Text>
-        <Text className="text-sm text-gray-600 text-center leading-5 px-4">
-          {persona.description}
-        </Text>
+    <ScrollView contentContainerStyle={styles.container}>
+      <View style={[styles.iconContainer, { backgroundColor: info.color + "20" }]}>
+        <Text style={styles.icon}>{info.icon}</Text>
       </View>
 
-      <View
-        className="rounded-2xl p-5 mb-10"
-        style={{ backgroundColor: persona.color + "10" }}
-      >
-        <Text
-          className="text-lg font-bold mb-3"
-          style={{ color: persona.color }}
-        >
-          Votre programme
-        </Text>
-        <Text className="text-base font-semibold mb-1">{program.name}</Text>
-        {program.tagline ? (
-          <Text className="text-sm text-gray-500 mb-3">{program.tagline}</Text>
-        ) : null}
+      <Text style={styles.title}>Ton profil : {info.name}</Text>
+      <Text style={styles.code}>{params.persona_code}</Text>
+      <Text style={styles.description}>
+        Ton programme personnalise est pret. Lance ta premiere seance
+        pour commencer ton parcours.
+      </Text>
 
-        <View className="flex-row flex-wrap gap-2">
-          <View className="bg-white rounded-lg px-3 py-2">
-            <Text className="text-xs text-gray-500">Durée</Text>
-            <Text className="text-sm font-semibold">{durationLabel}</Text>
-          </View>
-          <View className="bg-white rounded-lg px-3 py-2">
-            <Text className="text-xs text-gray-500">Fréquence</Text>
-            <Text className="text-sm font-semibold">{frequencyLabel}</Text>
-          </View>
-          <View className="bg-white rounded-lg px-3 py-2">
-            <Text className="text-xs text-gray-500">Séance</Text>
-            <Text className="text-sm font-semibold">
-              {durationSessionLabel}
+      {!sessionGenerated ? (
+        <Pressable
+          style={[styles.button, generatingWorkout && styles.buttonDisabled]}
+          onPress={handleGenerateFirstSession}
+          disabled={generatingWorkout}
+        >
+          {generatingWorkout ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>
+              Generer ma premiere seance
+            </Text>
+          )}
+        </Pressable>
+      ) : (
+        <>
+          <View style={styles.successBox}>
+            <Text style={styles.successText}>
+              Ta premiere seance a ete generee !
             </Text>
           </View>
-        </View>
-      </View>
-
-      <Pressable
-        className="rounded-xl py-4 items-center"
-        style={{ backgroundColor: persona.color }}
-        onPress={() => router.replace("/dashboard")}
-      >
-        <Text className="text-white text-base font-bold">
-          Démarrer mon programme
-        </Text>
-      </Pressable>
-    </View>
+          <Pressable
+            style={styles.button}
+            onPress={() => router.replace("/dashboard")}
+          >
+            <Text style={styles.buttonText}>Voir mon dashboard</Text>
+          </Pressable>
+        </>
+      )}
+    </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flexGrow: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 24,
+    backgroundColor: "#fff",
+  },
+  iconContainer: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 24,
+  },
+  icon: { fontSize: 48 },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 4,
+  },
+  code: {
+    fontSize: 14,
+    color: "#999",
+    marginBottom: 16,
+  },
+  description: {
+    fontSize: 15,
+    color: "#555",
+    textAlign: "center",
+    lineHeight: 22,
+    marginBottom: 32,
+    paddingHorizontal: 16,
+  },
+  button: {
+    backgroundColor: "#1565C0",
+    paddingVertical: 14,
+    paddingHorizontal: 32,
+    borderRadius: 12,
+    alignItems: "center",
+    width: "100%",
+    marginBottom: 16,
+  },
+  buttonDisabled: { opacity: 0.6 },
+  buttonText: { color: "#fff", fontSize: 16, fontWeight: "600" },
+  successBox: {
+    backgroundColor: "#E8F5E9",
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 16,
+    width: "100%",
+  },
+  successText: {
+    color: "#2E7D32",
+    fontSize: 15,
+    fontWeight: "600",
+    textAlign: "center",
+  },
+});

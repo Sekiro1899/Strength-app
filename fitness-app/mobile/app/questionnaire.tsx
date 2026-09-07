@@ -3,277 +3,239 @@ import {
   View,
   Text,
   Pressable,
+  StyleSheet,
   ScrollView,
   ActivityIndicator,
   Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { useSession } from "./_layout";
 import { supabase } from "../lib/supabase";
+
+interface Option {
+  id: string;
+  label: string;
+  value: string;
+  question_id: string;
+}
 
 interface Question {
   id: string;
   question_number: number;
   text: string;
   type: string;
+  options: Option[];
 }
 
-interface Option {
-  id: string;
+interface Answer {
   question_id: string;
-  label: string;
-  value: string;
-  score_smb: number;
-  score_bf: number;
-  score_aw: number;
-  score_cr: number;
-  score_sav: number;
+  option_ids: string[];
 }
-
-const PERSONA_CODES = ["CR", "SMB", "AW", "BF", "SAV"] as const;
-
-const CODE_TO_ID: Record<string, string> = {
-  CR: "persona_cr",
-  SMB: "persona_smb",
-  AW: "persona_aw",
-  BF: "persona_bf",
-  SAV: "persona_sav",
-};
 
 export default function QuestionnaireScreen() {
-  const { session } = useSession();
   const router = useRouter();
-
   const [questions, setQuestions] = useState<Question[]>([]);
-  const [options, setOptions] = useState<Option[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
+  const [answers, setAnswers] = useState<Record<string, string[]>>({});
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    async function fetchData() {
-      const [qRes, oRes] = await Promise.all([
-        supabase
-          .from("questionnaire_questions")
-          .select("*")
-          .order("question_number"),
-        supabase.from("questionnaire_options").select("*"),
-      ]);
-      if (qRes.data) setQuestions(qRes.data);
-      if (oRes.data) setOptions(oRes.data);
-      setLoading(false);
-    }
-    fetchData();
+    loadQuestions();
   }, []);
+
+  const loadQuestions = async () => {
+    const { data: qs, error: qErr } = await supabase
+      .from("questionnaire_questions")
+      .select("id, question_number, text, type")
+      .eq("questionnaire_id", "initial_profiling_v3")
+      .order("question_number");
+
+    if (qErr || !qs) {
+      Alert.alert("Erreur", "Impossible de charger le questionnaire");
+      return;
+    }
+
+    const { data: opts, error: oErr } = await supabase
+      .from("questionnaire_options")
+      .select("id, question_id, label, value")
+      .in(
+        "question_id",
+        qs.map((q) => q.id)
+      );
+
+    if (oErr || !opts) {
+      Alert.alert("Erreur", "Impossible de charger les options");
+      return;
+    }
+
+    const merged: Question[] = qs.map((q) => ({
+      ...q,
+      options: opts.filter((o) => o.question_id === q.id),
+    }));
+
+    setQuestions(merged);
+    setLoading(false);
+  };
+
+  const currentQuestion = questions[currentIndex];
+  const isMultipleChoice = currentQuestion?.type === "multiple_choice";
+  const selectedOptions = answers[currentQuestion?.id] || [];
+
+  const toggleOption = (optionId: string) => {
+    const qId = currentQuestion.id;
+    const current = answers[qId] || [];
+
+    // Pour les options exclusives (ex: q8_d "Flexible")
+    if (isMultipleChoice) {
+      if (current.includes(optionId)) {
+        setAnswers({ ...answers, [qId]: current.filter((id) => id !== optionId) });
+      } else {
+        setAnswers({ ...answers, [qId]: [...current, optionId] });
+      }
+    } else {
+      setAnswers({ ...answers, [qId]: [optionId] });
+    }
+  };
+
+  const canProceed = selectedOptions.length > 0;
+
+  const handleNext = () => {
+    if (!canProceed) return;
+
+    if (currentIndex < questions.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+    } else {
+      handleSubmit();
+    }
+  };
+
+  const handleBack = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+    }
+  };
+
+  const handleSubmit = async () => {
+    setSubmitting(true);
+
+    const formattedAnswers: Answer[] = Object.entries(answers).map(
+      ([question_id, option_ids]) => ({ question_id, option_ids })
+    );
+
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session) {
+        Alert.alert("Erreur", "Session expirée");
+        router.replace("/auth");
+        return;
+      }
+
+      const res = await supabase.functions.invoke("score-questionnaire", {
+        body: { answers: formattedAnswers },
+      });
+
+      if (res.error) throw res.error;
+
+      const result = res.data;
+
+      // Naviguer vers le résultat avec les données
+      router.replace({
+        pathname: "/onboarding-result",
+        params: {
+          persona_id: result.persona_id,
+          persona_code: result.persona_code,
+          program_id: result.program_id,
+          phase_id: result.phase_id || "",
+          protocol: result.protocol || "",
+          user_program_id: result.user_program_id,
+        },
+      });
+    } catch (err: any) {
+      Alert.alert("Erreur", err.message || "Erreur lors de la soumission");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   if (loading) {
     return (
-      <View className="flex-1 items-center justify-center bg-white">
+      <View style={styles.centered}>
         <ActivityIndicator size="large" color="#1565C0" />
       </View>
     );
   }
 
-  const question = questions[currentIndex];
-  const questionOptions = options.filter(
-    (o) => o.question_id === question?.id,
-  );
-  const isMultiple = question?.type === "multiple_choice";
-  const isLast = currentIndex === questions.length - 1;
-  const currentAnswer = answers[question?.id];
-
-  function selectOption(value: string) {
-    if (!question) return;
-    if (isMultiple) {
-      const current = (answers[question.id] as string[]) || [];
-      const updated = current.includes(value)
-        ? current.filter((v) => v !== value)
-        : [...current, value];
-      setAnswers({ ...answers, [question.id]: updated });
-    } else {
-      setAnswers({ ...answers, [question.id]: value });
-    }
-  }
-
-  function isSelected(value: string): boolean {
-    if (!currentAnswer) return false;
-    if (Array.isArray(currentAnswer)) return currentAnswer.includes(value);
-    return currentAnswer === value;
-  }
-
-  function hasAnswer(): boolean {
-    if (!currentAnswer) return false;
-    if (Array.isArray(currentAnswer)) return currentAnswer.length > 0;
-    return true;
-  }
-
-  async function handleNext() {
-    if (!hasAnswer()) return;
-
-    if (!isLast) {
-      setCurrentIndex(currentIndex + 1);
-      return;
-    }
-
-    await submitQuestionnaire();
-  }
-
-  async function submitQuestionnaire() {
-    if (!session) return;
-    setSubmitting(true);
-
-    try {
-      const scores = { SMB: 0, BF: 0, AW: 0, CR: 0, SAV: 0 };
-
-      for (const [qId, answer] of Object.entries(answers)) {
-        const selectedValues = Array.isArray(answer) ? answer : [answer];
-        for (const val of selectedValues) {
-          const opt = options.find(
-            (o) => o.question_id === qId && o.value === val,
-          );
-          if (opt) {
-            scores.SMB += opt.score_smb ?? 0;
-            scores.BF += opt.score_bf ?? 0;
-            scores.AW += opt.score_aw ?? 0;
-            scores.CR += opt.score_cr ?? 0;
-            scores.SAV += opt.score_sav ?? 0;
-          }
-        }
-      }
-
-      const maxScore = Math.max(...Object.values(scores));
-      const winner = PERSONA_CODES.find((p) => scores[p] === maxScore)!;
-      const personaId = CODE_TO_ID[winner];
-
-      const { data: persona } = await supabase
-        .from("personas")
-        .select("*")
-        .eq("id", personaId)
-        .single();
-
-      if (!persona) throw new Error("Persona not found");
-
-      const { data: firstPhase } = await supabase
-        .from("program_phases")
-        .select("id")
-        .eq("program_id", persona.primary_program_id)
-        .order("phase_number")
-        .limit(1)
-        .single();
-
-      const { data: program } = await supabase
-        .from("programs")
-        .select("default_protocol")
-        .eq("id", persona.primary_program_id)
-        .single();
-
-      await supabase.from("users").upsert({
-        id: session.user.id,
-        email: session.user.email,
-        persona_id: persona.id,
-        questionnaire_answers: answers,
-        questionnaire_scores: scores,
-        onboarding_completed: true,
-      });
-
-      await supabase.from("user_programs").insert({
-        user_id: session.user.id,
-        program_id: persona.primary_program_id,
-        persona_id: persona.id,
-        protocol: program?.default_protocol,
-        status: "active",
-        current_phase_id: firstPhase?.id,
-        current_week: 1,
-        total_sessions_completed: 0,
-      });
-
-      router.replace({
-        pathname: "/onboarding-result",
-        params: { personaId: persona.id },
-      });
-    } catch (e: any) {
-      Alert.alert("Erreur", e.message);
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
-  const progress = (currentIndex + 1) / questions.length;
+  if (!currentQuestion) return null;
 
   return (
-    <View className="flex-1 bg-white">
-      <View className="px-6 pt-4 pb-2">
-        <Text className="text-sm text-gray-500 mb-2 text-center">
-          Question {currentIndex + 1} / {questions.length}
-        </Text>
-        <View className="h-2 bg-gray-200 rounded-full overflow-hidden">
-          <View
-            className="h-full bg-[#1565C0] rounded-full"
-            style={{ width: `${progress * 100}%` }}
-          />
-        </View>
+    <View style={styles.container}>
+      {/* Progress bar */}
+      <View style={styles.progressContainer}>
+        <View
+          style={[
+            styles.progressBar,
+            { width: `${((currentIndex + 1) / questions.length) * 100}%` },
+          ]}
+        />
       </View>
 
-      <ScrollView
-        className="flex-1 px-6"
-        contentContainerStyle={{ paddingVertical: 24 }}
-      >
-        <Text className="text-xl font-bold mb-6">{question?.text}</Text>
+      <Text style={styles.counter}>
+        {currentIndex + 1} / {questions.length}
+      </Text>
 
-        {isMultiple && (
-          <Text className="text-sm text-gray-500 mb-4">
-            Plusieurs réponses possibles
-          </Text>
+      <ScrollView style={styles.scrollArea} contentContainerStyle={styles.scrollContent}>
+        <Text style={styles.questionText}>{currentQuestion.text}</Text>
+
+        {isMultipleChoice && (
+          <Text style={styles.hint}>Plusieurs réponses possibles</Text>
         )}
 
-        {questionOptions.map((opt) => (
-          <Pressable
-            key={opt.id}
-            className={`border-2 rounded-xl py-4 px-4 mb-3 ${
-              isSelected(opt.value)
-                ? "border-[#1565C0] bg-blue-50"
-                : "border-gray-200"
-            }`}
-            onPress={() => selectOption(opt.value)}
-          >
-            <Text
-              className={`text-base ${
-                isSelected(opt.value)
-                  ? "text-[#1565C0] font-semibold"
-                  : "text-gray-800"
-              }`}
+        {currentQuestion.options.map((opt) => {
+          const isSelected = selectedOptions.includes(opt.id);
+          return (
+            <Pressable
+              key={opt.id}
+              style={[styles.option, isSelected && styles.optionSelected]}
+              onPress={() => toggleOption(opt.id)}
             >
-              {opt.label}
-            </Text>
-          </Pressable>
-        ))}
+              <Text
+                style={[
+                  styles.optionText,
+                  isSelected && styles.optionTextSelected,
+                ]}
+              >
+                {opt.label}
+              </Text>
+            </Pressable>
+          );
+        })}
       </ScrollView>
 
-      <View className="px-6 pb-8 pt-4 flex-row gap-3">
+      {/* Navigation buttons */}
+      <View style={styles.navRow}>
         {currentIndex > 0 && (
-          <Pressable
-            className="flex-1 border-2 border-gray-300 rounded-xl py-4 items-center"
-            onPress={() => setCurrentIndex(currentIndex - 1)}
-          >
-            <Text className="text-gray-600 text-base font-semibold">
-              Retour
-            </Text>
+          <Pressable style={styles.backButton} onPress={handleBack}>
+            <Text style={styles.backButtonText}>Retour</Text>
           </Pressable>
         )}
 
         <Pressable
-          className={`flex-1 rounded-xl py-4 items-center ${
-            hasAnswer() ? "bg-[#1565C0]" : "bg-gray-300"
-          }`}
+          style={[
+            styles.nextButton,
+            !canProceed && styles.nextButtonDisabled,
+            currentIndex === 0 && { flex: 1 },
+          ]}
           onPress={handleNext}
-          disabled={!hasAnswer() || submitting}
+          disabled={!canProceed || submitting}
         >
           {submitting ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text className="text-white text-base font-semibold">
-              {isLast ? "Terminer" : "Suivant"}
+            <Text style={styles.nextButtonText}>
+              {currentIndex === questions.length - 1 ? "Terminer" : "Suivant"}
             </Text>
           )}
         </Pressable>
@@ -281,3 +243,78 @@ export default function QuestionnaireScreen() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: "#fff" },
+  centered: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#fff",
+  },
+  progressContainer: {
+    height: 4,
+    backgroundColor: "#e0e0e0",
+  },
+  progressBar: {
+    height: 4,
+    backgroundColor: "#1565C0",
+  },
+  counter: {
+    textAlign: "center",
+    color: "#999",
+    fontSize: 13,
+    marginTop: 12,
+  },
+  scrollArea: { flex: 1 },
+  scrollContent: { padding: 24, paddingTop: 16 },
+  questionText: {
+    fontSize: 20,
+    fontWeight: "600",
+    lineHeight: 28,
+    marginBottom: 24,
+  },
+  hint: {
+    fontSize: 13,
+    color: "#888",
+    marginBottom: 16,
+    fontStyle: "italic",
+  },
+  option: {
+    borderWidth: 1.5,
+    borderColor: "#ddd",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 10,
+  },
+  optionSelected: {
+    borderColor: "#1565C0",
+    backgroundColor: "#E3F2FD",
+  },
+  optionText: { fontSize: 15, color: "#333", lineHeight: 22 },
+  optionTextSelected: { color: "#1565C0", fontWeight: "600" },
+  navRow: {
+    flexDirection: "row",
+    padding: 24,
+    paddingTop: 12,
+    gap: 12,
+  },
+  backButton: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "#1565C0",
+  },
+  backButtonText: { color: "#1565C0", fontSize: 16, fontWeight: "600" },
+  nextButton: {
+    flex: 2,
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: "center",
+    backgroundColor: "#1565C0",
+  },
+  nextButtonDisabled: { opacity: 0.4 },
+  nextButtonText: { color: "#fff", fontSize: 16, fontWeight: "600" },
+});

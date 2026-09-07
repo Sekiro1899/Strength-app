@@ -2,7 +2,15 @@ import { useState } from "react";
 import { KeyboardAvoidingView, Platform, Text, TextInput, View } from "react-native";
 import { useRouter } from "expo-router";
 import { useAuth } from "../_layout";
-import { Button, ErrorText, Screen, Subtitle, Title } from "../../components/ui";
+import {
+  Body,
+  Button,
+  Display,
+  ErrorText,
+  MonoLabel,
+  Screen,
+} from "../../components/ui";
+import { COLORS } from "../../lib/theme";
 import { signUp } from "../../lib/data";
 
 const MIN_PASSWORD = 6;
@@ -34,55 +42,69 @@ export default function SignupScreen() {
 
   return (
     <KeyboardAvoidingView
-      className="flex-1"
+      className="flex-1 bg-bg"
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <Screen center>
-        <View className="items-center mb-10">
-          <Text className="text-5xl mb-3">🎯</Text>
-          <Title>Créer un compte</Title>
-          <Subtitle>9 questions et votre programme est prêt</Subtitle>
-        </View>
+      <Screen scroll={false}>
+        <View className="flex-1 justify-between">
+          <View>
+            <MonoLabel tone="accent" className="mb-5">
+              Étape 01 · Compte
+            </MonoLabel>
+            <Display size={34}>
+              Neuf questions,{"\n"}
+              <Text className="text-accent">un programme</Text>.
+            </Display>
+            <Body className="mt-4">
+              On identifie ton persona parmi cinq profils, puis on assigne le
+              programme qui te correspond.
+            </Body>
+          </View>
 
-        <ErrorText message={error} />
+          <View>
+            <ErrorText message={error} />
 
-        <TextInput
-          className="border border-slate-300 bg-white rounded-xl px-4 py-3.5 text-base mb-3"
-          placeholder="Email"
-          placeholderTextColor="#94a3b8"
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          autoComplete="email"
-          keyboardType="email-address"
-          inputMode="email"
-        />
+            <MonoLabel className="mb-2">Email</MonoLabel>
+            <TextInput
+              className="bg-surface border border-line rounded-[14px] px-4 py-3.5 font-body text-[14px] text-ink mb-4"
+              placeholder="toi@exemple.com"
+              placeholderTextColor={COLORS.muted}
+              value={email}
+              onChangeText={setEmail}
+              autoCapitalize="none"
+              autoComplete="email"
+              keyboardType="email-address"
+              inputMode="email"
+            />
 
-        <TextInput
-          className="border border-slate-300 bg-white rounded-xl px-4 py-3.5 text-base"
-          placeholder={`Mot de passe (min. ${MIN_PASSWORD} caractères)`}
-          placeholderTextColor="#94a3b8"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          autoComplete="new-password"
-        />
-        <Text className="text-xs h-5 mt-1 mb-4 text-red-600">
-          {tooShort ? `Minimum ${MIN_PASSWORD} caractères.` : ""}
-        </Text>
+            <MonoLabel className="mb-2">Mot de passe</MonoLabel>
+            <TextInput
+              className="bg-surface border border-line rounded-[14px] px-4 py-3.5 font-body text-[14px] text-ink"
+              placeholder={`${MIN_PASSWORD} caractères minimum`}
+              placeholderTextColor={COLORS.muted}
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+              autoComplete="new-password"
+            />
+            <Text className="font-mono text-[9px] uppercase tracking-label text-danger h-4 mt-2">
+              {tooShort ? `Minimum ${MIN_PASSWORD} caractères` : ""}
+            </Text>
+          </View>
 
-        <View className="gap-3">
-          <Button
-            label="S'inscrire"
-            onPress={handleSignup}
-            loading={loading}
-            disabled={!email || password.length < MIN_PASSWORD}
-          />
-          <Button
-            label="J'ai déjà un compte"
-            variant="ghost"
-            onPress={() => router.replace("/login")}
-          />
+          <View className="gap-2.5">
+            <Button
+              label="Commencer le profilage"
+              onPress={handleSignup}
+              loading={loading}
+              disabled={!email || password.length < MIN_PASSWORD}
+            />
+            <Button
+              label="J'ai déjà un compte"
+              variant="ghost"
+              onPress={() => router.replace("/login")}
+            />
+          </View>
         </View>
       </Screen>
     </KeyboardAvoidingView>

@@ -41,6 +41,19 @@ export function resolveFocus(
   return schedule[index];
 }
 
+/**
+ * exercise_selector.py::FOCUS_CATEGORY_MAP — quelles catégories d'exercices
+ * alimentent le bloc principal pour un focus donné.
+ */
+export const FOCUS_CATEGORY_MAP: Record<Focus, string[]> = {
+  push: ["push"],
+  pull: ["pull"],
+  legs: ["legs"],
+  upper: ["push", "pull", "arms"],
+  lower: ["legs"],
+  full_body: ["push", "pull", "legs"],
+};
+
 /** generator.py::_build_session_label */
 export function buildSessionLabel(focus: Focus): string {
   return (

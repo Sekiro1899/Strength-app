@@ -1,17 +1,21 @@
 import { useEffect, useMemo, useState } from "react";
-import { Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import {
+  Body,
   Button,
   Card,
-  Choice,
+  ChoiceRow,
+  Display,
   ErrorText,
-  Label,
+  GradientCard,
   Loading,
+  MetaPill,
+  MonoLabel,
   ProgressBar,
   Screen,
-  Title,
 } from "../components/ui";
+import { COLORS, personaGradient } from "../lib/theme";
 import { fetchFeedbackPoll, scoreFeedback } from "../lib/data";
 import { PROGRAMS } from "../lib/fixtures";
 import type {
@@ -22,21 +26,24 @@ import type {
   SatisfactionTier,
 } from "../lib/types";
 
-const TIER_COPY: Record<SatisfactionTier, { icon: string; title: string; body: string }> = {
+const TIER_COPY: Record<
+  SatisfactionTier,
+  { tag: string; title: string; body: string }
+> = {
   very_satisfied: {
-    icon: "🎉",
-    title: "Excellent cycle",
-    body: "On garde le cap et on augmente progressivement la charge.",
+    tag: "Cycle réussi",
+    title: "On garde\nle cap",
+    body: "Les charges augmentent progressivement sur le prochain cycle.",
   },
   moderate: {
-    icon: "👌",
-    title: "Cycle correct",
-    body: "Quelques ajustements vont rendre le prochain cycle plus efficace.",
+    tag: "Cycle correct",
+    title: "On ajuste\nà la marge",
+    body: "Quelques variantes vont rendre le prochain cycle plus efficace.",
   },
   unsatisfied: {
-    icon: "🔧",
-    title: "On ajuste",
-    body: "Le programme va être adapté pour mieux coller à vos contraintes.",
+    tag: "Cycle difficile",
+    title: "On change\nl'approche",
+    body: "Le programme est adapté pour mieux coller à tes contraintes.",
   },
 };
 
@@ -76,48 +83,62 @@ export default function FeedbackScreen() {
     [options, question?.id],
   );
 
-  // fp_q2 : le sous-score d'impact n'apparaît que si le facteur en demande un.
+  // fp_q2 : la sous-échelle n'apparaît que si le facteur en demande une.
   const selectedFactorOption = questionOptions.find((o) => o.value === factor);
   const needsSubscale = Boolean(selectedFactorOption?.has_subscale);
 
-  if (loading) return <Loading label="Chargement du questionnaire…" />;
+  if (loading) return <Loading label="Chargement" />;
 
-  // ── Écran de résultat ──
+  // ── Résultat ──
   if (outcome) {
     const copy = TIER_COPY[outcome.satisfaction_tier];
     const redirected = PROGRAMS.find((p) => p.id === outcome.redirected_program_id);
 
     return (
       <Screen
-        center
         footer={
-          <Button label="Retour au dashboard" onPress={() => router.replace("/dashboard")} />
+          <Button
+            label="Retour au dashboard"
+            onPress={() => router.replace("/dashboard")}
+          />
         }
       >
         <View className="items-center mb-6">
-          <Text className="text-5xl mb-3">{copy.icon}</Text>
-          <Title>{copy.title}</Title>
-          <Text className="text-sm text-slate-500 text-center mt-2">{copy.body}</Text>
+          <MonoLabel tone="accent" className="mb-3">
+            {copy.tag}
+          </MonoLabel>
+          <Display size={30} className="text-center">
+            {copy.title}
+          </Display>
+          <Body className="text-center mt-3">{copy.body}</Body>
         </View>
 
         <Card className="mb-3">
-          <Label>Score global</Label>
-          <Text className="text-3xl font-bold text-slate-900 mt-1">
-            {outcome.score_global.toFixed(1)}
-            <Text className="text-base text-slate-400"> / 5</Text>
-          </Text>
-          <Text className="text-[11px] text-slate-400 mt-1">
+          <MonoLabel className="mb-2">Score global</MonoLabel>
+          <View className="flex-row items-baseline">
+            <Text className="font-display text-accent text-[40px]">
+              {outcome.score_global.toFixed(1)}
+            </Text>
+            <Text className="font-display text-muted text-[18px] ml-1">/ 5</Text>
+          </View>
+          <View className="mt-3">
+            <ProgressBar value={outcome.score_global / 5} height={4} />
+          </View>
+          <Text className="font-body text-[10px] text-muted mt-2.5">
             (satisfaction + facteur limitant) ÷ 2
           </Text>
         </Card>
 
         {outcome.applied_variant_ids.length > 0 ? (
           <Card className="mb-3">
-            <Label>Variantes appliquées</Label>
-            <View className="flex-row flex-wrap gap-2 mt-2">
+            <MonoLabel className="mb-3">Variantes appliquées</MonoLabel>
+            <View className="flex-row flex-wrap gap-2">
               {outcome.applied_variant_ids.map((id) => (
-                <View key={id} className="bg-blue-50 rounded-lg px-3 py-1.5">
-                  <Text className="text-xs text-blue-800 font-medium">
+                <View
+                  key={id}
+                  className="border border-accent/40 bg-accent/10 rounded-lg px-2.5 py-1.5"
+                >
+                  <Text className="font-mono text-[10px] uppercase tracking-label text-accent">
                     {id.replace(/_/g, " ")}
                   </Text>
                 </View>
@@ -127,23 +148,40 @@ export default function FeedbackScreen() {
         ) : null}
 
         {redirected ? (
-          <Card tint={redirected.color}>
-            <Label>Programme suggéré</Label>
-            <View className="flex-row items-center mt-2">
-              <Text className="text-2xl mr-2">{redirected.icon}</Text>
-              <Text className="text-base font-bold text-slate-900 flex-1">
-                {redirected.name}
-              </Text>
-            </View>
+          <GradientCard colors={personaGradient("AW")}>
+            <Text className="font-mono text-[9px] uppercase tracking-label text-white/70 mb-2">
+              Programme suggéré
+            </Text>
+            <Text className="font-display text-white uppercase text-[20px] mb-1">
+              {redirected.name}
+            </Text>
             {redirected.tagline ? (
-              <Text className="text-xs text-slate-600 mt-1">{redirected.tagline}</Text>
+              <Text className="font-body text-[12px] text-white/85 mb-3.5">
+                {redirected.tagline}
+              </Text>
             ) : null}
-          </Card>
+            <View className="flex-row gap-2.5">
+              <MetaPill
+                dark
+                label="Durée"
+                value={
+                  redirected.is_continuous
+                    ? "Continu"
+                    : `${redirected.duration_weeks} sem`
+                }
+              />
+              <MetaPill
+                dark
+                label="Fréq"
+                value={`${redirected.frequency_per_week_min}-${redirected.frequency_per_week_max}×`}
+              />
+            </View>
+          </GradientCard>
         ) : null}
 
-        <Text className="text-[11px] text-slate-400 text-center mt-5 leading-4">
-          L'application effective des variantes passera par POST /feedback/redirect,
-          pas encore livré côté backend.
+        <Text className="font-body text-[10px] text-muted text-center mt-5 leading-4">
+          L'application effective des variantes passera par POST
+          /feedback/redirect, pas encore livré côté backend.
         </Text>
       </Screen>
     );
@@ -172,32 +210,33 @@ export default function FeedbackScreen() {
       return;
     }
 
-    const answers: FeedbackAnswers = {
-      score_q1: scoreQ1!,
-      q2_factor: factor as FeedbackAnswers["q2_factor"],
-      q2_subscale: needsSubscale ? subscale : null,
-      q3_new_objective: objective!,
-    };
-    setOutcome(scoreFeedback(answers, options));
+    setOutcome(
+      scoreFeedback(
+        {
+          score_q1: scoreQ1!,
+          q2_factor: factor as FeedbackAnswers["q2_factor"],
+          q2_subscale: needsSubscale ? subscale : null,
+          q3_new_objective: objective!,
+        },
+        options,
+      ),
+    );
   }
-
-  const selectedValue =
-    step === 0 ? (scoreQ1 !== null ? String(scoreQ1) : null) : step === 1 ? factor : objective;
 
   return (
     <Screen
       footer={
-        <View className="flex-row gap-3">
+        <View className="flex-row gap-2.5">
           {step > 0 ? (
             <View className="flex-1">
               <Button
                 label="Retour"
-                variant="secondary"
+                variant="ghost"
                 onPress={() => setStep((s) => s - 1)}
               />
             </View>
           ) : null}
-          <View className="flex-1">
+          <View className="flex-[2]">
             <Button
               label={step === questions.length - 1 ? "Voir le résultat" : "Suivant"}
               onPress={handleNext}
@@ -207,45 +246,89 @@ export default function FeedbackScreen() {
         </View>
       }
     >
+      <View className="items-center mb-6">
+        <MonoLabel className="mb-2" tone="accent">
+          Bilan de cycle
+        </MonoLabel>
+        <Display size={24} className="text-center">
+          Aide-nous à{"\n"}calibrer la suite
+        </Display>
+      </View>
+
       <View className="mb-6">
-        <Label>
-          Feedback {step + 1} sur {questions.length}
-        </Label>
-        <View className="mt-2">
-          <ProgressBar value={(step + 1) / questions.length} />
-        </View>
+        <ProgressBar value={(step + 1) / questions.length} />
       </View>
 
       <ErrorText message={error} />
 
-      <Text className="text-xl font-bold text-slate-900 leading-7 mb-5">
-        {question.text}
+      <Text className="font-body-sb text-[14px] text-ink mb-4 leading-5">
+        {step + 1}. {question.text}
       </Text>
 
-      {questionOptions.map((option) => (
-        <Choice
-          key={option.id}
-          label={option.label}
-          sublabel={option.sublabel}
-          selected={selectedValue === option.value}
-          onPress={() => {
-            if (step === 0) setScoreQ1(Number(option.value));
-            else if (step === 1) {
-              setFactor(option.value);
-              setSubscale(null);
-            } else setObjective(option.value);
-          }}
-        />
-      ))}
+      {/* fp_q1 : échelle 1-5 en tuiles carrées */}
+      {step === 0 ? (
+        <View className="flex-row gap-1.5 mb-2">
+          {questionOptions.map((option) => {
+            const value = Number(option.value);
+            const active = scoreQ1 === value;
+            return (
+              <Pressable
+                key={option.id}
+                accessibilityRole="radio"
+                accessibilityState={{ checked: active }}
+                accessibilityLabel={option.label}
+                onPress={() => setScoreQ1(value)}
+                className={`flex-1 aspect-square rounded-xl border items-center justify-center ${
+                  active ? "bg-accent border-accent" : "bg-surface border-line"
+                }`}
+              >
+                <Text className="text-[18px]">⭐</Text>
+                <Text
+                  className={`font-mono-md text-[10px] mt-1 ${
+                    active ? "text-black" : "text-muted"
+                  }`}
+                >
+                  {value}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      ) : (
+        questionOptions.map((option) => (
+          <ChoiceRow
+            key={option.id}
+            label={option.label}
+            sublabel={option.sublabel}
+            selected={
+              step === 1 ? factor === option.value : objective === option.value
+            }
+            onPress={() => {
+              if (step === 1) {
+                setFactor(option.value);
+                setSubscale(null);
+              } else {
+                setObjective(option.value);
+              }
+            }}
+          />
+        ))
+      )}
 
-      {/* Sous-échelle d'impact — uniquement pour fp_q2 avec has_subscale. */}
+      {scoreQ1 !== null && step === 0 ? (
+        <Text className="font-body text-[11px] text-muted text-center mt-3">
+          {questionOptions.find((o) => Number(o.value) === scoreQ1)?.sublabel}
+        </Text>
+      ) : null}
+
+      {/* Sous-échelle d'impact — fp_q2 uniquement */}
       {step === 1 && needsSubscale && question.subscale ? (
-        <View className="mt-4">
-          <Text className="text-sm font-semibold text-slate-800 mb-3">
+        <View className="mt-5">
+          <MonoLabel tone="accent" className="mb-3">
             {question.subscale.text}
-          </Text>
+          </MonoLabel>
           {question.subscale.options.map((sub) => (
-            <Choice
+            <ChoiceRow
               key={sub.value}
               label={sub.label}
               sublabel={sub.sublabel}

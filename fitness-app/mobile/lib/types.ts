@@ -359,6 +359,8 @@ export interface DashboardData {
   nextSession: NextSessionPreview;
   streak: number;
   completedCount: number;
+  /** Quelques noms d'exercices du focus à venir, pour l'aperçu du dashboard. */
+  previewExercises: string[];
 }
 
 /** Prochaine séance dérivée de user_programs — pas encore générée en base. */

@@ -4,16 +4,27 @@ import { useRouter } from "expo-router";
 import { useAuth } from "./_layout";
 import {
   Button,
-  Choice,
+  ChoiceRow,
+  Display,
   ErrorText,
-  Label,
   Loading,
+  MonoLabel,
   ProgressBar,
   Screen,
 } from "../components/ui";
+import { optionLetter } from "../lib/theme";
 import { fetchQuestionnaire, submitQuestionnaire } from "../lib/data";
 import { PERSONA_CODE_TO_ID, scoreAnswers, toggleMultiChoice } from "../lib/scoring";
 import type { QuestionnaireOption, QuestionnaireQuestion } from "../lib/types";
+
+/** Intitulé court affiché en sur-titre, dérivé du rôle de segmentation. */
+const ROLE_LABELS: Record<string, string> = {
+  primary: "Profil",
+  major_differentiator: "Objectif principal",
+  secondary: "Historique",
+  constraint: "Contraintes",
+  psychological_differentiator: "Rapport à l'effort",
+};
 
 export default function QuestionnaireScreen() {
   const router = useRouter();
@@ -55,7 +66,7 @@ export default function QuestionnaireScreen() {
     [options, question?.id],
   );
 
-  if (loading || authLoading) return <Loading label="Chargement du questionnaire…" />;
+  if (loading || authLoading) return <Loading label="Chargement" />;
 
   if (!question) {
     return (
@@ -97,12 +108,7 @@ export default function QuestionnaireScreen() {
     setSubmitting(true);
     try {
       const { winner, scores } = scoreAnswers(answers, options);
-      await submitQuestionnaire(
-        userId,
-        answers,
-        scores,
-        PERSONA_CODE_TO_ID[winner],
-      );
+      await submitQuestionnaire(userId, answers, scores, PERSONA_CODE_TO_ID[winner]);
       router.replace("/onboarding-result");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Envoi impossible.");
@@ -111,21 +117,23 @@ export default function QuestionnaireScreen() {
     }
   }
 
+  const pad = (n: number) => String(n).padStart(2, "0");
+
   return (
     <Screen
       footer={
-        <View className="flex-row gap-3">
+        <View className="flex-row gap-2.5">
           {index > 0 ? (
             <View className="flex-1">
               <Button
                 label="Retour"
-                variant="secondary"
+                variant="ghost"
                 onPress={() => setIndex((i) => i - 1)}
                 disabled={submitting}
               />
             </View>
           ) : null}
-          <View className="flex-1">
+          <View className="flex-[2]">
             <Button
               label={isLast ? "Voir mon profil" : "Suivant"}
               onPress={handleNext}
@@ -136,30 +144,31 @@ export default function QuestionnaireScreen() {
         </View>
       }
     >
-      <View className="mb-6">
-        <View className="flex-row justify-between items-center mb-2">
-          <Label>
-            Question {index + 1} sur {questions.length}
-          </Label>
-          <Text className="text-xs text-slate-400">
-            {Math.round(((index + 1) / questions.length) * 100)} %
-          </Text>
-        </View>
+      <View className="flex-row justify-between items-center mb-3">
+        <Text className="font-mono text-[11px] tracking-label text-muted">
+          <Text className="text-accent">{pad(index + 1)}</Text> / {pad(questions.length)}
+        </Text>
+        <MonoLabel>{isMulti ? "Choix multiple" : "Choix unique"}</MonoLabel>
+      </View>
+
+      <View className="mb-7">
         <ProgressBar value={(index + 1) / questions.length} />
       </View>
 
       <ErrorText message={error} />
 
-      <Text className="text-xl font-bold text-slate-900 leading-7 mb-2">
-        {question.text}
-      </Text>
-      <Text className="text-xs text-slate-500 mb-5">
-        {isMulti ? "Plusieurs réponses possibles" : "Une seule réponse"}
-      </Text>
+      <MonoLabel tone="accent" className="mb-3">
+        {ROLE_LABELS[question.segmentation_role ?? ""] ?? "Profilage"}
+      </MonoLabel>
 
-      {questionOptions.map((option) => (
-        <Choice
+      <View className="mb-7">
+        <Display size={22}>{question.text}</Display>
+      </View>
+
+      {questionOptions.map((option, i) => (
+        <ChoiceRow
           key={option.id}
+          letter={optionLetter(i)}
           label={option.label}
           selected={selectedValues.includes(option.value)}
           onPress={() => select(option.value)}
@@ -168,7 +177,9 @@ export default function QuestionnaireScreen() {
       ))}
 
       {question.note ? (
-        <Text className="text-xs text-slate-400 italic mt-1">{question.note}</Text>
+        <Text className="font-body text-[11px] text-muted italic mt-2 leading-4">
+          {question.note}
+        </Text>
       ) : null}
     </Screen>
   );

@@ -3,25 +3,21 @@ import { Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import { useAuth } from "./_layout";
 import {
+  Body,
   Button,
   Card,
+  Display,
   ErrorText,
-  Label,
+  GradientCard,
   Loading,
-  Pill,
+  MetaPill,
+  MonoLabel,
   Screen,
 } from "../components/ui";
+import { personaColor, personaGradient } from "../lib/theme";
 import { fetchOnboardingResult } from "../lib/data";
 import { TIEBREAK_ORDER } from "../lib/scoring";
-import type { OnboardingResult, PersonaCode } from "../lib/types";
-
-const PERSONA_LABELS: Record<PersonaCode, string> = {
-  SMB: "Summer Muscle Builder",
-  BF: "Brut Force",
-  AW: "Athlete Wannabe",
-  CR: "Corporate Rusher",
-  SAV: "Savage",
-};
+import type { OnboardingResult } from "../lib/types";
 
 export default function OnboardingResultScreen() {
   const router = useRouter();
@@ -49,32 +45,32 @@ export default function OnboardingResultScreen() {
     };
   }, [userId, authLoading, router]);
 
-  if (loading || authLoading) return <Loading label="Calcul de votre profil…" />;
+  if (loading || authLoading) return <Loading label="Calcul du profil" />;
 
   if (!result) {
     return (
       <Screen center>
         <ErrorText message={error ?? "Profil introuvable."} />
-        <Button label="Refaire le questionnaire" onPress={() => router.replace("/questionnaire")} />
+        <Button
+          label="Refaire le questionnaire"
+          onPress={() => router.replace("/questionnaire")}
+        />
       </Screen>
     );
   }
 
   const { persona, program, scores } = result;
-  const tint = persona.color ?? "#1565C0";
+  const tint = personaColor(persona.code);
+  const gradient = personaGradient(persona.code);
   const maxScore = Math.max(...Object.values(scores), 1);
 
   const duration = program.is_continuous
-    ? "En continu"
-    : `${program.duration_weeks} semaines`;
+    ? "Continu"
+    : `${program.duration_weeks} sem`;
   const frequency =
     program.frequency_per_week_min === program.frequency_per_week_max
-      ? `${program.frequency_per_week_min}×/sem`
-      : `${program.frequency_per_week_min}–${program.frequency_per_week_max}×/sem`;
-  const sessionLength =
-    program.session_duration_min === program.session_duration_max
-      ? `${program.session_duration_min} min`
-      : `${program.session_duration_min}–${program.session_duration_max} min`;
+      ? `${program.frequency_per_week_min}×`
+      : `${program.frequency_per_week_min}-${program.frequency_per_week_max}×`;
 
   return (
     <Screen
@@ -82,59 +78,62 @@ export default function OnboardingResultScreen() {
         <Button
           label="Démarrer mon programme"
           onPress={() => router.replace("/dashboard")}
-          color={tint}
         />
       }
     >
-      <View className="items-center mb-6">
-        <Label>Votre profil</Label>
-        <View
-          className="w-24 h-24 rounded-full items-center justify-center my-4"
-          style={{ backgroundColor: `${tint}1F` }}
-        >
-          <Text className="text-5xl">{persona.icon}</Text>
-        </View>
-        <Text className="text-2xl font-bold text-center text-slate-900">
-          {persona.name}
-        </Text>
-        {persona.tagline ? (
-          <Text className="text-sm text-slate-500 text-center mt-1">
-            {persona.tagline}
-          </Text>
-        ) : null}
+      <View className="items-center mb-4">
+        <MonoLabel tone="accent">Profil identifié</MonoLabel>
+      </View>
+
+      {/* Carte persona — dégradé plein, signature de l'écran 03 */}
+      <View className="mb-5">
+        <GradientCard colors={gradient} className="items-center py-7">
+          <Text className="text-[52px] mb-2">{persona.icon}</Text>
+          <View className="items-center">
+            <Text
+              className="font-display text-white uppercase text-[26px] text-center"
+              style={{ lineHeight: 27 }}
+            >
+              {persona.name}
+            </Text>
+          </View>
+          {persona.tagline ? (
+            <Text className="font-body text-[12px] text-white/90 text-center mt-2.5 leading-[17px]">
+              {persona.tagline}
+            </Text>
+          ) : null}
+        </GradientCard>
       </View>
 
       {persona.description ? (
         <Card className="mb-4">
-          <Text className="text-sm text-slate-700 leading-5">
-            {persona.description}
-          </Text>
+          <Body className="text-ink">{persona.description}</Body>
         </Card>
       ) : null}
 
-      <Card tint={tint} className="mb-4">
-        <Label>Programme assigné</Label>
-        <View className="flex-row items-center mt-2 mb-1">
-          <Text className="text-2xl mr-2">{program.icon}</Text>
-          <Text className="text-lg font-bold text-slate-900 flex-1">
-            {program.name}
-          </Text>
-        </View>
-        {program.tagline ? (
-          <Text className="text-sm text-slate-600 mb-4">{program.tagline}</Text>
-        ) : null}
-        <View className="flex-row flex-wrap gap-2">
-          <Pill label="Durée" value={duration} />
-          <Pill label="Fréquence" value={frequency} />
-          <Pill label="Séance" value={sessionLength} />
+      {/* Programme assigné */}
+      <Card className="mb-4">
+        <MonoLabel tone="accent" className="mb-2">
+          Programme assigné
+        </MonoLabel>
+        <Display size={20} className="mb-2">
+          {program.name}
+        </Display>
+        {program.tagline ? <Body className="mb-4">{program.tagline}</Body> : null}
+        <View className="flex-row gap-2.5">
+          <MetaPill label="Durée" value={duration} />
+          <MetaPill label="Fréq" value={`${frequency}/sem`} />
+          <MetaPill
+            label="Séance"
+            value={`${program.session_duration_min}′`}
+          />
         </View>
       </Card>
 
-      {/* Le détail du score rend l'attribution lisible — utile pour itérer
-          sur la pondération du questionnaire. */}
+      {/* Détail du scoring — rend l'attribution lisible et débuggable */}
       <Card>
-        <Label>Détail du scoring</Label>
-        <View className="mt-3 gap-2">
+        <MonoLabel className="mb-3">Détail du scoring</MonoLabel>
+        <View className="gap-2">
           {TIEBREAK_ORDER.map((code) => {
             const value = scores[code];
             const isWinner = code === persona.code;
@@ -142,24 +141,24 @@ export default function OnboardingResultScreen() {
             return (
               <View key={code} className="flex-row items-center">
                 <Text
-                  className={`w-11 text-[11px] ${
-                    isWinner ? "font-bold text-slate-900" : "text-slate-400"
+                  className={`w-9 font-mono-md text-[10px] ${
+                    isWinner ? "text-ink" : "text-muted"
                   }`}
                 >
                   {code}
                 </Text>
-                <View className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden mx-2">
+                <View className="flex-1 h-1.5 bg-bg rounded-full overflow-hidden mx-2">
                   <View
                     className="h-full rounded-full"
                     style={{
                       width: `${width}%`,
-                      backgroundColor: isWinner ? tint : "#cbd5e1",
+                      backgroundColor: isWinner ? tint : "#2a2a3a",
                     }}
                   />
                 </View>
                 <Text
-                  className={`w-7 text-right text-[11px] ${
-                    isWinner ? "font-bold text-slate-900" : "text-slate-400"
+                  className={`w-6 text-right font-mono-md text-[10px] ${
+                    isWinner ? "text-ink" : "text-muted"
                   }`}
                 >
                   {value}
@@ -168,9 +167,8 @@ export default function OnboardingResultScreen() {
             );
           })}
         </View>
-        <Text className="text-[11px] text-slate-400 mt-3 leading-4">
-          {PERSONA_LABELS[persona.code]} l'emporte. Égalité départagée dans
-          l'ordre CR › SMB › AW › BF › SAV.
+        <Text className="font-body text-[10px] text-muted mt-3 leading-4">
+          Égalité départagée dans l'ordre CR › SMB › AW › BF › SAV.
         </Text>
       </Card>
     </Screen>

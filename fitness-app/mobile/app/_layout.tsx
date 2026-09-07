@@ -3,7 +3,20 @@ import { createContext, useCallback, useContext, useEffect, useState } from "rea
 import { View } from "react-native";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { DemoBanner } from "../components/ui";
+import { useFonts } from "expo-font";
+import { Archivo_900Black } from "@expo-google-fonts/archivo";
+import {
+  Inter_400Regular,
+  Inter_500Medium,
+  Inter_600SemiBold,
+  Inter_700Bold,
+} from "@expo-google-fonts/inter";
+import {
+  JetBrainsMono_400Regular,
+  JetBrainsMono_500Medium,
+} from "@expo-google-fonts/jetbrains-mono";
+import { DemoBanner, Loading } from "../components/ui";
+import { COLORS } from "../lib/theme";
 import { isDemoMode, supabase } from "../lib/supabase";
 import { demoCurrentUser } from "../lib/demoStore";
 
@@ -37,13 +50,23 @@ const initialDemoUser = () => (isDemoMode() ? demoCurrentUser() : null);
 export default function RootLayout() {
   const demo = isDemoMode();
 
+  // Une famille par graisse : React Native ne synthétise pas le gras.
+  const [fontsLoaded] = useFonts({
+    Archivo_900Black,
+    Inter_400Regular,
+    Inter_500Medium,
+    Inter_600SemiBold,
+    Inter_700Bold,
+    JetBrainsMono_400Regular,
+    JetBrainsMono_500Medium,
+  });
+
   const [userId, setUserId] = useState<string | null>(
     () => initialDemoUser()?.id ?? null,
   );
   const [email, setEmail] = useState<string | null>(
     () => initialDemoUser()?.email ?? null,
   );
-  // Supabase impose un aller-retour asynchrone ; la démo non.
   const [isLoading, setIsLoading] = useState(!demo);
 
   const refresh = useCallback(() => {
@@ -79,12 +102,21 @@ export default function RootLayout() {
     };
   }, [demo]);
 
+  // Monter les écrans avant les polices ferait clignoter la typo display.
+  if (!fontsLoaded) return <Loading />;
+
   return (
     <AuthContext.Provider value={{ userId, email, isLoading, refresh }}>
-      <StatusBar style="dark" />
-      <View className="flex-1 bg-slate-50">
+      <StatusBar style="light" />
+      <View className="flex-1 bg-bg">
         {demo ? <DemoBanner /> : null}
-        <Stack screenOptions={{ headerShown: false, animation: "fade" }} />
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            animation: "fade",
+            contentStyle: { backgroundColor: COLORS.bg },
+          }}
+        />
       </View>
     </AuthContext.Provider>
   );

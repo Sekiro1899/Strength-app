@@ -14,6 +14,7 @@
 import { generateWorkout } from "./api";
 import * as demo from "./demoStore";
 import {
+  EXERCISES,
   FEEDBACK_POLL_OPTIONS,
   FEEDBACK_POLL_QUESTIONS,
   PERSONAS,
@@ -23,7 +24,13 @@ import {
   QUESTIONNAIRE_OPTIONS,
   QUESTIONNAIRE_QUESTIONS,
 } from "./fixtures";
-import { buildSessionLabel, nextDayNumber, resolveFocus, weekForDay } from "./protocol";
+import {
+  FOCUS_CATEGORY_MAP,
+  buildSessionLabel,
+  nextDayNumber,
+  resolveFocus,
+  weekForDay,
+} from "./protocol";
 import { computeStreak, resolveProgramId } from "./scoring";
 import { isDemoMode, supabase } from "./supabase";
 import type {
@@ -325,6 +332,30 @@ function previewNextSession(
   };
 }
 
+const PREVIEW_COUNT = 3;
+
+/** Noms d'exercices affichés en puces sur la carte « prochaine séance ». */
+async function previewExerciseNames(focus: string): Promise<string[]> {
+  const categories = FOCUS_CATEGORY_MAP[focus as keyof typeof FOCUS_CATEGORY_MAP] ?? [];
+  if (categories.length === 0) return [];
+
+  if (isDemoMode()) {
+    return EXERCISES.filter((e) => categories.includes(e.category))
+      .sort((a, b) => a.id.localeCompare(b.id))
+      .slice(0, PREVIEW_COUNT)
+      .map((e) => e.name);
+  }
+
+  const { data } = await supabase
+    .from("exercises")
+    .select("name")
+    .in("category", categories)
+    .order("id")
+    .limit(PREVIEW_COUNT);
+
+  return (data ?? []).map((e: { name: string }) => e.name);
+}
+
 export async function fetchDashboard(
   userId: string,
   now: Date,
@@ -337,16 +368,18 @@ export async function fetchDashboard(
       PROGRAM_PHASES.find((ph) => ph.id === up.current_phase_id) ?? null;
     const sessions = demo.demoSessions();
     const completed = sessions.filter((s) => s.status === "completed");
+    const nextSession = previewNextSession(up, program);
     return {
       userProgram: up,
       program,
       phase,
-      nextSession: previewNextSession(up, program),
+      nextSession,
       streak: computeStreak(
         completed.map((s) => s.completed_at),
         now,
       ),
       completedCount: up.total_sessions_completed,
+      previewExercises: await previewExerciseNames(nextSession.focus),
     };
   }
 
@@ -382,18 +415,20 @@ export async function fetchDashboard(
   if (programRes.error) throw new Error(programRes.error.message);
 
   const program = programRes.data as Program;
+  const nextSession = previewNextSession(userProgram, program);
 
   return {
     userProgram,
     program,
     // program_lactate n'a aucune phase — le moteur retombe sur le programme.
     phase: (phaseRes.data as ProgramPhase) ?? null,
-    nextSession: previewNextSession(userProgram, program),
+    nextSession,
     streak: computeStreak(
       (sessionsRes.data ?? []).map((s: { completed_at: string | null }) => s.completed_at),
       now,
     ),
     completedCount: userProgram.total_sessions_completed,
+    previewExercises: await previewExerciseNames(nextSession.focus),
   };
 }
 

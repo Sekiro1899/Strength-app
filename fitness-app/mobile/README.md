@@ -20,6 +20,24 @@ en local, sans Supabase ni FastAPI. Un bandeau ambre le signale.
 Pour brancher le vrai backend, copier `.env.example` en `.env` et renseigner
 les clés.
 
+## Direction artistique
+
+Éditorial / brutaliste sportif. Référence : `../docs/ui-prototype.html`.
+
+- **Fond** charbon `#0a0a0f`, surfaces `#1c1c28` bordées `#2a2a3a`
+- **Accent** lime `#e3ff5c` — il porte l'action, toujours avec du texte noir
+- **Display** Archivo Black, CAPITALES, interlignage serré
+- **Étiquettes** JetBrains Mono, 10px, tracking large
+- **Corps** Inter
+
+Les tokens vivent à deux endroits, à garder synchronisés :
+`tailwind.config.js` (classes) et `lib/theme.ts` (valeurs passées aux props
+natives — dégradés, `ActivityIndicator`, `RefreshControl`).
+
+Les couleurs persona affichées viennent de `lib/theme.ts`, **pas** de
+`personas.color` en base : ces valeurs ont été choisies pour un fond clair et
+deviennent illisibles sur charbon.
+
 ## Architecture
 
 Les écrans ne parlent jamais directement à Supabase ni à `fetch`. Tout passe
@@ -32,11 +50,13 @@ app/                     écrans (expo-router, routes = fichiers)
   (auth)/login|signup    → URLs /login et /signup
   questionnaire.tsx      9 questions + scoring persona
   onboarding-result.tsx  persona + programme + détail du scoring
-  dashboard.tsx          programme, prochaine séance, streak
-  session.tsx            lecteur de séance (4 blocs)
+  dashboard.tsx          programme, prochaine séance, streak, énergie
+  session.tsx            aperçu de séance (4 blocs)
+  tracking.tsx           suivi série par série + minuteur de repos
   feedback.tsx           poll 3 questions + variantes
 
 components/ui.tsx        primitives NativeWind partagées
+lib/theme.ts             tokens non exprimables en classe (dégradés…)
 
 lib/
   types.ts       ← CONTRAT : miroir de schema.sql + models/workout.py

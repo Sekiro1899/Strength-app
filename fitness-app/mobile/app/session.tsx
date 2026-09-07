@@ -1,41 +1,63 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useAuth } from "./_layout";
-import { Button, Card, ErrorText, Label, Loading, Title } from "../components/ui";
-import { completeSession, fetchDashboard, fetchSession } from "../lib/data";
-import type { BlockType, ExerciseBlock, WorkoutSession } from "../lib/types";
+import {
+  BlockHeader,
+  Button,
+  Display,
+  ErrorText,
+  Loading,
+  MonoLabel,
+  Screen,
+} from "../components/ui";
+import { fetchSession } from "../lib/data";
+import type { ExerciseBlock, WorkoutSession } from "../lib/types";
 
-const BLOCK_META: { key: BlockType; field: keyof WorkoutSession; title: string; icon: string }[] = [
-  { key: "warmup", field: "warmup_block", title: "Échauffement", icon: "🔆" },
-  { key: "main", field: "main_block", title: "Bloc principal", icon: "🏋️" },
-  { key: "core", field: "core_block", title: "Gainage", icon: "🧱" },
-  { key: "finisher", field: "finisher_block", title: "Finisher", icon: "🔥" },
+const BLOCKS: {
+  field: keyof WorkoutSession;
+  symbol: string;
+  name: string;
+}[] = [
+  { field: "warmup_block", symbol: "⊹", name: "Warmup" },
+  { field: "main_block", symbol: "▲", name: "Main Block" },
+  { field: "core_block", symbol: "■", name: "Core" },
+  { field: "finisher_block", symbol: "◆", name: "Finisher" },
 ];
 
-/** "4 × 10 · 75 % 1RM · repos 90 s" — n'affiche que ce que le moteur a renvoyé. */
-function describe(block: ExerciseBlock): string {
-  const parts: string[] = [];
-  if (block.reps !== undefined) parts.push(`${block.sets} × ${block.reps}`);
-  else if (block.duration_sec !== undefined)
-    parts.push(`${block.sets} × ${block.duration_sec} s`);
-  else parts.push(`${block.sets} série${block.sets > 1 ? "s" : ""}`);
+/** "4 × 8" ou "3 × 30 s" — la métrique dominante, en mono lime. */
+export function setsLabel(block: ExerciseBlock): string {
+  if (block.reps !== undefined) return `${block.sets} × ${block.reps}`;
+  if (block.duration_sec !== undefined) return `${block.sets} × ${block.duration_sec}s`;
+  return `${block.sets} série${block.sets > 1 ? "s" : ""}`;
+}
 
-  if (block.load_pct_1rm !== undefined) parts.push(`${block.load_pct_1rm} % 1RM`);
-  if (block.rest_sec !== undefined) parts.push(`repos ${block.rest_sec} s`);
+/** "75% 1RM · Repos 90s" — le détail secondaire, en muted. */
+export function detailLabel(block: ExerciseBlock): string {
+  const parts: string[] = [];
+  if (block.load_pct_1rm !== undefined) parts.push(`${block.load_pct_1rm}% 1RM`);
+  if (block.rest_sec !== undefined) parts.push(`Repos ${block.rest_sec}s`);
+  if (block.superset_with) parts.push("Superset");
+  if (parts.length === 0 && block.notes) return block.notes;
   return parts.join(" · ");
+}
+
+/** Estimation grossière de la durée d'un bloc, pour l'en-tête. */
+function blockMinutes(blocks: ExerciseBlock[]): number {
+  const seconds = blocks.reduce((total, b) => {
+    const work = b.duration_sec ?? (b.reps ?? 10) * 3;
+    const rest = b.rest_sec ?? 30;
+    return total + b.sets * (work + rest);
+  }, 0);
+  return Math.max(1, Math.round(seconds / 60));
 }
 
 export default function SessionScreen() {
   const router = useRouter();
-  const { userId } = useAuth();
   const { sessionId } = useLocalSearchParams<{ sessionId: string }>();
 
   const [session, setSession] = useState<WorkoutSession | null>(null);
-  const [done, setDone] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
-  const [finishing, setFinishing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -50,171 +72,95 @@ export default function SessionScreen() {
     };
   }, [sessionId]);
 
-  const allBlocks = useMemo(() => {
-    if (!session) return [];
-    return BLOCK_META.flatMap(({ key, field }) => {
-      const blocks = (session[field] as ExerciseBlock[] | null) ?? [];
-      return blocks.map((b, i) => ({ uid: `${key}-${i}`, block: b }));
-    });
-  }, [session]);
-
-  const completedCount = allBlocks.filter((b) => done[b.uid]).length;
-  const progress = allBlocks.length ? completedCount / allBlocks.length : 0;
-
-  async function handleFinish() {
-    if (!session || !userId) return;
-    setFinishing(true);
-    setError(null);
-    try {
-      const dashboard = await fetchDashboard(userId, new Date());
-      await completeSession(
-        session.id,
-        session.user_program_id,
-        dashboard?.completedCount ?? 0,
-        new Date(),
-      );
-      router.replace("/dashboard");
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Enregistrement impossible.");
-      setFinishing(false);
-    }
-  }
-
-  if (loading) return <Loading label="Préparation de la séance…" />;
+  if (loading) return <Loading label="Préparation" />;
 
   if (!session) {
     return (
-      <SafeAreaView className="flex-1 bg-slate-50 items-center justify-center px-8">
+      <Screen center>
         <ErrorText message={error ?? "Séance introuvable."} />
         <Button label="Retour au dashboard" onPress={() => router.replace("/dashboard")} />
-      </SafeAreaView>
+      </Screen>
     );
   }
 
+  const totalExercises = BLOCKS.reduce(
+    (n, b) => n + ((session[b.field] as ExerciseBlock[] | null) ?? []).length,
+    0,
+  );
+  const totalMinutes = BLOCKS.reduce(
+    (n, b) => n + blockMinutes((session[b.field] as ExerciseBlock[] | null) ?? []),
+    0,
+  );
+
   return (
-    <SafeAreaView className="flex-1 bg-slate-50">
-      <ScrollView contentContainerStyle={{ paddingVertical: 20, paddingBottom: 32 }}>
-        <View className="w-full max-w-[520px] mx-auto px-6">
-          <View className="flex-row justify-between items-start mb-4">
-            <View className="flex-1">
-              <Label>
-                Semaine {session.week_number} · Jour {session.day_number}
-              </Label>
-              <Title>{session.session_label}</Title>
-              <Text className="text-sm text-slate-500 mt-1">
-                Focus : {session.focus?.replace(/_/g, " ")}
-              </Text>
-            </View>
-            <Pressable onPress={() => router.back()} className="p-2 -mr-2">
-              <Text className="text-xs text-slate-400">Fermer</Text>
+    <SafeAreaView className="flex-1 bg-bg">
+      <ScrollView
+        contentContainerStyle={{ paddingVertical: 20, paddingBottom: 32 }}
+        showsVerticalScrollIndicator={false}
+      >
+        <View className="w-full max-w-[420px] mx-auto px-5">
+          {/* En-tête : bouton retour carré + titre display */}
+          <View className="flex-row items-center gap-2.5 mb-2">
+            <Pressable
+              onPress={() => router.back()}
+              accessibilityLabel="Retour"
+              className="w-8 h-8 rounded-[10px] bg-surface border border-line items-center justify-center"
+            >
+              <Text className="text-ink text-[18px] leading-[20px]">‹</Text>
             </Pressable>
+            <Display size={22}>{session.session_label}</Display>
           </View>
 
-          <View className="flex-row items-center mb-6">
-            <View className="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden mr-3">
-              <View
-                className="h-full bg-emerald-500 rounded-full"
-                style={{ width: `${progress * 100}%` }}
-              />
-            </View>
-            <Text className="text-xs text-slate-500">
-              {completedCount}/{allBlocks.length}
-            </Text>
-          </View>
+          <MonoLabel className="mb-6">
+            Semaine {session.week_number} · Jour {session.day_number} ·{" "}
+            {totalExercises} exercices · ~{totalMinutes} min
+          </MonoLabel>
 
-          <ErrorText message={error} />
-
-          {BLOCK_META.map(({ key, field, title, icon }) => {
+          {BLOCKS.map(({ field, symbol, name }) => {
             const blocks = (session[field] as ExerciseBlock[] | null) ?? [];
             if (blocks.length === 0) return null;
 
             return (
-              <View key={key} className="mb-6">
-                <View className="flex-row items-center mb-3">
-                  <Text className="text-base mr-2">{icon}</Text>
-                  <Text className="text-sm font-bold text-slate-900 uppercase tracking-wide">
-                    {title}
-                  </Text>
-                  <Text className="text-xs text-slate-400 ml-2">
-                    {blocks.length} exercice{blocks.length > 1 ? "s" : ""}
-                  </Text>
-                </View>
+              <View key={String(field)} className="mb-5">
+                <BlockHeader
+                  symbol={symbol}
+                  name={name}
+                  meta={`${blockMinutes(blocks)} min`}
+                />
 
-                {blocks.map((block, i) => {
-                  const uid = `${key}-${i}`;
-                  const checked = Boolean(done[uid]);
-                  return (
-                    <Pressable
-                      key={uid}
-                      accessibilityRole="checkbox"
-                      accessibilityState={{ checked }}
-                      onPress={() => setDone((d) => ({ ...d, [uid]: !d[uid] }))}
-                      className={`flex-row items-start rounded-xl border p-4 mb-2 ${
-                        checked
-                          ? "bg-emerald-50 border-emerald-200"
-                          : "bg-white border-slate-200"
-                      }`}
-                    >
-                      <View
-                        className={`w-5 h-5 rounded-md border-2 mr-3 mt-0.5 items-center justify-center ${
-                          checked
-                            ? "bg-emerald-500 border-emerald-500"
-                            : "border-slate-300"
-                        }`}
+                {blocks.map((block, i) => (
+                  <View
+                    key={`${String(field)}-${i}`}
+                    className="bg-surface border border-line rounded-[14px] p-3.5 mb-2"
+                  >
+                    <View className="flex-row justify-between items-start mb-1.5">
+                      <Text
+                        className="font-body-sb text-[13px] text-ink flex-1 pr-3"
+                        numberOfLines={2}
                       >
-                        {checked ? (
-                          <Text className="text-white text-[11px] font-bold">✓</Text>
-                        ) : null}
-                      </View>
-
-                      <View className="flex-1">
-                        <Text
-                          className={`text-[15px] font-semibold ${
-                            checked
-                              ? "text-emerald-900 line-through"
-                              : "text-slate-900"
-                          }`}
-                        >
-                          {block.name}
-                        </Text>
-                        <Text className="text-xs text-slate-500 mt-1">
-                          {describe(block)}
-                        </Text>
-                        {block.superset_with ? (
-                          <View className="self-start bg-violet-100 rounded px-2 py-0.5 mt-1.5">
-                            <Text className="text-[10px] text-violet-700 font-semibold">
-                              SUPERSET
-                            </Text>
-                          </View>
-                        ) : null}
-                        {block.notes ? (
-                          <Text className="text-[11px] text-slate-400 mt-1 italic">
-                            {block.notes}
-                          </Text>
-                        ) : null}
-                      </View>
-                    </Pressable>
-                  );
-                })}
+                        {block.name}
+                      </Text>
+                      <Text className="font-mono-md text-[12px] text-accent">
+                        {setsLabel(block)}
+                      </Text>
+                    </View>
+                    <Text className="font-body text-[11px] text-muted">
+                      {detailLabel(block)}
+                    </Text>
+                  </View>
+                ))}
               </View>
             );
           })}
 
-          <Card className="mb-4">
-            <Text className="text-xs text-slate-500 leading-4">
-              Cochez les exercices au fur et à mesure. Terminer la séance
-              incrémente votre compteur et votre streak sur le dashboard.
-            </Text>
-          </Card>
-
           <Button
-            label={
-              completedCount === allBlocks.length
-                ? "Terminer la séance"
-                : `Terminer (${completedCount}/${allBlocks.length})`
+            label="Commencer la séance"
+            onPress={() =>
+              router.push({
+                pathname: "/tracking",
+                params: { sessionId: session.id },
+              })
             }
-            onPress={handleFinish}
-            loading={finishing}
           />
         </View>
       </ScrollView>

@@ -1,101 +1,176 @@
 import { useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  Pressable,
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-} from "react-native";
+import { KeyboardAvoidingView, Platform, Text, TextInput, View } from "react-native";
 import { useRouter } from "expo-router";
-import { supabase } from "../../lib/supabase";
+import { useAuth } from "../_layout";
+import {
+  Body,
+  Button,
+  Display,
+  ErrorText,
+  MonoLabel,
+  Screen,
+} from "../../components/ui";
+import { COLORS, PERSONA_COLORS } from "../../lib/theme";
+import { isDemoMode, signIn } from "../../lib/data";
+
+/**
+ * Écran d'accueil + connexion.
+ *
+ * Le motif d'orbites reprend l'écran 01 du prototype : les 5 personas
+ * gravitent autour du chiffre, ce qui annonce visuellement le profilage.
+ */
+function Orbit() {
+  return (
+    <View className="h-[200px] my-6 items-center justify-center">
+      <View className="absolute w-[220px] h-[220px] rounded-full border border-line opacity-50" />
+      <View className="absolute w-[164px] h-[164px] rounded-full border border-line" />
+
+      <View
+        className="w-[92px] h-[92px] rounded-full items-center justify-center"
+        style={{
+          backgroundColor: COLORS.accent,
+          shadowColor: COLORS.accent,
+          shadowOpacity: 0.45,
+          shadowRadius: 40,
+          shadowOffset: { width: 0, height: 0 },
+        }}
+      >
+        <Text className="font-display text-black text-[34px]">5</Text>
+      </View>
+
+      <View
+        className="absolute w-3 h-3 rounded-full top-[8px]"
+        style={{ backgroundColor: COLORS.ink }}
+      />
+      <View
+        className="absolute w-3 h-3 rounded-full bottom-[22px] right-[36px]"
+        style={{ backgroundColor: PERSONA_COLORS.AW }}
+      />
+      <View
+        className="absolute w-3 h-3 rounded-full bottom-[34px] left-[36px]"
+        style={{ backgroundColor: PERSONA_COLORS.CR }}
+      />
+      <View
+        className="absolute w-2.5 h-2.5 rounded-full top-[44px] right-[16px]"
+        style={{ backgroundColor: PERSONA_COLORS.SAV }}
+      />
+    </View>
+  );
+}
 
 export default function LoginScreen() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const { refresh } = useAuth();
+
+  const [showForm, setShowForm] = useState(false);
+  const [email, setEmail] = useState(isDemoMode() ? "demo@strength.app" : "");
+  const [password, setPassword] = useState(isDemoMode() ? "demo1234" : "");
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   async function handleLogin() {
-    setError("");
+    setError(null);
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
-      password,
-    });
-    setLoading(false);
-
-    if (error) {
-      setError(error.message);
-      return;
+    try {
+      const result = await signIn(email.trim(), password);
+      refresh();
+      router.replace(result.onboardingCompleted ? "/dashboard" : "/questionnaire");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Connexion impossible.");
+    } finally {
+      setLoading(false);
     }
-
-    router.replace("/");
   }
 
   return (
     <KeyboardAvoidingView
-      className="flex-1 bg-white"
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      className="flex-1 bg-bg"
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <View className="flex-1 justify-center px-8">
-        <Text className="text-3xl font-bold text-center mb-2">
-          Strength App
-        </Text>
-        <Text className="text-base text-gray-500 text-center mb-10">
-          Programme sportif personnalisé
-        </Text>
+      <Screen scroll={false}>
+        <View className="flex-1 justify-between">
+          <View>
+            <MonoLabel tone="accent" className="mb-5">
+              Strength · v0.1
+            </MonoLabel>
+            <Display size={36}>
+              Construisons{"\n"}ton{" "}
+              <Text className="text-accent">programme</Text>.
+            </Display>
+            <Body className="mt-4">
+              Une app de musculation personnalisée selon ton profil, ton temps
+              et ton ambition.
+            </Body>
+          </View>
 
-        {error ? (
-          <Text className="text-red-500 text-sm text-center mb-4">
-            {error}
-          </Text>
-        ) : null}
-
-        <TextInput
-          className="border border-gray-300 rounded-xl px-4 py-3 text-base mb-4"
-          placeholder="Email"
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          keyboardType="email-address"
-          textContentType="emailAddress"
-        />
-
-        <TextInput
-          className="border border-gray-300 rounded-xl px-4 py-3 text-base mb-6"
-          placeholder="Mot de passe"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          textContentType="password"
-        />
-
-        <Pressable
-          className="bg-[#1565C0] rounded-xl py-4 items-center mb-4"
-          onPress={handleLogin}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color="#fff" />
+          {showForm ? (
+            <View>
+              <ErrorText message={error} />
+              <MonoLabel className="mb-2">Email</MonoLabel>
+              <TextInput
+                className="bg-surface border border-line rounded-[14px] px-4 py-3.5 font-body text-[14px] text-ink mb-4"
+                placeholder="toi@exemple.com"
+                placeholderTextColor={COLORS.muted}
+                value={email}
+                onChangeText={setEmail}
+                autoCapitalize="none"
+                autoComplete="email"
+                keyboardType="email-address"
+                inputMode="email"
+              />
+              <MonoLabel className="mb-2">Mot de passe</MonoLabel>
+              <TextInput
+                className="bg-surface border border-line rounded-[14px] px-4 py-3.5 font-body text-[14px] text-ink"
+                placeholder="••••••••"
+                placeholderTextColor={COLORS.muted}
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+                autoComplete="current-password"
+                onSubmitEditing={handleLogin}
+              />
+            </View>
           ) : (
-            <Text className="text-white text-base font-semibold">
-              Se connecter
-            </Text>
+            <Orbit />
           )}
-        </Pressable>
 
-        <Pressable
-          className="border-2 border-[#1565C0] rounded-xl py-4 items-center"
-          onPress={() => router.push("/(auth)/signup")}
-        >
-          <Text className="text-[#1565C0] text-base font-semibold">
-            Créer un compte
-          </Text>
-        </Pressable>
-      </View>
+          <View className="gap-2.5">
+            {showForm ? (
+              <>
+                <Button
+                  label="Se connecter"
+                  onPress={handleLogin}
+                  loading={loading}
+                  disabled={!email || !password}
+                />
+                <Button
+                  label="Créer un compte"
+                  variant="ghost"
+                  onPress={() => router.push("/signup")}
+                />
+              </>
+            ) : (
+              <>
+                <Button
+                  label="Démarrer le profilage"
+                  onPress={() => router.push("/signup")}
+                />
+                <Button
+                  label="J'ai déjà un compte"
+                  variant="ghost"
+                  onPress={() => setShowForm(true)}
+                />
+              </>
+            )}
+
+            {isDemoMode() ? (
+              <Text className="font-mono text-[9px] uppercase tracking-label text-muted text-center mt-2 leading-4">
+                Mode démo — n'importe quel identifiant fonctionne
+              </Text>
+            ) : null}
+          </View>
+        </View>
+      </Screen>
     </KeyboardAvoidingView>
   );
 }

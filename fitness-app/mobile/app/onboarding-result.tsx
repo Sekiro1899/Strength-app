@@ -1,171 +1,176 @@
 import { useEffect, useState } from "react";
+import { Text, View } from "react-native";
+import { useRouter } from "expo-router";
+import { useAuth } from "./_layout";
 import {
-  View,
-  Text,
-  Pressable,
-  StyleSheet,
-  ActivityIndicator,
-  Alert,
-  ScrollView,
-} from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { supabase } from "../lib/supabase";
-import { generateWorkout } from "../lib/api";
-
-const PERSONA_INFO: Record<string, { name: string; icon: string; color: string }> = {
-  SMB: { name: "Summer Muscle Builder", icon: "💪", color: "#E91E8C" },
-  BF: { name: "Brut Force", icon: "🏋️", color: "#B71C1C" },
-  AW: { name: "Athlete Wannabe", icon: "⚡", color: "#1565C0" },
-  CR: { name: "Corporate Rusher", icon: "⏱️", color: "#2E7D32" },
-  SAV: { name: "Savage", icon: "🔥", color: "#6A1B9A" },
-};
+  Body,
+  Button,
+  Card,
+  Display,
+  ErrorText,
+  GradientCard,
+  Loading,
+  MetaPill,
+  MonoLabel,
+  Screen,
+} from "../components/ui";
+import { personaColor, personaGradient } from "../lib/theme";
+import { fetchOnboardingResult } from "../lib/data";
+import { TIEBREAK_ORDER } from "../lib/scoring";
+import type { OnboardingResult } from "../lib/types";
 
 export default function OnboardingResultScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{
-    persona_id: string;
-    persona_code: string;
-    program_id: string;
-    phase_id: string;
-    protocol: string;
-    user_program_id: string;
-  }>();
+  const { userId, isLoading: authLoading } = useAuth();
 
-  const [generatingWorkout, setGeneratingWorkout] = useState(false);
-  const [sessionGenerated, setSessionGenerated] = useState(false);
+  const [result, setResult] = useState<OnboardingResult | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const info = PERSONA_INFO[params.persona_code] || PERSONA_INFO.SMB;
-
-  const handleGenerateFirstSession = async () => {
-    setGeneratingWorkout(true);
-
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Non authentifie");
-
-      await generateWorkout({
-        user_id: user.id,
-        user_program_id: params.user_program_id,
-        persona_id: params.persona_id,
-        program_id: params.program_id,
-        phase_id: params.phase_id || undefined,
-        week_number: 1,
-        day_number: 1,
-        energy_level: 3,
-      });
-
-      setSessionGenerated(true);
-    } catch (err: any) {
-      Alert.alert("Erreur", err.message || "Impossible de generer la seance");
-    } finally {
-      setGeneratingWorkout(false);
+  useEffect(() => {
+    if (authLoading) return;
+    if (!userId) {
+      router.replace("/login");
+      return;
     }
-  };
+
+    let active = true;
+    fetchOnboardingResult(userId)
+      .then((r) => active && setResult(r))
+      .catch((e) => active && setError(e.message))
+      .finally(() => active && setLoading(false));
+
+    return () => {
+      active = false;
+    };
+  }, [userId, authLoading, router]);
+
+  if (loading || authLoading) return <Loading label="Calcul du profil" />;
+
+  if (!result) {
+    return (
+      <Screen center>
+        <ErrorText message={error ?? "Profil introuvable."} />
+        <Button
+          label="Refaire le questionnaire"
+          onPress={() => router.replace("/questionnaire")}
+        />
+      </Screen>
+    );
+  }
+
+  const { persona, program, scores } = result;
+  const tint = personaColor(persona.code);
+  const gradient = personaGradient(persona.code);
+  const maxScore = Math.max(...Object.values(scores), 1);
+
+  const duration = program.is_continuous
+    ? "Continu"
+    : `${program.duration_weeks} sem`;
+  const frequency =
+    program.frequency_per_week_min === program.frequency_per_week_max
+      ? `${program.frequency_per_week_min}×`
+      : `${program.frequency_per_week_min}-${program.frequency_per_week_max}×`;
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <View style={[styles.iconContainer, { backgroundColor: info.color + "20" }]}>
-        <Text style={styles.icon}>{info.icon}</Text>
+    <Screen
+      footer={
+        <Button
+          label="Démarrer mon programme"
+          onPress={() => router.replace("/dashboard")}
+        />
+      }
+    >
+      <View className="items-center mb-4">
+        <MonoLabel tone="accent">Profil identifié</MonoLabel>
       </View>
 
-      <Text style={styles.title}>Ton profil : {info.name}</Text>
-      <Text style={styles.code}>{params.persona_code}</Text>
-      <Text style={styles.description}>
-        Ton programme personnalise est pret. Lance ta premiere seance
-        pour commencer ton parcours.
-      </Text>
-
-      {!sessionGenerated ? (
-        <Pressable
-          style={[styles.button, generatingWorkout && styles.buttonDisabled]}
-          onPress={handleGenerateFirstSession}
-          disabled={generatingWorkout}
-        >
-          {generatingWorkout ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.buttonText}>
-              Generer ma premiere seance
-            </Text>
-          )}
-        </Pressable>
-      ) : (
-        <>
-          <View style={styles.successBox}>
-            <Text style={styles.successText}>
-              Ta premiere seance a ete generee !
+      {/* Carte persona — dégradé plein, signature de l'écran 03 */}
+      <View className="mb-5">
+        <GradientCard colors={gradient} className="items-center py-7">
+          <Text className="text-[52px] mb-2">{persona.icon}</Text>
+          <View className="items-center">
+            <Text
+              className="font-display text-white uppercase text-[26px] text-center"
+              style={{ lineHeight: 27 }}
+            >
+              {persona.name}
             </Text>
           </View>
-          <Pressable
-            style={styles.button}
-            onPress={() => router.replace("/dashboard")}
-          >
-            <Text style={styles.buttonText}>Voir mon dashboard</Text>
-          </Pressable>
-        </>
-      )}
-    </ScrollView>
+          {persona.tagline ? (
+            <Text className="font-body text-[12px] text-white/90 text-center mt-2.5 leading-[17px]">
+              {persona.tagline}
+            </Text>
+          ) : null}
+        </GradientCard>
+      </View>
+
+      {persona.description ? (
+        <Card className="mb-4">
+          <Body className="text-ink">{persona.description}</Body>
+        </Card>
+      ) : null}
+
+      {/* Programme assigné */}
+      <Card className="mb-4">
+        <MonoLabel tone="accent" className="mb-2">
+          Programme assigné
+        </MonoLabel>
+        <Display size={20} className="mb-2">
+          {program.name}
+        </Display>
+        {program.tagline ? <Body className="mb-4">{program.tagline}</Body> : null}
+        <View className="flex-row gap-2.5">
+          <MetaPill label="Durée" value={duration} />
+          <MetaPill label="Fréq" value={`${frequency}/sem`} />
+          <MetaPill
+            label="Séance"
+            value={`${program.session_duration_min}′`}
+          />
+        </View>
+      </Card>
+
+      {/* Détail du scoring — rend l'attribution lisible et débuggable */}
+      <Card>
+        <MonoLabel className="mb-3">Détail du scoring</MonoLabel>
+        <View className="gap-2">
+          {TIEBREAK_ORDER.map((code) => {
+            const value = scores[code];
+            const isWinner = code === persona.code;
+            const width = Math.max(0, (value / maxScore) * 100);
+            return (
+              <View key={code} className="flex-row items-center">
+                <Text
+                  className={`w-9 font-mono-md text-[10px] ${
+                    isWinner ? "text-ink" : "text-muted"
+                  }`}
+                >
+                  {code}
+                </Text>
+                <View className="flex-1 h-1.5 bg-bg rounded-full overflow-hidden mx-2">
+                  <View
+                    className="h-full rounded-full"
+                    style={{
+                      width: `${width}%`,
+                      backgroundColor: isWinner ? tint : "#2a2a3a",
+                    }}
+                  />
+                </View>
+                <Text
+                  className={`w-6 text-right font-mono-md text-[10px] ${
+                    isWinner ? "text-ink" : "text-muted"
+                  }`}
+                >
+                  {value}
+                </Text>
+              </View>
+            );
+          })}
+        </View>
+        <Text className="font-body text-[10px] text-muted mt-3 leading-4">
+          Égalité départagée dans l'ordre CR › SMB › AW › BF › SAV.
+        </Text>
+      </Card>
+    </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 24,
-    backgroundColor: "#fff",
-  },
-  iconContainer: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 24,
-  },
-  icon: { fontSize: 48 },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 4,
-  },
-  code: {
-    fontSize: 14,
-    color: "#999",
-    marginBottom: 16,
-  },
-  description: {
-    fontSize: 15,
-    color: "#555",
-    textAlign: "center",
-    lineHeight: 22,
-    marginBottom: 32,
-    paddingHorizontal: 16,
-  },
-  button: {
-    backgroundColor: "#1565C0",
-    paddingVertical: 14,
-    paddingHorizontal: 32,
-    borderRadius: 12,
-    alignItems: "center",
-    width: "100%",
-    marginBottom: 16,
-  },
-  buttonDisabled: { opacity: 0.6 },
-  buttonText: { color: "#fff", fontSize: 16, fontWeight: "600" },
-  successBox: {
-    backgroundColor: "#E8F5E9",
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 16,
-    width: "100%",
-  },
-  successText: {
-    color: "#2E7D32",
-    fontSize: 15,
-    fontWeight: "600",
-    textAlign: "center",
-  },
-});

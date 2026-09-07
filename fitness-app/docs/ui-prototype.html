@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Strength App — Prototype</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a0f;
+  --panel: #13131c;
+  --surface: #1c1c28;
+  --line: #2a2a3a;
+  --text: #f4f4f5;
+  --muted: #8b8b9a;
+  --accent: #e3ff5c;
+  --accent-2: #ff4d3d;
+  --persona-smb: #ff5fa8;
+  --persona-bf: #ff3d3d;
+  --persona-aw: #2a8fff;
+  --persona-cr: #4ade80;
+  --persona-sav: #a855f7;
+  --display: 'Archivo Black', 'Inter', sans-serif;
+  --body: 'Inter', sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { background: var(--bg); color: var(--text); font-family: var(--body); }
+
+body {
+  min-height: 100vh;
+  padding: 40px 24px 80px;
+  background-image:
+    radial-gradient(circle at 20% 0%, rgba(227, 255, 92, 0.04), transparent 50%),
+    radial-gradient(circle at 80% 100%, rgba(168, 85, 247, 0.04), transparent 50%);
+}
+
+/* ───── Lab Header ───── */
+.lab-header {
+  max-width: 1400px;
+  margin: 0 auto 48px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.lab-title {
+  font-family: var(--display);
+  font-size: clamp(36px, 5vw, 56px);
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+.lab-title em {
+  font-style: normal;
+  background: linear-gradient(135deg, var(--accent), #fff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.lab-subtitle {
+  color: var(--muted);
+  font-size: 14px;
+  margin-top: 12px;
+  max-width: 480px;
+  line-height: 1.5;
+}
+.lab-meta {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  text-align: right;
+}
+.lab-meta strong { color: var(--accent); display: block; font-size: 13px; margin-bottom: 4px; }
+
+/* ───── Phone Frames ───── */
+.screens-grid {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 32px;
+}
+.phone-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.phone {
+  width: 320px;
+  height: 660px;
+  background: #000;
+  border-radius: 44px;
+  padding: 10px;
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.5),
+    inset 0 0 0 2px rgba(255, 255, 255, 0.04);
+  position: relative;
+}
+.phone::before {
+  content: '';
+  position: absolute;
+  top: 22px; left: 50%;
+  transform: translateX(-50%);
+  width: 110px; height: 30px;
+  background: #000;
+  border-radius: 18px;
+  z-index: 100;
+}
+.phone-screen {
+  width: 100%; height: 100%;
+  background: var(--panel);
+  border-radius: 36px;
+  overflow: hidden;
+  position: relative;
+}
+.phone-content {
+  height: 100%;
+  overflow-y: auto;
+  padding: 64px 22px 28px;
+  scrollbar-width: none;
+}
+.phone-content::-webkit-scrollbar { display: none; }
+
+.phone-label {
+  margin-top: 16px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-align: center;
+}
+.phone-label span {
+  color: var(--accent);
+  display: block;
+  font-size: 13px;
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+/* ───── Common Components ───── */
+.h-display {
+  font-family: var(--display);
+  text-transform: uppercase;
+  line-height: 0.95;
+  letter-spacing: -0.01em;
+}
+.btn {
+  display: block;
+  width: 100%;
+  padding: 16px;
+  border: none;
+  border-radius: 16px;
+  font-family: var(--body);
+  font-weight: 600;
+  font-size: 14px;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  text-decoration: none;
+}
+.btn:active { transform: scale(0.98); }
+.btn-primary {
+  background: var(--accent);
+  color: #000;
+  box-shadow: 0 10px 30px rgba(227, 255, 92, 0.2);
+}
+.btn-primary:hover { box-shadow: 0 14px 36px rgba(227, 255, 92, 0.35); }
+.btn-secondary {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--line);
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--line);
+}
+
+/* ───── SCREEN 1 — WELCOME ───── */
+.welcome { display: flex; flex-direction: column; height: 100%; justify-content: space-between; }
+.welcome-brand {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 24px;
+}
+.welcome-hero {
+  font-family: var(--display);
+  font-size: 38px;
+  line-height: 0.92;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+}
+.welcome-hero em {
+  font-style: normal;
+  color: var(--accent);
+}
+.welcome-tag {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.5;
+  margin-top: 20px;
+}
+.welcome-orbit {
+  position: relative;
+  height: 220px;
+  margin: 32px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.orbit-ring {
+  position: absolute;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+}
+.orbit-1 { width: 180px; height: 180px; }
+.orbit-2 { width: 240px; height: 240px; border-style: dashed; opacity: 0.5; }
+.orbit-3 { width: 100px; height: 100px; background: var(--accent); border: none; box-shadow: 0 0 60px rgba(227, 255, 92, 0.4); }
+.orbit-3 .orbit-num {
+  font-family: var(--display);
+  color: #000;
+  font-size: 36px;
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.orbit-dot {
+  position: absolute;
+  width: 12px; height: 12px;
+  background: var(--text);
+  border-radius: 50%;
+}
+.orbit-dot:nth-child(4) { top: 10px; left: 50%; }
+.orbit-dot:nth-child(5) { bottom: 20px; right: 30px; background: var(--persona-aw); }
+.orbit-dot:nth-child(6) { bottom: 30px; left: 30px; background: var(--persona-cr); }
+.welcome-actions { display: flex; flex-direction: column; gap: 10px; }
+
+/* ───── SCREEN 2 — QUESTIONNAIRE ───── */
+.q-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.q-counter {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+}
+.q-counter strong { color: var(--accent); }
+.q-skip {
+  font-size: 12px;
+  color: var(--muted);
+  cursor: pointer;
+}
+.q-progress {
+  height: 3px;
+  background: var(--line);
+  border-radius: 2px;
+  margin-bottom: 32px;
+  overflow: hidden;
+}
+.q-progress-fill {
+  height: 100%;
+  width: 33%;
+  background: var(--accent);
+  border-radius: 2px;
+}
+.q-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.q-question {
+  font-family: var(--display);
+  font-size: 22px;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  margin-bottom: 28px;
+}
+.q-options { display: flex; flex-direction: column; gap: 8px; }
+.q-option {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px 16px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.q-option:hover { border-color: var(--accent); }
+.q-option.selected {
+  background: var(--accent);
+  color: #000;
+  border-color: var(--accent);
+}
+.q-option-letter {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+}
+.q-option.selected .q-option-letter {
+  background: #000;
+  color: var(--accent);
+}
+
+/* ───── SCREEN 3 — ONBOARDING RESULT ───── */
+.result-tag {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+  text-transform: uppercase;
+  text-align: center;
+  margin-bottom: 12px;
+}
+.result-title {
+  font-family: var(--display);
+  font-size: 16px;
+  text-align: center;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 24px;
+  letter-spacing: 0.05em;
+}
+.result-persona {
+  background: linear-gradient(135deg, #ff5fa8 0%, #ff3d8b 100%);
+  border-radius: 24px;
+  padding: 28px 20px;
+  text-align: center;
+  margin-bottom: 24px;
+  position: relative;
+  overflow: hidden;
+}
+.result-persona::before {
+  content: '';
+  position: absolute;
+  top: -50%; right: -30%;
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(255,255,255,0.2), transparent 60%);
+  border-radius: 50%;
+}
+.result-icon {
+  font-size: 56px;
+  margin-bottom: 12px;
+  position: relative;
+  z-index: 2;
+}
+.result-name {
+  font-family: var(--display);
+  font-size: 28px;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  margin-bottom: 8px;
+  position: relative;
+  z-index: 2;
+}
+.result-tagline {
+  font-size: 13px;
+  opacity: 0.9;
+  line-height: 1.4;
+  position: relative;
+  z-index: 2;
+}
+.result-program-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+.result-program-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--accent);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.result-program-name {
+  font-family: var(--display);
+  font-size: 20px;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  margin-bottom: 8px;
+}
+.result-program-tagline {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+  margin-bottom: 14px;
+}
+.result-program-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.meta-pill {
+  background: var(--bg);
+  border-radius: 10px;
+  padding: 10px;
+}
+.meta-pill-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.meta-pill-value {
+  font-family: var(--display);
+  font-size: 16px;
+  margin-top: 2px;
+}
+
+/* ───── SCREEN 4 — DASHBOARD ───── */
+.dash-greeting {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+.dash-hi {
+  font-size: 13px;
+  color: var(--muted);
+}
+.dash-name {
+  font-family: var(--display);
+  font-size: 22px;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+}
+.dash-avatar {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--persona-smb), var(--persona-bf));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+}
+.dash-streak {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 14px 18px;
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.streak-info { display: flex; flex-direction: column; }
+.streak-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+.streak-value {
+  font-family: var(--display);
+  font-size: 24px;
+  color: var(--accent);
+}
+.streak-fire { font-size: 32px; }
+
+.dash-program-card {
+  background: linear-gradient(135deg, #ff5fa8, #ff3d8b);
+  border-radius: 20px;
+  padding: 18px;
+  margin-bottom: 16px;
+}
+.dash-phase-tag {
+  display: inline-block;
+  background: rgba(0,0,0,0.2);
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.dash-program-name {
+  font-family: var(--display);
+  font-size: 18px;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  margin-bottom: 4px;
+}
+.dash-week {
+  font-size: 12px;
+  opacity: 0.85;
+  margin-bottom: 14px;
+}
+.dash-progress {
+  height: 6px;
+  background: rgba(0,0,0,0.25);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.dash-progress-fill {
+  height: 100%;
+  width: 30%;
+  background: white;
+  border-radius: 3px;
+}
+
+.next-session {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 18px;
+  margin-bottom: 12px;
+}
+.next-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--accent);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.next-title {
+  font-family: var(--display);
+  font-size: 22px;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  margin-bottom: 6px;
+}
+.next-meta {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 14px;
+}
+.next-exercises {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.ex-chip {
+  background: var(--bg);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.energy-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 16px;
+}
+.energy-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.energy-dots {
+  display: flex;
+  gap: 6px;
+  justify-content: space-between;
+}
+.energy-dot {
+  flex: 1;
+  height: 28px;
+  background: var(--bg);
+  border-radius: 8px;
+  border: 1px solid var(--line);
+}
+.energy-dot.active { background: var(--accent); border-color: var(--accent); }
+
+/* ───── SCREEN 5 — SESSION DETAIL ───── */
+.session-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.back-btn {
+  width: 32px; height: 32px;
+  border-radius: 10px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  cursor: pointer;
+}
+.session-title {
+  font-family: var(--display);
+  font-size: 22px;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+}
+.block-section { margin-bottom: 22px; }
+.block-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.block-name {
+  font-family: var(--display);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--accent);
+}
+.block-duration {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+}
+.exercise-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 8px;
+}
+.ex-top {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.ex-name {
+  font-weight: 600;
+  font-size: 13px;
+}
+.ex-sets {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--accent);
+  font-weight: 600;
+}
+.ex-detail {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* ───── SCREEN 6 — TRACKING LIVE ───── */
+.track-top {
+  text-align: center;
+  margin-bottom: 24px;
+}
+.track-current-ex {
+  font-family: var(--display);
+  font-size: 26px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  line-height: 1;
+}
+.track-progress-info {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+}
+.set-row {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  display: grid;
+  grid-template-columns: 30px 1fr 1fr 30px;
+  gap: 10px;
+  align-items: center;
+}
+.set-row.done {
+  background: rgba(227, 255, 92, 0.08);
+  border-color: var(--accent);
+}
+.set-num {
+  font-family: var(--mono);
+  font-weight: 600;
+  font-size: 11px;
+  color: var(--accent);
+}
+.set-input {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 13px;
+  text-align: center;
+  width: 100%;
+}
+.set-check {
+  width: 26px; height: 26px;
+  border-radius: 8px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+}
+.set-row.done .set-check {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #000;
+}
+.timer-card {
+  background: linear-gradient(135deg, var(--accent), #c4e045);
+  color: #000;
+  border-radius: 20px;
+  padding: 18px;
+  margin-top: 16px;
+  text-align: center;
+}
+.timer-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  opacity: 0.7;
+  margin-bottom: 4px;
+}
+.timer-display {
+  font-family: var(--display);
+  font-size: 44px;
+  letter-spacing: -0.02em;
+}
+.timer-btns {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+.timer-btn {
+  flex: 1;
+  background: rgba(0,0,0,0.15);
+  border: none;
+  border-radius: 10px;
+  padding: 8px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* ───── SCREEN 7 — FEEDBACK POLL ───── */
+.fb-header { text-align: center; margin-bottom: 24px; }
+.fb-title {
+  font-family: var(--display);
+  font-size: 24px;
+  text-transform: uppercase;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.fb-sub {
+  font-size: 12px;
+  color: var(--muted);
+}
+.fb-question {
+  margin-bottom: 20px;
+}
+.fb-q-text {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+.stars {
+  display: flex;
+  justify-content: space-between;
+  gap: 4px;
+}
+.star {
+  flex: 1;
+  aspect-ratio: 1;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  cursor: pointer;
+}
+.star.active { background: var(--accent); border-color: var(--accent); color: #000; }
+.fb-factor {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 6px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.fb-factor.selected {
+  background: var(--accent-2);
+  border-color: var(--accent-2);
+  color: #000;
+  font-weight: 600;
+}
+
+/* ───── Footer Notes ───── */
+.notes {
+  max-width: 1400px;
+  margin: 80px auto 0;
+  padding: 32px;
+  border-top: 1px solid var(--line);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 24px;
+}
+.note-block h4 {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--accent);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.note-block p {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+</style>
+</head>
+<body>
+
+<div class="lab-header">
+  <div>
+    <h1 class="lab-title">Strength App<br><em>— Prototype mobile</em></h1>
+    <p class="lab-subtitle">Visualisation des 7 écrans clés de l'app, basée sur les spécifications fonctionnelles construites en sessions S1 à S4. Direction artistique : éditorial / brutaliste sportif.</p>
+  </div>
+  <div class="lab-meta">
+    <strong>v0.1 — Preview</strong>
+    Persona affiché : SMB<br>
+    Programme : Muscle Building<br>
+    iPhone 14 · 320×660
+  </div>
+</div>
+
+<div class="screens-grid">
+
+  <!-- ─── SCREEN 1 — WELCOME ─── -->
+  <div class="phone-wrap">
+    <div class="phone"><div class="phone-screen"><div class="phone-content">
+      <div class="welcome">
+        <div>
+          <div class="welcome-brand">STRENGTH · v0.1</div>
+          <h1 class="welcome-hero">Construisons<br>ton <em>programme</em>.</h1>
+          <p class="welcome-tag">Une app de musculation personnalisée selon ton profil, ton temps et ton ambition.</p>
+        </div>
+        <div class="welcome-orbit">
+          <div class="orbit-ring orbit-2"></div>
+          <div class="orbit-ring orbit-1"></div>
+          <div class="orbit-ring orbit-3"><div class="orbit-num">5</div></div>
+          <div class="orbit-dot"></div>
+          <div class="orbit-dot"></div>
+          <div class="orbit-dot"></div>
+        </div>
+        <div class="welcome-actions">
+          <button class="btn btn-primary">Démarrer le profilage</button>
+          <button class="btn btn-ghost">J'ai déjà un compte</button>
+        </div>
+      </div>
+    </div></div></div>
+    <div class="phone-label"><span>Écran 01</span>Welcome / Auth</div>
+  </div>
+
+  <!-- ─── SCREEN 2 — QUESTIONNAIRE ─── -->
+  <div class="phone-wrap">
+    <div class="phone"><div class="phone-screen"><div class="phone-content">
+      <div class="q-top">
+        <div class="q-counter"><strong>03</strong> / 09</div>
+        <div class="q-skip">Passer</div>
+      </div>
+      <div class="q-progress"><div class="q-progress-fill"></div></div>
+      <div class="q-label">Objectif principal</div>
+      <h2 class="q-question">Quel est ton<br>objectif principal ?</h2>
+      <div class="q-options">
+        <div class="q-option selected">
+          <div class="q-option-letter">A</div>
+          <span>Sculpter mon corps (Hypertrophie)</span>
+        </div>
+        <div class="q-option">
+          <div class="q-option-letter">B</div>
+          <span>Devenir extrêmement fort (Force pure)</span>
+        </div>
+        <div class="q-option">
+          <div class="q-option-letter">C</div>
+          <span>Explosivité, athlétique, fonctionnel</span>
+        </div>
+        <div class="q-option">
+          <div class="q-option-letter">D</div>
+          <span>Cardio et santé, temps limité</span>
+        </div>
+        <div class="q-option">
+          <div class="q-option-letter">E</div>
+          <span>Athlète complet (Polyvalence)</span>
+        </div>
+      </div>
+    </div></div></div>
+    <div class="phone-label"><span>Écran 02</span>Questionnaire — Q3/9</div>
+  </div>
+
+  <!-- ─── SCREEN 3 — RESULT ─── -->
+  <div class="phone-wrap">
+    <div class="phone"><div class="phone-screen"><div class="phone-content">
+      <div class="result-tag">Profil identifié</div>
+      <h2 class="result-title">Ton persona</h2>
+      <div class="result-persona">
+        <div class="result-icon">💪</div>
+        <h1 class="result-name">Summer<br>Muscle Builder</h1>
+        <p class="result-tagline">Construire du muscle visible sur un horizon de 3 mois. Volume élevé, hypertrophie, esthétique.</p>
+      </div>
+      <div class="result-program-card">
+        <div class="result-program-label">Programme assigné</div>
+        <h3 class="result-program-name">Muscle Building Focus</h3>
+        <p class="result-program-tagline">Surcharge progressive sur 10 semaines en 3 phases : Neuro-Activation → Progressive Overload → Peak.</p>
+        <div class="result-program-meta">
+          <div class="meta-pill">
+            <div class="meta-pill-label">Durée</div>
+            <div class="meta-pill-value">10 sem</div>
+          </div>
+          <div class="meta-pill">
+            <div class="meta-pill-label">Fréq</div>
+            <div class="meta-pill-value">4-5×</div>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-primary">Démarrer mon programme</button>
+    </div></div></div>
+    <div class="phone-label"><span>Écran 03</span>Onboarding Result</div>
+  </div>
+
+  <!-- ─── SCREEN 4 — DASHBOARD ─── -->
+  <div class="phone-wrap">
+    <div class="phone"><div class="phone-screen"><div class="phone-content">
+      <div class="dash-greeting">
+        <div>
+          <div class="dash-hi">Salut,</div>
+          <h2 class="dash-name">Salah</h2>
+        </div>
+        <div class="dash-avatar">SZ</div>
+      </div>
+
+      <div class="dash-streak">
+        <div class="streak-info">
+          <div class="streak-label">Série actuelle</div>
+          <div class="streak-value">7 jours</div>
+        </div>
+        <div class="streak-fire">🔥</div>
+      </div>
+
+      <div class="dash-program-card">
+        <div class="dash-phase-tag">Phase 2 · Progressive Overload</div>
+        <h3 class="dash-program-name">Muscle Building Focus</h3>
+        <p class="dash-week">Semaine 3 sur 10 · 12 séances complétées</p>
+        <div class="dash-progress"><div class="dash-progress-fill"></div></div>
+      </div>
+
+      <div class="next-session">
+        <div class="next-label">Prochaine séance · Aujourd'hui</div>
+        <h3 class="next-title">Push A</h3>
+        <p class="next-meta">~ 60 min · 6 exercices · Niveau modéré</p>
+        <div class="next-exercises">
+          <span class="ex-chip">Bench Press</span>
+          <span class="ex-chip">OHP</span>
+          <span class="ex-chip">Incline DB</span>
+          <span class="ex-chip">+3</span>
+        </div>
+        <button class="btn btn-primary">Démarrer la séance</button>
+      </div>
+
+      <div class="energy-card">
+        <div class="energy-label">Niveau d'énergie aujourd'hui</div>
+        <div class="energy-dots">
+          <div class="energy-dot"></div>
+          <div class="energy-dot"></div>
+          <div class="energy-dot active"></div>
+          <div class="energy-dot active"></div>
+          <div class="energy-dot"></div>
+        </div>
+      </div>
+    </div></div></div>
+    <div class="phone-label"><span>Écran 04</span>Dashboard</div>
+  </div>
+
+  <!-- ─── SCREEN 5 — SESSION DETAIL ─── -->
+  <div class="phone-wrap">
+    <div class="phone"><div class="phone-screen"><div class="phone-content">
+      <div class="session-header">
+        <div class="back-btn">‹</div>
+        <h2 class="session-title">Push A</h2>
+      </div>
+
+      <div class="block-section">
+        <div class="block-header">
+          <div class="block-name">⊹ Warmup</div>
+          <div class="block-duration">8 MIN</div>
+        </div>
+        <div class="exercise-card">
+          <div class="ex-top">
+            <span class="ex-name">Band Pull-Aparts</span>
+            <span class="ex-sets">3 × 15</span>
+          </div>
+          <div class="ex-detail">Rétraction scapulaire — activation</div>
+        </div>
+        <div class="exercise-card">
+          <div class="ex-top">
+            <span class="ex-name">Shoulder CARs</span>
+            <span class="ex-sets">2 × 5</span>
+          </div>
+          <div class="ex-detail">Mobilité capsule épaule</div>
+        </div>
+      </div>
+
+      <div class="block-section">
+        <div class="block-header">
+          <div class="block-name">▲ Main Block</div>
+          <div class="block-duration">38 MIN</div>
+        </div>
+        <div class="exercise-card">
+          <div class="ex-top">
+            <span class="ex-name">Barbell Bench Press</span>
+            <span class="ex-sets">4 × 8</span>
+          </div>
+          <div class="ex-detail">75% 1RM · Repos 90s</div>
+        </div>
+        <div class="exercise-card">
+          <div class="ex-top">
+            <span class="ex-name">Overhead Press</span>
+            <span class="ex-sets">4 × 8</span>
+          </div>
+          <div class="ex-detail">Superset · Repos 60s</div>
+        </div>
+        <div class="exercise-card">
+          <div class="ex-top">
+            <span class="ex-name">Incline DB Press</span>
+            <span class="ex-sets">3 × 10</span>
+          </div>
+          <div class="ex-detail">70% · Repos 90s</div>
+        </div>
+      </div>
+
+      <div class="block-section">
+        <div class="block-header">
+          <div class="block-name">◆ Finisher</div>
+          <div class="block-duration">6 MIN</div>
+        </div>
+        <div class="exercise-card">
+          <div class="ex-top">
+            <span class="ex-name">Burpees AMRAP</span>
+            <span class="ex-sets">3 MIN</span>
+          </div>
+          <div class="ex-detail">Cardio finisher</div>
+        </div>
+      </div>
+    </div></div></div>
+    <div class="phone-label"><span>Écran 05</span>Session Detail</div>
+  </div>
+
+  <!-- ─── SCREEN 6 — TRACKING LIVE ─── -->
+  <div class="phone-wrap">
+    <div class="phone"><div class="phone-screen"><div class="phone-content">
+      <div class="track-top">
+        <h2 class="track-current-ex">Barbell<br>Bench Press</h2>
+        <div class="track-progress-info">EX 2/6 · MAIN BLOCK</div>
+      </div>
+
+      <div class="set-row done">
+        <div class="set-num">S1</div>
+        <input class="set-input" value="80 kg" readonly>
+        <input class="set-input" value="8 reps" readonly>
+        <div class="set-check">✓</div>
+      </div>
+      <div class="set-row done">
+        <div class="set-num">S2</div>
+        <input class="set-input" value="80 kg" readonly>
+        <input class="set-input" value="8 reps" readonly>
+        <div class="set-check">✓</div>
+      </div>
+      <div class="set-row">
+        <div class="set-num">S3</div>
+        <input class="set-input" placeholder="kg">
+        <input class="set-input" placeholder="reps">
+        <div class="set-check">○</div>
+      </div>
+      <div class="set-row">
+        <div class="set-num">S4</div>
+        <input class="set-input" placeholder="kg">
+        <input class="set-input" placeholder="reps">
+        <div class="set-check">○</div>
+      </div>
+
+      <div class="timer-card">
+        <div class="timer-label">Repos en cours</div>
+        <div class="timer-display">01:23</div>
+        <div class="timer-btns">
+          <button class="timer-btn">−15 s</button>
+          <button class="timer-btn">PASSER</button>
+          <button class="timer-btn">+15 s</button>
+        </div>
+      </div>
+    </div></div></div>
+    <div class="phone-label"><span>Écran 06</span>Tracking Live</div>
+  </div>
+
+  <!-- ─── SCREEN 7 — FEEDBACK ─── -->
+  <div class="phone-wrap">
+    <div class="phone"><div class="phone-screen"><div class="phone-content">
+      <div class="fb-header">
+        <div class="result-tag" style="color: var(--accent-2)">Programme terminé</div>
+        <h2 class="fb-title">10 semaines<br>plus tard...</h2>
+        <p class="fb-sub">Aide-nous à calibrer la suite</p>
+      </div>
+
+      <div class="fb-question">
+        <p class="fb-q-text">1. Satisfait de tes résultats ?</p>
+        <div class="stars">
+          <div class="star">⭐</div>
+          <div class="star">⭐</div>
+          <div class="star">⭐</div>
+          <div class="star active">⭐</div>
+          <div class="star">⭐</div>
+        </div>
+      </div>
+
+      <div class="fb-question">
+        <p class="fb-q-text">2. Qu'est-ce qui a été le plus difficile ?</p>
+        <div class="fb-factor">Difficulté physique</div>
+        <div class="fb-factor">Temps disponible</div>
+        <div class="fb-factor selected">Ennui · répétitivité</div>
+        <div class="fb-factor">Équipement</div>
+        <div class="fb-factor">Récupération</div>
+        <div class="fb-factor">Rien, c'était parfait</div>
+      </div>
+
+      <button class="btn btn-primary" style="margin-top: 24px;">Voir mon nouveau programme</button>
+    </div></div></div>
+    <div class="phone-label"><span>Écran 07</span>Feedback Poll</div>
+  </div>
+
+</div>
+
+<div class="notes">
+  <div class="note-block">
+    <h4>Direction artistique</h4>
+    <p>Éditorial sportif / brutaliste. Display Archivo Black + body Inter. Accent vert lime sur fond charbon. Cartes persona en gradient unique par profil.</p>
+  </div>
+  <div class="note-block">
+    <h4>Cohérence data model</h4>
+    <p>Tous les écrans utilisent des données réelles issues du seed : Persona SMB, Program Muscle Building, Phase 2 Progressive Overload, exercices de la table exercises.</p>
+  </div>
+  <div class="note-block">
+    <h4>Écrans manquants</h4>
+    <p>Historique avec graphique progression (Victory Native), Paywall RevenueCat, Auth Login/Signup, Détail exercice avec vidéo embed. À ajouter en S5-S8.</p>
+  </div>
+  <div class="note-block">
+    <h4>Implémentation</h4>
+    <p>Ce prototype HTML statique sert de référence visuelle pour Claude Code en S5. Chaque écran se traduit en composant React Native + NativeWind avec les tokens définis.</p>
+  </div>
+</div>
+
+</body>
+</html>

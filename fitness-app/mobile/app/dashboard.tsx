@@ -1,262 +1,298 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
+import { useFocusEffect, useRouter } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { LinearGradient } from "expo-linear-gradient";
+import { useAuth } from "./_layout";
 import {
-  View,
-  Text,
-  Pressable,
-  StyleSheet,
-  ScrollView,
-  ActivityIndicator,
-  Alert,
-} from "react-native";
-import { useRouter } from "expo-router";
-import { supabase } from "../lib/supabase";
-import { generateWorkout } from "../lib/api";
+  Body,
+  Button,
+  Card,
+  Chip,
+  Display,
+  ErrorText,
+  GradientCard,
+  Loading,
+  MonoLabel,
+  ProgressBar,
+  Screen,
+} from "../components/ui";
+import {
+  COLORS,
+  GRADIENT_DIRECTION,
+  initialsFromEmail,
+  personaGradient,
+} from "../lib/theme";
+import { fetchDashboard, signOut, startSession } from "../lib/data";
+import type { DashboardData } from "../lib/types";
 
-interface UserProgram {
-  id: string;
-  program_id: string;
-  persona_id: string;
-  protocol: string;
-  current_phase_id: string | null;
-  current_week: number;
-  programs: { name: string; tagline: string; icon: string; color: string };
-}
-
-interface Session {
-  id: string;
-  session_label: string;
-  focus: string;
-  protocol: string;
-  week_number: number;
-  day_number: number;
-  status: string;
-  warmup_block: any[];
-  main_block: any[];
-  core_block: any[];
-  finisher_block: any[];
-}
+/** energy_level pilote le volume et la charge côté moteur (Pydantic : 1..5). */
+const ENERGY_LABELS = ["Épuisé", "Fatigué", "Normal", "En forme", "Au top"];
 
 export default function DashboardScreen() {
   const router = useRouter();
-  const [userProgram, setUserProgram] = useState<UserProgram | null>(null);
-  const [latestSession, setLatestSession] = useState<Session | null>(null);
+  const { userId, email, isLoading: authLoading, refresh } = useAuth();
+
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [energy, setEnergy] = useState(3);
   const [loading, setLoading] = useState(true);
-  const [generating, setGenerating] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [starting, setStarting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    if (!userId) return;
+    try {
+      setData(await fetchDashboard(userId, new Date()));
+      setError(null);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Chargement impossible.");
+    }
+  }, [userId]);
 
   useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) return;
-
-    // Charger le programme actif
-    const { data: up } = await supabase
-      .from("user_programs")
-      .select("id, program_id, persona_id, protocol, current_phase_id, current_week, programs(name, tagline, icon, color)")
-      .eq("user_id", user.id)
-      .eq("status", "active")
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .single();
-
-    if (up) setUserProgram(up as unknown as UserProgram);
-
-    // Charger la dernière séance
-    const { data: sess } = await supabase
-      .from("sessions")
-      .select("id, session_label, focus, protocol, week_number, day_number, status, warmup_block, main_block, core_block, finisher_block")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .single();
-
-    if (sess) setLatestSession(sess as Session);
-
-    setLoading(false);
-  };
-
-  const handleGenerateNext = async () => {
-    if (!userProgram) return;
-    setGenerating(true);
-
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Non authentifie");
-
-      const nextDay = latestSession ? latestSession.day_number + 1 : 1;
-
-      await generateWorkout({
-        user_id: user.id,
-        user_program_id: userProgram.id,
-        persona_id: userProgram.persona_id,
-        program_id: userProgram.program_id,
-        phase_id: userProgram.current_phase_id || undefined,
-        week_number: userProgram.current_week,
-        day_number: nextDay,
-        energy_level: 3,
-      });
-
-      await loadData();
-    } catch (err: any) {
-      Alert.alert("Erreur", err.message);
-    } finally {
-      setGenerating(false);
+    if (authLoading) return;
+    if (!userId) {
+      router.replace("/login");
+      return;
     }
-  };
+    load().finally(() => setLoading(false));
+  }, [userId, authLoading, load, router]);
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-  };
+  // Recharge au retour de l'écran séance pour refléter la séance terminée.
+  useFocusEffect(
+    useCallback(() => {
+      if (!loading) load();
+    }, [load, loading]),
+  );
 
-  if (loading) {
+  async function handleStart() {
+    if (!data || !userId) return;
+    setError(null);
+    setStarting(true);
+    try {
+      const workout = await startSession(userId, data, energy);
+      router.push({
+        pathname: "/session",
+        params: { sessionId: workout.session_id },
+      });
+    } catch (e) {
+      setError(
+        e instanceof Error
+          ? `Génération impossible — ${e.message}`
+          : "Génération impossible.",
+      );
+    } finally {
+      setStarting(false);
+    }
+  }
+
+  async function handleSignOut() {
+    await signOut();
+    refresh();
+    router.replace("/login");
+  }
+
+  if (loading || authLoading) return <Loading label="Chargement" />;
+
+  if (!data) {
     return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#1565C0" />
-      </View>
+      <Screen center>
+        <View className="items-center mb-8">
+          <MonoLabel tone="accent" className="mb-3">
+            Aucun programme
+          </MonoLabel>
+          <Display size={28} className="text-center">
+            Rien à{"\n"}l'entraînement
+          </Display>
+          <Body className="text-center mt-3">
+            Complète le questionnaire pour recevoir ton programme.
+          </Body>
+        </View>
+        <View className="gap-2.5">
+          <Button
+            label="Faire le questionnaire"
+            onPress={() => router.replace("/questionnaire")}
+          />
+          <Button label="Se déconnecter" variant="ghost" onPress={handleSignOut} />
+        </View>
+      </Screen>
     );
   }
 
-  const totalExercises = latestSession
-    ? (latestSession.warmup_block?.length ?? 0) +
-      (latestSession.main_block?.length ?? 0) +
-      (latestSession.core_block?.length ?? 0) +
-      (latestSession.finisher_block?.length ?? 0)
+  const {
+    program,
+    phase,
+    userProgram,
+    nextSession,
+    streak,
+    completedCount,
+    previewExercises,
+  } = data;
+  const gradient = personaGradient(
+    userProgram.persona_id?.replace("persona_", "").toUpperCase(),
+  );
+  const totalWeeks = program.duration_weeks;
+  const progress = totalWeeks
+    ? Math.min(1, userProgram.current_week / totalWeeks)
     : 0;
 
+  const sessionMinutes =
+    program.session_duration_min === program.session_duration_max
+      ? `~ ${program.session_duration_min} min`
+      : `~ ${program.session_duration_min}-${program.session_duration_max} min`;
+
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {/* Programme actif */}
-      {userProgram && (
-        <View style={styles.programCard}>
-          <Text style={styles.programIcon}>{userProgram.programs?.icon}</Text>
-          <Text style={styles.programName}>{userProgram.programs?.name}</Text>
-          <Text style={styles.programTagline}>{userProgram.programs?.tagline}</Text>
-          <Text style={styles.programMeta}>
-            Semaine {userProgram.current_week} | Protocole : {userProgram.protocol || "auto"}
-          </Text>
-        </View>
-      )}
-
-      {/* Dernière séance */}
-      {latestSession && (
-        <View style={styles.sessionCard}>
-          <Text style={styles.sectionTitle}>Derniere seance</Text>
-          <Text style={styles.sessionLabel}>{latestSession.session_label}</Text>
-          <Text style={styles.sessionMeta}>
-            Semaine {latestSession.week_number} | Jour {latestSession.day_number} | {totalExercises} exercices
-          </Text>
-          <Text style={styles.sessionStatus}>
-            Statut : {latestSession.status}
-          </Text>
-
-          {/* Blocs résumés */}
-          <View style={styles.blocksContainer}>
-            <BlockSummary label="Warmup" count={latestSession.warmup_block?.length ?? 0} />
-            <BlockSummary label="Main" count={latestSession.main_block?.length ?? 0} />
-            <BlockSummary label="Core" count={latestSession.core_block?.length ?? 0} />
-            <BlockSummary label="Finisher" count={latestSession.finisher_block?.length ?? 0} />
-          </View>
-        </View>
-      )}
-
-      {/* Actions */}
-      <Pressable
-        style={[styles.button, generating && styles.buttonDisabled]}
-        onPress={handleGenerateNext}
-        disabled={generating}
+    <SafeAreaView className="flex-1 bg-bg">
+      <ScrollView
+        contentContainerStyle={{ paddingVertical: 20, paddingBottom: 40 }}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            tintColor={COLORS.accent}
+            colors={[COLORS.accent]}
+            progressBackgroundColor={COLORS.surface}
+            onRefresh={async () => {
+              setRefreshing(true);
+              await load();
+              setRefreshing(false);
+            }}
+          />
+        }
       >
-        {generating ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text style={styles.buttonText}>Generer la seance suivante</Text>
-        )}
-      </Pressable>
+        <View className="w-full max-w-[420px] mx-auto px-5">
+          {/* Salutation + avatar */}
+          <View className="flex-row justify-between items-center mb-5">
+            <View>
+              <Body className="text-[12px]">Salut,</Body>
+              <Display size={22}>{(email ?? "athlète").split("@")[0]}</Display>
+            </View>
+            <Pressable onPress={handleSignOut} accessibilityLabel="Se déconnecter">
+              <LinearGradient
+                colors={gradient}
+                start={GRADIENT_DIRECTION.start}
+                end={GRADIENT_DIRECTION.end}
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 20,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Text className="font-body-sb text-[13px] text-white">
+                  {initialsFromEmail(email)}
+                </Text>
+              </LinearGradient>
+            </Pressable>
+          </View>
 
-      <Pressable style={styles.logoutButton} onPress={handleLogout}>
-        <Text style={styles.logoutText}>Se deconnecter</Text>
-      </Pressable>
-    </ScrollView>
+          <ErrorText message={error} />
+
+          {/* Streak */}
+          <Card className="flex-row justify-between items-center mb-4 py-3.5">
+            <View>
+              <MonoLabel className="text-[9px]">Série actuelle</MonoLabel>
+              <Text className="font-display text-accent text-[24px] mt-0.5">
+                {streak} {streak > 1 ? "jours" : "jour"}
+              </Text>
+            </View>
+            <Text className="text-[30px]">🔥</Text>
+          </Card>
+
+          {/* Programme en cours */}
+          <View className="mb-4">
+            <GradientCard colors={gradient}>
+              <View className="self-start bg-black/25 rounded-lg px-2.5 py-1 mb-3">
+                <Text className="font-mono text-[9px] uppercase tracking-label text-white">
+                  Phase {phase?.phase_number ?? 1}
+                  {phase?.name ? ` · ${phase.name}` : ""}
+                </Text>
+              </View>
+              <Text className="font-display text-white uppercase text-[18px] mb-1">
+                {program.name}
+              </Text>
+              <Text className="font-body text-[12px] text-white/85 mb-3.5">
+                {totalWeeks
+                  ? `Semaine ${userProgram.current_week} sur ${totalWeeks}`
+                  : `Semaine ${userProgram.current_week}`}
+                {" · "}
+                {completedCount} séance{completedCount > 1 ? "s" : ""} complétée
+                {completedCount > 1 ? "s" : ""}
+              </Text>
+              <View className="h-1.5 bg-black/25 rounded-full overflow-hidden">
+                <View
+                  className="h-full bg-white rounded-full"
+                  style={{ width: `${Math.max(progress * 100, 3)}%` }}
+                />
+              </View>
+            </GradientCard>
+          </View>
+
+          {/* Prochaine séance */}
+          <Card className="mb-3">
+            <MonoLabel tone="accent" className="mb-2">
+              Prochaine séance · Jour {nextSession.day_number}
+            </MonoLabel>
+            <Display size={22} className="mb-1.5">
+              {nextSession.session_label}
+            </Display>
+            <Body className="text-[12px] mb-3.5">
+              {sessionMinutes} · Focus {nextSession.focus.replace(/_/g, " ")}
+            </Body>
+
+            {previewExercises.length > 0 ? (
+              <View className="flex-row flex-wrap gap-1.5 mb-4">
+                {previewExercises.map((name) => (
+                  <Chip key={name} label={name} />
+                ))}
+                <Chip label="+ …" />
+              </View>
+            ) : null}
+
+            <Button
+              label="Démarrer la séance"
+              onPress={handleStart}
+              loading={starting}
+            />
+          </Card>
+
+          {/* Niveau d'énergie */}
+          <Card className="mb-3">
+            <MonoLabel className="mb-3">Niveau d'énergie aujourd'hui</MonoLabel>
+            <View className="flex-row gap-1.5">
+              {[1, 2, 3, 4, 5].map((level) => {
+                const active = level <= energy;
+                return (
+                  <Pressable
+                    key={level}
+                    onPress={() => setEnergy(level)}
+                    accessibilityRole="radio"
+                    accessibilityState={{ checked: energy === level }}
+                    accessibilityLabel={ENERGY_LABELS[level - 1]}
+                    className={`flex-1 h-7 rounded-lg border ${
+                      active ? "bg-accent border-accent" : "bg-bg border-line"
+                    }`}
+                  />
+                );
+              })}
+            </View>
+            <Text className="font-mono text-[9px] uppercase tracking-label text-muted mt-2.5">
+              {ENERGY_LABELS[energy - 1]} · ajuste volume et charge
+            </Text>
+          </Card>
+
+          {completedCount > 0 ? (
+            <Pressable
+              onPress={() => router.push("/feedback")}
+              className="py-3 items-center"
+            >
+              <MonoLabel tone="accent">Donner mon feedback →</MonoLabel>
+            </Pressable>
+          ) : null}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
-
-function BlockSummary({ label, count }: { label: string; count: number }) {
-  return (
-    <View style={styles.blockChip}>
-      <Text style={styles.blockLabel}>{label}</Text>
-      <Text style={styles.blockCount}>{count}</Text>
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f5f5f5" },
-  content: { padding: 16, paddingBottom: 40 },
-  centered: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#f5f5f5",
-  },
-  programCard: {
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    padding: 20,
-    alignItems: "center",
-    marginBottom: 16,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  programIcon: { fontSize: 40, marginBottom: 8 },
-  programName: { fontSize: 20, fontWeight: "bold", marginBottom: 4 },
-  programTagline: { fontSize: 14, color: "#666", textAlign: "center", marginBottom: 8 },
-  programMeta: { fontSize: 13, color: "#999" },
-  sessionCard: {
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 16,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  sectionTitle: { fontSize: 13, color: "#999", fontWeight: "600", marginBottom: 8, textTransform: "uppercase" },
-  sessionLabel: { fontSize: 18, fontWeight: "bold", marginBottom: 4 },
-  sessionMeta: { fontSize: 14, color: "#555", marginBottom: 4 },
-  sessionStatus: { fontSize: 13, color: "#1565C0", marginBottom: 12 },
-  blocksContainer: { flexDirection: "row", gap: 8 },
-  blockChip: {
-    flex: 1,
-    backgroundColor: "#E3F2FD",
-    borderRadius: 8,
-    padding: 8,
-    alignItems: "center",
-  },
-  blockLabel: { fontSize: 11, color: "#1565C0", fontWeight: "600" },
-  blockCount: { fontSize: 16, fontWeight: "bold", color: "#0D47A1" },
-  button: {
-    backgroundColor: "#1565C0",
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  buttonDisabled: { opacity: 0.6 },
-  buttonText: { color: "#fff", fontSize: 16, fontWeight: "600" },
-  logoutButton: {
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#ddd",
-  },
-  logoutText: { color: "#999", fontSize: 14 },
-});

@@ -1,38 +1,74 @@
-const API_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:8000";
+/**
+ * Client FastAPI.
+ *
+ * Réservé aux deux endpoints qui portent de la logique métier serveur :
+ *   POST /workout/generate   — sélection d'exercices + persistance de la séance
+ *   POST /feedback/redirect  — adaptation du programme (pas encore livré côté backend)
+ *
+ * Tout le CRUD standard passe par le SDK Supabase (voir lib/data.ts).
+ */
 
-export async function generateWorkout(params: {
-  user_id: string;
-  user_program_id: string;
-  persona_id: string;
-  program_id: string;
-  phase_id?: string;
-  week_number?: number;
-  day_number?: number;
-  energy_level?: number;
-  available_equipment?: string[];
-}) {
-  const body = {
-    user_id: params.user_id,
-    user_program_id: params.user_program_id,
-    persona_id: params.persona_id,
-    program_id: params.program_id,
-    phase_id: params.phase_id || null,
-    week_number: params.week_number ?? 1,
-    day_number: params.day_number ?? 1,
-    energy_level: params.energy_level ?? 3,
-    available_equipment: params.available_equipment ?? [],
+import { supabase } from "./supabase";
+import type { WorkoutRequest, WorkoutResponse } from "./types";
+
+const API_URL = process.env.EXPO_PUBLIC_API_URL ?? "";
+
+async function authHeaders(): Promise<Record<string, string>> {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  return {
+    "Content-Type": "application/json",
+    ...(session?.access_token
+      ? { Authorization: `Bearer ${session.access_token}` }
+      : {}),
   };
+}
 
-  const res = await fetch(`${API_URL}/workout/generate`, {
+async function post<T>(path: string, body: unknown): Promise<T> {
+  if (!API_URL) {
+    throw new Error(
+      "EXPO_PUBLIC_API_URL n'est pas défini — impossible d'appeler l'API.",
+    );
+  }
+
+  const response = await fetch(`${API_URL}${path}`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: await authHeaders(),
     body: JSON.stringify(body),
   });
 
-  if (!res.ok) {
-    const detail = await res.json().catch(() => ({}));
-    throw new Error(detail.detail || `API error ${res.status}`);
+  if (!response.ok) {
+    // FastAPI renvoie {"detail": "..."} sur HTTPException (422 ici).
+    const raw = await response.text();
+    let message = raw;
+    try {
+      const parsed = JSON.parse(raw) as { detail?: string };
+      if (parsed.detail) message = parsed.detail;
+    } catch {
+      /* corps non-JSON — on garde le texte brut */
+    }
+    throw new Error(`${path} — ${response.status} : ${message}`);
   }
 
-  return res.json();
+  return response.json() as Promise<T>;
+}
+
+/** POST /workout/generate — routers/workout_generator.py */
+export function generateWorkout(
+  request: WorkoutRequest,
+): Promise<WorkoutResponse> {
+  return post<WorkoutResponse>("/workout/generate", request);
+}
+
+/** GET /health — sonde de disponibilité du backend. */
+export async function checkHealth(): Promise<boolean> {
+  if (!API_URL) return false;
+  try {
+    const response = await fetch(`${API_URL}/health`);
+    return response.ok;
+  } catch {
+    return false;
+  }
 }

@@ -1,320 +1,186 @@
-import { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  Pressable,
-  StyleSheet,
-  ScrollView,
-  ActivityIndicator,
-  Alert,
-} from "react-native";
+import { useEffect, useMemo, useState } from "react";
+import { Text, View } from "react-native";
 import { useRouter } from "expo-router";
-import { supabase } from "../lib/supabase";
+import { useAuth } from "./_layout";
+import {
+  Button,
+  ChoiceRow,
+  Display,
+  ErrorText,
+  Loading,
+  MonoLabel,
+  ProgressBar,
+  Screen,
+} from "../components/ui";
+import { optionLetter } from "../lib/theme";
+import { fetchQuestionnaire, submitQuestionnaire } from "../lib/data";
+import { PERSONA_CODE_TO_ID, scoreAnswers, toggleMultiChoice } from "../lib/scoring";
+import type { QuestionnaireOption, QuestionnaireQuestion } from "../lib/types";
 
-interface Option {
-  id: string;
-  label: string;
-  value: string;
-  question_id: string;
-}
-
-interface Question {
-  id: string;
-  question_number: number;
-  text: string;
-  type: string;
-  options: Option[];
-}
-
-interface Answer {
-  question_id: string;
-  option_ids: string[];
-}
+/** Intitulé court affiché en sur-titre, dérivé du rôle de segmentation. */
+const ROLE_LABELS: Record<string, string> = {
+  primary: "Profil",
+  major_differentiator: "Objectif principal",
+  secondary: "Historique",
+  constraint: "Contraintes",
+  psychological_differentiator: "Rapport à l'effort",
+};
 
 export default function QuestionnaireScreen() {
   const router = useRouter();
-  const [questions, setQuestions] = useState<Question[]>([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, string[]>>({});
+  const { userId, isLoading: authLoading } = useAuth();
+
+  const [questions, setQuestions] = useState<QuestionnaireQuestion[]>([]);
+  const [options, setOptions] = useState<QuestionnaireOption[]>([]);
+  const [index, setIndex] = useState(0);
+  const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    loadQuestions();
-  }, []);
-
-  const loadQuestions = async () => {
-    const { data: qs, error: qErr } = await supabase
-      .from("questionnaire_questions")
-      .select("id, question_number, text, type")
-      .eq("questionnaire_id", "initial_profiling_v3")
-      .order("question_number");
-
-    if (qErr || !qs) {
-      Alert.alert("Erreur", "Impossible de charger le questionnaire");
+    if (authLoading) return;
+    if (!userId) {
+      router.replace("/login");
       return;
     }
 
-    const { data: opts, error: oErr } = await supabase
-      .from("questionnaire_options")
-      .select("id, question_id, label, value")
-      .in(
-        "question_id",
-        qs.map((q) => q.id)
-      );
+    let active = true;
+    fetchQuestionnaire()
+      .then(({ questions, options }) => {
+        if (!active) return;
+        setQuestions(questions);
+        setOptions(options);
+      })
+      .catch((e) => active && setError(e.message))
+      .finally(() => active && setLoading(false));
 
-    if (oErr || !opts) {
-      Alert.alert("Erreur", "Impossible de charger les options");
-      return;
-    }
+    return () => {
+      active = false;
+    };
+  }, [userId, authLoading, router]);
 
-    const merged: Question[] = qs.map((q) => ({
-      ...q,
-      options: opts.filter((o) => o.question_id === q.id),
-    }));
+  const question = questions[index];
+  const questionOptions = useMemo(
+    () => options.filter((o) => o.question_id === question?.id),
+    [options, question?.id],
+  );
 
-    setQuestions(merged);
-    setLoading(false);
-  };
+  if (loading || authLoading) return <Loading label="Chargement" />;
 
-  const currentQuestion = questions[currentIndex];
-  const isMultipleChoice = currentQuestion?.type === "multiple_choice";
-  const selectedOptions = answers[currentQuestion?.id] || [];
-
-  const toggleOption = (optionId: string) => {
-    const qId = currentQuestion.id;
-    const current = answers[qId] || [];
-
-    // Pour les options exclusives (ex: q8_d "Flexible")
-    if (isMultipleChoice) {
-      if (current.includes(optionId)) {
-        setAnswers({ ...answers, [qId]: current.filter((id) => id !== optionId) });
-      } else {
-        setAnswers({ ...answers, [qId]: [...current, optionId] });
-      }
-    } else {
-      setAnswers({ ...answers, [qId]: [optionId] });
-    }
-  };
-
-  const canProceed = selectedOptions.length > 0;
-
-  const handleNext = () => {
-    if (!canProceed) return;
-
-    if (currentIndex < questions.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-    } else {
-      handleSubmit();
-    }
-  };
-
-  const handleBack = () => {
-    if (currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1);
-    }
-  };
-
-  const handleSubmit = async () => {
-    setSubmitting(true);
-
-    const formattedAnswers: Answer[] = Object.entries(answers).map(
-      ([question_id, option_ids]) => ({ question_id, option_ids })
-    );
-
-    try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      if (!session) {
-        Alert.alert("Erreur", "Session expirée");
-        router.replace("/auth");
-        return;
-      }
-
-      const res = await supabase.functions.invoke("score-questionnaire", {
-        body: { answers: formattedAnswers },
-      });
-
-      if (res.error) throw res.error;
-
-      const result = res.data;
-
-      // Naviguer vers le résultat avec les données
-      router.replace({
-        pathname: "/onboarding-result",
-        params: {
-          persona_id: result.persona_id,
-          persona_code: result.persona_code,
-          program_id: result.program_id,
-          phase_id: result.phase_id || "",
-          protocol: result.protocol || "",
-          user_program_id: result.user_program_id,
-        },
-      });
-    } catch (err: any) {
-      Alert.alert("Erreur", err.message || "Erreur lors de la soumission");
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  if (loading) {
+  if (!question) {
     return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#1565C0" />
-      </View>
+      <Screen center>
+        <ErrorText message={error ?? "Aucune question disponible."} />
+        <Button label="Réessayer" onPress={() => router.replace("/questionnaire")} />
+      </Screen>
     );
   }
 
-  if (!currentQuestion) return null;
+  const isMulti = question.type === "multiple_choice";
+  const isLast = index === questions.length - 1;
+  const answer = answers[question.id];
+  const selectedValues = Array.isArray(answer) ? answer : answer ? [answer] : [];
+  const canAdvance = selectedValues.length > 0;
+
+  function select(value: string) {
+    setAnswers((prev) => {
+      if (!isMulti) return { ...prev, [question.id]: value };
+      const current = Array.isArray(prev[question.id])
+        ? (prev[question.id] as string[])
+        : [];
+      return {
+        ...prev,
+        [question.id]: toggleMultiChoice(current, value, questionOptions),
+      };
+    });
+  }
+
+  async function handleNext() {
+    if (!canAdvance) return;
+    if (!isLast) {
+      setIndex((i) => i + 1);
+      return;
+    }
+    if (!userId) return;
+
+    setError(null);
+    setSubmitting(true);
+    try {
+      const { winner, scores } = scoreAnswers(answers, options);
+      await submitQuestionnaire(userId, answers, scores, PERSONA_CODE_TO_ID[winner]);
+      router.replace("/onboarding-result");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Envoi impossible.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  const pad = (n: number) => String(n).padStart(2, "0");
 
   return (
-    <View style={styles.container}>
-      {/* Progress bar */}
-      <View style={styles.progressContainer}>
-        <View
-          style={[
-            styles.progressBar,
-            { width: `${((currentIndex + 1) / questions.length) * 100}%` },
-          ]}
+    <Screen
+      footer={
+        <View className="flex-row gap-2.5">
+          {index > 0 ? (
+            <View className="flex-1">
+              <Button
+                label="Retour"
+                variant="ghost"
+                onPress={() => setIndex((i) => i - 1)}
+                disabled={submitting}
+              />
+            </View>
+          ) : null}
+          <View className="flex-[2]">
+            <Button
+              label={isLast ? "Voir mon profil" : "Suivant"}
+              onPress={handleNext}
+              disabled={!canAdvance}
+              loading={submitting}
+            />
+          </View>
+        </View>
+      }
+    >
+      <View className="flex-row justify-between items-center mb-3">
+        <Text className="font-mono text-[11px] tracking-label text-muted">
+          <Text className="text-accent">{pad(index + 1)}</Text> / {pad(questions.length)}
+        </Text>
+        <MonoLabel>{isMulti ? "Choix multiple" : "Choix unique"}</MonoLabel>
+      </View>
+
+      <View className="mb-7">
+        <ProgressBar value={(index + 1) / questions.length} />
+      </View>
+
+      <ErrorText message={error} />
+
+      <MonoLabel tone="accent" className="mb-3">
+        {ROLE_LABELS[question.segmentation_role ?? ""] ?? "Profilage"}
+      </MonoLabel>
+
+      <View className="mb-7">
+        <Display size={22}>{question.text}</Display>
+      </View>
+
+      {questionOptions.map((option, i) => (
+        <ChoiceRow
+          key={option.id}
+          letter={optionLetter(i)}
+          label={option.label}
+          selected={selectedValues.includes(option.value)}
+          onPress={() => select(option.value)}
+          multi={isMulti}
         />
-      </View>
+      ))}
 
-      <Text style={styles.counter}>
-        {currentIndex + 1} / {questions.length}
-      </Text>
-
-      <ScrollView style={styles.scrollArea} contentContainerStyle={styles.scrollContent}>
-        <Text style={styles.questionText}>{currentQuestion.text}</Text>
-
-        {isMultipleChoice && (
-          <Text style={styles.hint}>Plusieurs réponses possibles</Text>
-        )}
-
-        {currentQuestion.options.map((opt) => {
-          const isSelected = selectedOptions.includes(opt.id);
-          return (
-            <Pressable
-              key={opt.id}
-              style={[styles.option, isSelected && styles.optionSelected]}
-              onPress={() => toggleOption(opt.id)}
-            >
-              <Text
-                style={[
-                  styles.optionText,
-                  isSelected && styles.optionTextSelected,
-                ]}
-              >
-                {opt.label}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </ScrollView>
-
-      {/* Navigation buttons */}
-      <View style={styles.navRow}>
-        {currentIndex > 0 && (
-          <Pressable style={styles.backButton} onPress={handleBack}>
-            <Text style={styles.backButtonText}>Retour</Text>
-          </Pressable>
-        )}
-
-        <Pressable
-          style={[
-            styles.nextButton,
-            !canProceed && styles.nextButtonDisabled,
-            currentIndex === 0 && { flex: 1 },
-          ]}
-          onPress={handleNext}
-          disabled={!canProceed || submitting}
-        >
-          {submitting ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.nextButtonText}>
-              {currentIndex === questions.length - 1 ? "Terminer" : "Suivant"}
-            </Text>
-          )}
-        </Pressable>
-      </View>
-    </View>
+      {question.note ? (
+        <Text className="font-body text-[11px] text-muted italic mt-2 leading-4">
+          {question.note}
+        </Text>
+      ) : null}
+    </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
-  centered: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#fff",
-  },
-  progressContainer: {
-    height: 4,
-    backgroundColor: "#e0e0e0",
-  },
-  progressBar: {
-    height: 4,
-    backgroundColor: "#1565C0",
-  },
-  counter: {
-    textAlign: "center",
-    color: "#999",
-    fontSize: 13,
-    marginTop: 12,
-  },
-  scrollArea: { flex: 1 },
-  scrollContent: { padding: 24, paddingTop: 16 },
-  questionText: {
-    fontSize: 20,
-    fontWeight: "600",
-    lineHeight: 28,
-    marginBottom: 24,
-  },
-  hint: {
-    fontSize: 13,
-    color: "#888",
-    marginBottom: 16,
-    fontStyle: "italic",
-  },
-  option: {
-    borderWidth: 1.5,
-    borderColor: "#ddd",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 10,
-  },
-  optionSelected: {
-    borderColor: "#1565C0",
-    backgroundColor: "#E3F2FD",
-  },
-  optionText: { fontSize: 15, color: "#333", lineHeight: 22 },
-  optionTextSelected: { color: "#1565C0", fontWeight: "600" },
-  navRow: {
-    flexDirection: "row",
-    padding: 24,
-    paddingTop: 12,
-    gap: 12,
-  },
-  backButton: {
-    flex: 1,
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: "center",
-    borderWidth: 2,
-    borderColor: "#1565C0",
-  },
-  backButtonText: { color: "#1565C0", fontSize: 16, fontWeight: "600" },
-  nextButton: {
-    flex: 2,
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: "center",
-    backgroundColor: "#1565C0",
-  },
-  nextButtonDisabled: { opacity: 0.4 },
-  nextButtonText: { color: "#fff", fontSize: 16, fontWeight: "600" },
-});

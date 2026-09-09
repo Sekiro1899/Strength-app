@@ -8,6 +8,7 @@ Deux colonnes de la bibliothèque pilotent tout :
     C'est lui, et non la catégorie, qui décide dans quel bloc l'exercice tombe.
 """
 
+import hashlib
 import random
 
 from database import supabase
@@ -53,17 +54,22 @@ def _matches_program(ex: dict, program_id: str, allow_universal: bool) -> bool:
     return program_id in targets
 
 
-def _matches_equipment(ex: dict, available: list[str]) -> bool:
-    """Sans équipement déclaré, on n'impose rien — l'utilisateur filtrera à l'usage."""
-    if not available:
-        return True
-    required = ex.get("material_required") or []
-    if not required:
-        return True
-    if ex.get("bodyweight_compatible"):
-        return True
-    have = {e.lower() for e in available}
-    return any(r.lower() in have for r in required)
+def _matches_location(ex: dict, location: str) -> bool:
+    """Le lieu déclaré en début de séance décide du matériel disponible."""
+    return location in (ex.get("locations") or ["gym"])
+
+
+def session_rng(user_program_id: str, day_number: int) -> random.Random:
+    """
+    Tirage reproductible par séance.
+
+    Une progression arithmétique sur l'index faisait resservir les mêmes
+    exercices d'une séance à l'autre ; on seede un vrai générateur sur le
+    couple (programme, jour) et on mélange.
+    """
+    key = f"{user_program_id}#{day_number}".encode()
+    seed = int.from_bytes(hashlib.sha256(key).digest()[:8], "big")
+    return random.Random(seed)
 
 
 def select_exercises(
@@ -73,7 +79,7 @@ def select_exercises(
     exercise_types: list[str] | None = None,
     level_max: str = "avance",
     bodyweight_only: bool = False,
-    available_equipment: list[str] | None = None,
+    location: str = "gym",
     warmup_targets: list[str] | None = None,
     intents: list[str] | None = None,
     allow_universal: bool = False,
@@ -104,19 +110,47 @@ def select_exercises(
             # "all" convient à toutes les séances.
             if not (set(warmup_targets) & set(targets) or "all" in targets):
                 continue
-        if not _matches_equipment(ex, available_equipment or []):
+        if not _matches_location(ex, location):
             continue
         pool.append(ex)
 
     return pool
 
 
-def pick(pool: list[dict], count: int, exclude_ids: set[str] | None = None) -> list[dict]:
-    """Tire `count` exercices distincts, en variant d'une séance à l'autre."""
-    exclude_ids = exclude_ids or set()
-    candidates = [e for e in pool if e["id"] not in exclude_ids]
-    if not candidates:
-        return []
-    if len(candidates) <= count:
-        return candidates
-    return random.sample(candidates, count)
+def pick(
+    pool: list[dict],
+    count: int,
+    rng: random.Random,
+    recent_ids: set[str] | None = None,
+) -> list[dict]:
+    """
+    Tire `count` exercices en privilégiant ceux qui n'ont pas servi récemment.
+    On ne les interdit pas : sur un pool étroit il faut bien réutiliser.
+    """
+    recent_ids = recent_ids or set()
+    fresh = [e for e in pool if e["id"] not in recent_ids]
+    stale = [e for e in pool if e["id"] in recent_ids]
+    rng.shuffle(fresh)
+    rng.shuffle(stale)
+    return (fresh + stale)[:count]
+
+
+# ─── Énergie → charge et volume ───
+
+VOLUME_BY_ENERGY = {
+    1: {"load_delta": -15, "sets_delta": -1, "compounds": 2, "isolations": 1,
+        "core": 1, "warmup": 5, "with_finisher": False},
+    2: {"load_delta": -10, "sets_delta": -1, "compounds": 3, "isolations": 1,
+        "core": 2, "warmup": 5, "with_finisher": False},
+    3: {"load_delta": 0, "sets_delta": 0, "compounds": 3, "isolations": 2,
+        "core": 2, "warmup": 4, "with_finisher": True},
+    4: {"load_delta": 0, "sets_delta": 0, "compounds": 4, "isolations": 3,
+        "core": 3, "warmup": 4, "with_finisher": True},
+    5: {"load_delta": 5, "sets_delta": 1, "compounds": 4, "isolations": 3,
+        "core": 3, "warmup": 3, "with_finisher": True},
+}
+
+
+def volume_for_energy(energy: int) -> dict:
+    """L'énergie déclarée module la charge ET le volume de la séance."""
+    return VOLUME_BY_ENERGY[max(1, min(5, int(energy)))]

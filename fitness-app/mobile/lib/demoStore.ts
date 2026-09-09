@@ -8,7 +8,15 @@
  * État persisté en localStorage sur le web, en mémoire sur natif.
  */
 
-import { buildCore, buildFinisher, buildMain, buildWarmup } from "./engine";
+import {
+  buildCore,
+  buildFinisher,
+  buildMain,
+  buildWarmup,
+  createRng,
+  sessionSeed,
+} from "./engine";
+import type { BuildContext } from "./engine";
 import { PERSONAS, PERSONA_PROGRAM_ELIGIBILITY, PROGRAMS, PROGRAM_PHASES } from "./fixtures";
 import { buildSessionPlan, isCycleComplete, nextPlanned, phaseForWeek } from "./plan";
 import type { PlannedSession } from "./plan";
@@ -18,10 +26,14 @@ import type {
   PersonaScores,
   Protocol,
   UserProgram,
+  TrainingLocation,
   WorkoutRequest,
   WorkoutResponse,
   WorkoutSession,
 } from "./types";
+
+/** Combien de séances passées comptent pour éviter de resservir un exercice. */
+const ROTATION_WINDOW = 2;
 
 const STORAGE_KEY = "strength-app.demo.v2";
 
@@ -206,6 +218,23 @@ function levelForPersona(personaId: string): string {
   return "intermediaire";
 }
 
+/**
+ * Exercices vus lors des dernières séances : la sélection les évite en
+ * priorité, ce qui fait réellement varier le contenu d'une séance à l'autre.
+ */
+function recentExerciseIds(sessions: WorkoutSession[]): Set<string> {
+  const recent = [...sessions]
+    .sort((a, b) => b.day_number - a.day_number)
+    .slice(0, ROTATION_WINDOW);
+  const ids = new Set<string>();
+  for (const s of recent) {
+    for (const block of [s.warmup_block, s.main_block, s.core_block, s.finisher_block]) {
+      for (const b of block ?? []) ids.add(b.exercise_id);
+    }
+  }
+  return ids;
+}
+
 /** Équivalent local de POST /workout/generate. */
 export function demoGenerateWorkout(request: WorkoutRequest): WorkoutResponse {
   const state = read();
@@ -228,11 +257,28 @@ export function demoGenerateWorkout(request: WorkoutRequest): WorkoutResponse {
 
   const levelMax = levelForPersona(request.persona_id);
   const energy = request.energy_level ?? 3;
-  const seed = dayNumber * 7;
+  const location: TrainingLocation = request.location ?? "gym";
 
-  // Une séance déjà matérialisée est renvoyée telle quelle : relancer ne doit
-  // pas régénérer un contenu différent.
-  const existing = state.sessions.find((s) => s.day_number === dayNumber);
+  const ctx: BuildContext = {
+    program,
+    phase,
+    focus,
+    levelMax,
+    energy,
+    location,
+    recentIds: recentExerciseIds(state.sessions),
+    rng: createRng(sessionSeed(request.user_program_id, dayNumber)),
+  };
+
+  // Une séance déjà matérialisée est renvoyée telle quelle, SAUF si l'énergie
+  // ou le lieu déclarés ont changé : la séance doit alors être recomposée.
+  const existing = state.sessions.find(
+    (s) =>
+      s.day_number === dayNumber &&
+      s.status !== "completed" &&
+      s.energy_level === (request.energy_level ?? 3) &&
+      s.location === (request.location ?? "gym"),
+  );
   if (existing) {
     return {
       session_id: existing.id,
@@ -260,17 +306,23 @@ export function demoGenerateWorkout(request: WorkoutRequest): WorkoutResponse {
     focus,
     status: "in_progress",
     energy_level: energy,
-    warmup_block: buildWarmup(program, focus, energy, seed),
-    main_block: buildMain(program, phase, focus, levelMax, energy, seed),
-    core_block: buildCore(program, levelMax, energy, seed),
-    finisher_block: buildFinisher(program, levelMax, energy, seed),
+    location,
+    warmup_block: buildWarmup(ctx),
+    main_block: buildMain(ctx),
+    core_block: buildCore(ctx),
+    finisher_block: buildFinisher(ctx),
     scheduled_date: planned?.scheduled_date ?? null,
     started_at: null,
     completed_at: null,
     actual_duration_min: null,
   };
 
-  write({ ...state, sessions: [...state.sessions, session] });
+  // Recomposer une séance remplace la précédente version du même jour, sinon
+  // le plan se retrouverait avec deux entrées pour le même day_number.
+  const others = state.sessions.filter(
+    (s) => !(s.day_number === dayNumber && s.status !== "completed"),
+  );
+  write({ ...state, sessions: [...others, session] });
 
   return {
     session_id: session.id,

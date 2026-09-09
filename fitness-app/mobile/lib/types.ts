@@ -172,6 +172,9 @@ export type ExerciseLevel = "debutant" | "intermediaire" | "avance";
 
 export type SessionStructure = "split" | "circuit";
 
+/** Lieu déclaré en début de séance — décide du matériel disponible. */
+export type TrainingLocation = "gym" | "home" | "outdoor";
+
 /** Décide dans quel bloc l'exercice tombe — prime sur la catégorie. */
 export type ExerciseType = "compound" | "isolation" | "core" | "cardio";
 
@@ -185,6 +188,10 @@ export interface Exercise {
   level: ExerciseLevel;
   bodyweight_compatible: boolean;
   material_required: string[] | null;
+  /** Vocabulaire fermé dérivé de material_required à l'import. */
+  equipment_tags: string[];
+  /** Lieux où l'exercice est praticable. */
+  locations: TrainingLocation[];
   warmup_target: string[] | null;
   description: string | null;
   exercise_type: ExerciseType | null;
@@ -280,6 +287,7 @@ export interface WorkoutSession {
   focus: Focus | null;
   status: SessionStatus;
   energy_level: number | null;
+  location: TrainingLocation | null;
   warmup_block: ExerciseBlock[] | null;
   main_block: ExerciseBlock[] | null;
   core_block: ExerciseBlock[] | null;
@@ -328,6 +336,8 @@ export interface WorkoutRequest {
   /** Contrainte Pydantic : ge=1, le=5. */
   energy_level?: number;
   available_equipment?: string[];
+  /** Lieu d'entraînement du jour. */
+  location?: TrainingLocation;
 }
 
 /** Miroir de models.workout.WorkoutResponse. */

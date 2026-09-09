@@ -93,7 +93,8 @@ for q in quest["questions"]:
 
 # ---- Exercises (champs utiles au rendu + à la sélection) ----
 EX_KEYS = ["id","category","name","muscles_primary","muscles_secondary","intent","level",
-           "bodyweight_compatible","material_required","warmup_target","description",
+           "bodyweight_compatible","material_required","equipment_tags","locations",
+           "warmup_target","description",
            "exercise_type","target_programs","image_url"]
 ex_out = [{k: e.get(k) for k in EX_KEYS} for e in exercises]
 

@@ -12,6 +12,8 @@ class WorkoutRequest(BaseModel):
     protocol: str | None = None
     focus: str | None = None
     energy_level: int = Field(default=3, ge=1, le=5)
+    # Lieu déclaré en début de séance — décide du matériel disponible.
+    location: str = "gym"
     available_equipment: list[str] = []
 
 

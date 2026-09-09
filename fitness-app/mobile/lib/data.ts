@@ -44,6 +44,7 @@ import type {
   ProgramPhase,
   Protocol,
   QuestionnaireOption,
+  TrainingLocation,
   QuestionnaireQuestion,
   UserProgram,
   WorkoutResponse,
@@ -468,6 +469,7 @@ export async function startSession(
   userId: string,
   dashboard: DashboardData,
   energyLevel: number,
+  location: TrainingLocation,
 ): Promise<WorkoutResponse> {
   const request = {
     user_id: userId,
@@ -479,6 +481,7 @@ export async function startSession(
     day_number: dashboard.nextSession.day_number,
     protocol: dashboard.nextSession.protocol,
     energy_level: energyLevel,
+    location,
     available_equipment: [] as string[],
   };
 

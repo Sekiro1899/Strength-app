@@ -203,6 +203,10 @@ CREATE TABLE exercises (
                                     CHECK (exercise_type IN ('compound','isolation','core','cardio')),
     -- Vide = universel (warmups et finishers servent tous les programmes)
     target_programs             TEXT[]          DEFAULT '{}',
+    -- Vocabulaire fermé dérivé de material_required à l'import
+    equipment_tags              TEXT[]          DEFAULT '{}',
+    -- Lieux où l'exercice est praticable
+    locations                   TEXT[]          DEFAULT '{gym}',
     video_url                   TEXT,
     image_url                   TEXT,
     is_custom                   BOOLEAN         DEFAULT FALSE,
@@ -363,6 +367,9 @@ CREATE TABLE sessions (
     focus                       VARCHAR(30),
     status                      VARCHAR(20)     DEFAULT 'planned' CHECK (status IN ('planned','in_progress','completed','skipped')),
     energy_level                INTEGER         CHECK (energy_level BETWEEN 1 AND 5),
+    -- Lieu déclaré en début de séance : filtre le matériel disponible
+    location                    VARCHAR(20)     DEFAULT 'gym'
+                                    CHECK (location IN ('gym','home','outdoor')),
     warmup_block                JSONB,
     main_block                  JSONB,
     core_block                  JSONB,

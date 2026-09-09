@@ -1,12 +1,17 @@
 /**
- * Miroir du moteur de génération — backend/engine/{exercise_selector,block_builder}.py
+ * Moteur de génération — miroir de backend/engine/{exercise_selector,block_builder}.py
  *
- * Les mêmes règles doivent produire la même séance des deux côtés, sinon
- * l'aperçu du mode démo ment sur ce que fera la production.
+ * Pur et sans I/O : exécutable côté client comme en edge function.
  *
- * Deux colonnes de la bibliothèque pilotent tout :
- *   target_programs : appartenance au programme (vide = universel)
- *   exercise_type   : compound | isolation | core | cardio -> choisit le bloc
+ * Trois entrées pilotent la composition :
+ *   target_programs / exercise_type  — quel exercice, dans quel bloc
+ *   locations                        — praticable au lieu déclaré
+ *   energy                           — charge ET volume
+ *
+ * La sélection est aléatoire mais REPRODUCTIBLE : le tirage est seedé sur
+ * (programme, jour), donc rejouer la même séance redonne la même chose, alors
+ * que deux séances différentes composent réellement différemment. Un historique
+ * des séances récentes évite en plus de resservir les mêmes exercices.
  */
 
 import { EXERCISES } from "./fixtures";
@@ -17,9 +22,9 @@ import type {
   Focus,
   Program,
   ProgramPhase,
+  TrainingLocation,
 } from "./types";
 
-/** exercise_selector.py::FOCUS_CATEGORY_MAP */
 const FOCUS_CATEGORY_MAP: Record<Focus, string[]> = {
   push: ["push"],
   pull: ["pull"],
@@ -29,7 +34,6 @@ const FOCUS_CATEGORY_MAP: Record<Focus, string[]> = {
   full_body: ["push", "pull", "legs", "arms"],
 };
 
-/** exercise_selector.py::FOCUS_WARMUP_TARGET_MAP */
 const FOCUS_WARMUP_TARGET_MAP: Record<Focus, string[]> = {
   push: ["push", "bench", "ohp"],
   pull: ["pull", "deadlift"],
@@ -39,7 +43,6 @@ const FOCUS_WARMUP_TARGET_MAP: Record<Focus, string[]> = {
   full_body: ["all"],
 };
 
-/** Programmes en circuit : aucun découpage par patron moteur. */
 const CIRCUIT_CATEGORIES = ["complex", "explosive", "conditioning"];
 
 const LEVEL_ORDER: Record<string, number> = {
@@ -48,18 +51,104 @@ const LEVEL_ORDER: Record<string, number> = {
   avance: 2,
 };
 
-const WARMUP_COUNT: Record<string, number> = {
-  very_light: 2,
-  light: 3,
-  moderate: 4,
-  heavy: 5,
-};
+// ─────────────────────────────────────────────
+// Tirage aléatoire reproductible
+// ─────────────────────────────────────────────
+
+/** FNV-1a — transforme la clé de séance en graine numérique. */
+function hashSeed(key: string): number {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < key.length; i++) {
+    h ^= key.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
+  }
+  return h >>> 0;
+}
+
+/** mulberry32 — petit PRNG rapide, suffisant pour du tirage d'exercices. */
+export function createRng(seed: number): () => number {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/** Graine d'une séance : stable pour un couple (programme, jour). */
+export function sessionSeed(userProgramId: string, dayNumber: number): number {
+  return hashSeed(`${userProgramId}#${dayNumber}`);
+}
+
+/** Fisher-Yates — un vrai mélange, là où un pas arithmétique répétait les séries. */
+function shuffle<T>(items: T[], rng: () => number): T[] {
+  const out = [...items];
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
+
+/**
+ * Tire `count` exercices en privilégiant ceux qui n'ont pas servi récemment.
+ * On ne les interdit pas : sur un pool étroit il faut bien réutiliser.
+ */
+function pick(
+  pool: Exercise[],
+  count: number,
+  rng: () => number,
+  recentIds: Set<string>,
+): Exercise[] {
+  if (pool.length === 0 || count <= 0) return [];
+  const fresh = shuffle(pool.filter((e) => !recentIds.has(e.id)), rng);
+  const stale = shuffle(pool.filter((e) => recentIds.has(e.id)), rng);
+  return [...fresh, ...stale].slice(0, count);
+}
+
+// ─────────────────────────────────────────────
+// Énergie → charge et volume
+// ─────────────────────────────────────────────
+
+export interface VolumePolicy {
+  loadDelta: number;
+  setsDelta: number;
+  compounds: number;
+  isolations: number;
+  core: number;
+  warmup: number;
+  withFinisher: boolean;
+}
+
+/**
+ * L'énergie déclarée en début de séance module la charge ET le volume.
+ * Épuisé, on raccourcit la séance ; au top, on l'étoffe.
+ */
+export function volumeForEnergy(energy: number): VolumePolicy {
+  switch (Math.max(1, Math.min(5, Math.round(energy)))) {
+    case 1:
+      return { loadDelta: -15, setsDelta: -1, compounds: 2, isolations: 1, core: 1, warmup: 5, withFinisher: false };
+    case 2:
+      return { loadDelta: -10, setsDelta: -1, compounds: 3, isolations: 1, core: 2, warmup: 5, withFinisher: false };
+    case 4:
+      return { loadDelta: 0, setsDelta: 0, compounds: 4, isolations: 3, core: 3, warmup: 4, withFinisher: true };
+    case 5:
+      return { loadDelta: 5, setsDelta: 1, compounds: 4, isolations: 3, core: 3, warmup: 3, withFinisher: true };
+    default:
+      return { loadDelta: 0, setsDelta: 0, compounds: 3, isolations: 2, core: 2, warmup: 4, withFinisher: true };
+  }
+}
+
+// ─────────────────────────────────────────────
+// Sélection
+// ─────────────────────────────────────────────
 
 interface SelectOptions {
   categories?: string[];
   exerciseTypes?: ExerciseType[];
   levelMax?: string;
-  bodyweightOnly?: boolean;
+  location: TrainingLocation;
   warmupTargets?: string[];
   allowUniversal?: boolean;
   excludeIds?: Set<string>;
@@ -73,12 +162,14 @@ function selectExercises(programId: string, opts: SelectOptions): Exercise[] {
     if (exclude.has(ex.id)) return false;
 
     const targets = ex.target_programs ?? [];
-    // Sans programme cible, l'exercice est universel (warmup / finisher).
     if (targets.length === 0) {
       if (!opts.allowUniversal) return false;
     } else if (!targets.includes(programId)) {
       return false;
     }
+
+    // Le lieu déclaré en début de séance décide du matériel disponible.
+    if (!(ex.locations ?? ["gym"]).includes(opts.location)) return false;
 
     if (opts.categories && !opts.categories.includes(ex.category)) return false;
     if (
@@ -88,38 +179,27 @@ function selectExercises(programId: string, opts: SelectOptions): Exercise[] {
       return false;
     }
     if ((LEVEL_ORDER[ex.level] ?? 0) > maxLevel) return false;
-    if (opts.bodyweightOnly && !ex.bodyweight_compatible) return false;
 
     if (opts.warmupTargets) {
       const t = ex.warmup_target ?? [];
-      const hit = t.includes("all") || opts.warmupTargets.some((w) => t.includes(w));
-      if (!hit) return false;
+      if (!(t.includes("all") || opts.warmupTargets.some((w) => t.includes(w)))) {
+        return false;
+      }
     }
     return true;
   });
 }
 
-/**
- * Tirage déterministe : trié par id puis parcouru à pas régulier.
- * Le seed vient du numéro de séance, ce qui fait varier les exercices d'une
- * séance à l'autre tout en restant rejouable.
- */
-function pick(pool: Exercise[], count: number, seed: number): Exercise[] {
-  if (pool.length === 0 || count <= 0) return [];
-  const sorted = [...pool].sort((a, b) => a.id.localeCompare(b.id));
-  if (sorted.length <= count) return sorted;
-
-  const step = Math.max(1, Math.floor(sorted.length / count));
-  const out: Exercise[] = [];
-  const seen = new Set<string>();
-  for (let i = 0; out.length < count && i < sorted.length * 2; i++) {
-    const ex = sorted[(seed + i * step) % sorted.length];
-    if (!seen.has(ex.id)) {
-      seen.add(ex.id);
-      out.push(ex);
-    }
-  }
-  return out;
+export interface BuildContext {
+  program: Program;
+  phase: ProgramPhase | null;
+  focus: Focus;
+  levelMax: string;
+  energy: number;
+  location: TrainingLocation;
+  /** Exercices vus lors des dernières séances — évités en priorité. */
+  recentIds: Set<string>;
+  rng: () => number;
 }
 
 function resolveLoadPct(phase: ProgramPhase | null, program: Program): number {
@@ -130,28 +210,24 @@ function resolveLoadPct(phase: ProgramPhase | null, program: Program): number {
 // Blocs
 // ─────────────────────────────────────────────
 
-export function buildWarmup(
-  program: Program,
-  focus: Focus,
-  energy: number,
-  seed: number,
-): ExerciseBlock[] {
-  let count = WARMUP_COUNT.moderate;
-  if (energy <= 2) count = Math.min(count + 1, 5);
+export function buildWarmup(ctx: BuildContext): ExerciseBlock[] {
+  const policy = volumeForEnergy(ctx.energy);
 
-  let pool = selectExercises(program.id, {
+  let pool = selectExercises(ctx.program.id, {
     categories: ["warmup"],
-    warmupTargets: FOCUS_WARMUP_TARGET_MAP[focus] ?? ["all"],
+    warmupTargets: FOCUS_WARMUP_TARGET_MAP[ctx.focus] ?? ["all"],
+    location: ctx.location,
     allowUniversal: true,
   });
-  if (pool.length < count) {
-    pool = selectExercises(program.id, {
+  if (pool.length < policy.warmup) {
+    pool = selectExercises(ctx.program.id, {
       categories: ["warmup"],
+      location: ctx.location,
       allowUniversal: true,
     });
   }
 
-  return pick(pool, count, seed).map((ex) => {
+  return pick(pool, policy.warmup, ctx.rng, ctx.recentIds).map((ex) => {
     const isMobility = ex.intent.includes("mobilite");
     return {
       exercise_id: ex.id,
@@ -164,31 +240,27 @@ export function buildWarmup(
   });
 }
 
-function buildCircuitMain(
-  program: Program,
-  phase: ProgramPhase | null,
-  levelMax: string,
-  energy: number,
-  seed: number,
-): ExerciseBlock[] {
-  const pool = selectExercises(program.id, {
+function buildCircuitMain(ctx: BuildContext): ExerciseBlock[] {
+  const policy = volumeForEnergy(ctx.energy);
+  const pool = selectExercises(ctx.program.id, {
     categories: CIRCUIT_CATEGORIES,
-    levelMax,
+    levelMax: ctx.levelMax,
+    location: ctx.location,
   });
-  const count = energy >= 3 ? 5 : 4;
-  const reps = Math.round(
-    ((phase?.rep_range_min ?? 8) + (phase?.rep_range_max ?? 10)) / 2,
-  );
-  const rest = phase?.rest_sec_min ?? 60;
-  let load = resolveLoadPct(phase, program);
-  if (energy <= 2) load = Math.max(load - 10, 40);
 
-  return pick(pool, count, seed).map((ex, i) => {
+  const reps = Math.round(
+    ((ctx.phase?.rep_range_min ?? 8) + (ctx.phase?.rep_range_max ?? 10)) / 2,
+  );
+  const rest = ctx.phase?.rest_sec_min ?? 60;
+  const load = Math.max(resolveLoadPct(ctx.phase, ctx.program) + policy.loadDelta, 40);
+  const count = policy.compounds + policy.isolations;
+
+  return pick(pool, count, ctx.rng, ctx.recentIds).map((ex, i) => {
     const isCardio = ex.exercise_type === "cardio";
     return {
       exercise_id: ex.id,
       name: ex.name,
-      sets: 3,
+      sets: Math.max(2, 3 + policy.setsDelta),
       ...(isCardio ? { duration_sec: 40 } : { reps, load_pct_1rm: load }),
       rest_sec: rest,
       notes: `Circuit — tour ${i + 1}`,
@@ -197,57 +269,47 @@ function buildCircuitMain(
   });
 }
 
-export function buildMain(
-  program: Program,
-  phase: ProgramPhase | null,
-  focus: Focus,
-  levelMax: string,
-  energy: number,
-  seed: number,
-): ExerciseBlock[] {
-  if (program.session_structure === "circuit") {
-    return buildCircuitMain(program, phase, levelMax, energy, seed);
-  }
+export function buildMain(ctx: BuildContext): ExerciseBlock[] {
+  if (ctx.program.session_structure === "circuit") return buildCircuitMain(ctx);
 
-  const categories = FOCUS_CATEGORY_MAP[focus] ?? ["push", "pull", "legs"];
-  const bodyweightOnly = program.id === "program_bodyweight";
+  const policy = volumeForEnergy(ctx.energy);
+  const categories = FOCUS_CATEGORY_MAP[ctx.focus] ?? ["push", "pull", "legs"];
+  const bodyweightOnly = ctx.program.id === "program_bodyweight";
 
-  let setsCompounds = phase?.sets_compounds ?? 4;
-  const setsIsolation = phase?.sets_isolation ?? 3;
-  const repMin = phase?.rep_range_min ?? program.rep_range_min ?? 8;
-  const repMax = phase?.rep_range_max ?? program.rep_range_max ?? 12;
-  const rest = phase?.rest_sec_min ?? 90;
-  let load = resolveLoadPct(phase, program);
+  const setsCompounds = Math.max(2, (ctx.phase?.sets_compounds ?? 4) + policy.setsDelta);
+  const setsIsolation = Math.max(2, (ctx.phase?.sets_isolation ?? 3) + policy.setsDelta);
+  const repMin = ctx.phase?.rep_range_min ?? ctx.program.rep_range_min ?? 8;
+  const repMax = ctx.phase?.rep_range_max ?? ctx.program.rep_range_max ?? 12;
+  const rest = ctx.phase?.rest_sec_min ?? 90;
+  const load = Math.min(
+    Math.max(resolveLoadPct(ctx.phase, ctx.program) + policy.loadDelta, 40),
+    100,
+  );
 
-  if (energy <= 2) {
-    load = Math.max(load - 10, 40);
-    setsCompounds = Math.max(setsCompounds - 1, 2);
-  } else if (energy >= 5) {
-    load = Math.min(load + 5, 100);
-  }
+  const base = {
+    levelMax: ctx.levelMax,
+    location: ctx.location,
+    ...(bodyweightOnly ? {} : {}),
+  };
 
   const compounds = pick(
-    selectExercises(program.id, {
-      categories,
-      exerciseTypes: ["compound"],
-      levelMax,
-      bodyweightOnly,
-    }),
-    Math.min(categories.length + 1, 4),
-    seed,
+    selectExercises(ctx.program.id, { ...base, categories, exerciseTypes: ["compound"] }),
+    policy.compounds,
+    ctx.rng,
+    ctx.recentIds,
   );
   const used = new Set(compounds.map((e) => e.id));
 
   const isolations = pick(
-    selectExercises(program.id, {
+    selectExercises(ctx.program.id, {
+      ...base,
       categories,
       exerciseTypes: ["isolation"],
-      levelMax,
-      bodyweightOnly,
       excludeIds: used,
     }),
-    Math.min(categories.length, 3),
-    seed,
+    policy.isolations,
+    ctx.rng,
+    ctx.recentIds,
   );
 
   const reps = Math.round((repMin + repMax) / 2);
@@ -277,26 +339,22 @@ export function buildMain(
   ];
 }
 
-export function buildCore(
-  program: Program,
-  levelMax: string,
-  energy: number,
-  seed: number,
-): ExerciseBlock[] {
-  // Le bloc core n'existe que sur les programmes qui le déclarent.
-  if (!program.has_core_block) return [];
+export function buildCore(ctx: BuildContext): ExerciseBlock[] {
+  if (!ctx.program.has_core_block) return [];
+  const policy = volumeForEnergy(ctx.energy);
 
-  const pool = selectExercises(program.id, {
+  const pool = selectExercises(ctx.program.id, {
     exerciseTypes: ["core"],
-    levelMax,
+    levelMax: ctx.levelMax,
+    location: ctx.location,
   });
 
-  return pick(pool, energy >= 3 ? 3 : 2, seed).map((ex) => {
+  return pick(pool, policy.core, ctx.rng, ctx.recentIds).map((ex) => {
     const isEndurance = ex.category === "core_endurance";
     return {
       exercise_id: ex.id,
       name: ex.name,
-      sets: 3,
+      sets: Math.max(2, 3 + policy.setsDelta),
       ...(isEndurance ? { duration_sec: 40 } : { reps: 12 }),
       rest_sec: 45,
       notes: isEndurance ? "Gainage" : "Core — force",
@@ -305,21 +363,19 @@ export function buildCore(
   });
 }
 
-export function buildFinisher(
-  program: Program,
-  levelMax: string,
-  energy: number,
-  seed: number,
-): ExerciseBlock[] {
-  if (energy <= 1) return [];
+export function buildFinisher(ctx: BuildContext): ExerciseBlock[] {
+  const policy = volumeForEnergy(ctx.energy);
+  // Énergie au plus bas : on supprime le finisher plutôt que de le bâcler.
+  if (!policy.withFinisher) return [];
 
-  const pool = selectExercises(program.id, {
+  const pool = selectExercises(ctx.program.id, {
     categories: ["finisher"],
-    levelMax,
+    levelMax: ctx.levelMax,
+    location: ctx.location,
     allowUniversal: true,
   });
 
-  return pick(pool, 2, seed).map((ex) => ({
+  return pick(pool, 2, ctx.rng, ctx.recentIds).map((ex) => ({
     exercise_id: ex.id,
     name: ex.name,
     sets: 1,
@@ -329,7 +385,6 @@ export function buildFinisher(
   }));
 }
 
-/** Retrouve la fiche complète d'un exercice (description, muscles, image). */
 export function findExercise(id: string): Exercise | undefined {
   return EXERCISES.find((e) => e.id === id);
 }

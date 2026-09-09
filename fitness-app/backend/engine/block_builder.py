@@ -7,8 +7,8 @@ Structure imposée :
   3. Core     — seulement si le programme le déclare (has_core_block)
   4. Finisher — jamais de saisie de résultats
 
-`log_results` porte cette règle jusqu'au client : l'écran de suivi n'affiche
-de lignes de séries que pour les blocs où il vaut True.
+Le contexte porte les deux réponses données en début de séance :
+l'énergie (charge et volume) et le lieu (matériel disponible).
 """
 
 import random
@@ -19,10 +19,26 @@ from engine.exercise_selector import (
     FOCUS_WARMUP_TARGET_MAP,
     pick,
     select_exercises,
+    volume_for_energy,
 )
 from models.workout import ExerciseBlock
 
-WARMUP_COUNT = {"very_light": 2, "light": 3, "moderate": 4, "heavy": 5}
+
+class BuildContext:
+    """Tout ce dont les constructeurs de blocs ont besoin pour une séance."""
+
+    def __init__(self, program, phase, focus, level_max, energy, location,
+                 rng: random.Random, recent_ids: set[str] | None = None):
+        self.program = program
+        self.phase = phase or {}
+        self.focus = focus
+        self.level_max = level_max
+        self.energy = energy
+        self.location = location
+        self.rng = rng
+        # Exercices vus lors des dernières séances — évités en priorité.
+        self.recent_ids = recent_ids or set()
+        self.policy = volume_for_energy(energy)
 
 
 def _resolve_load_pct(phase: dict, program: dict) -> int:
@@ -32,36 +48,27 @@ def _resolve_load_pct(phase: dict, program: dict) -> int:
     return program.get("load_pct_1rm_min") or 65
 
 
-def build_warmup_block(
-    focus: str,
-    program: dict,
-    available_equipment: list[str],
-    energy_level: int,
-) -> list[ExerciseBlock]:
+def build_warmup_block(ctx: BuildContext) -> list[ExerciseBlock]:
     """Activation + mobilité. Aucun résultat à saisir."""
-    count = WARMUP_COUNT.get(program.get("warmup_focus", "moderate"), 3)
-    if energy_level <= 2:
-        count = min(count + 1, 5)
+    count = ctx.policy["warmup"]
 
-    targets = FOCUS_WARMUP_TARGET_MAP.get(focus, ["all"])
     pool = select_exercises(
-        program["id"],
+        ctx.program["id"],
         categories=["warmup"],
-        warmup_targets=targets,
-        available_equipment=available_equipment,
+        warmup_targets=FOCUS_WARMUP_TARGET_MAP.get(ctx.focus, ["all"]),
+        location=ctx.location,
         allow_universal=True,
     )
     if len(pool) < count:
-        pool += select_exercises(
-            program["id"],
+        pool = select_exercises(
+            ctx.program["id"],
             categories=["warmup"],
-            available_equipment=available_equipment,
+            location=ctx.location,
             allow_universal=True,
-            exclude_ids={e["id"] for e in pool},
         )
 
     blocks = []
-    for ex in pick(pool, count):
+    for ex in pick(pool, count, ctx.rng, ctx.recent_ids):
         is_mobility = "mobilite" in (ex.get("intent") or [])
         blocks.append(ExerciseBlock(
             exercise_id=ex["id"],
@@ -75,13 +82,7 @@ def build_warmup_block(
     return blocks
 
 
-def _build_circuit_main(
-    program: dict,
-    phase: dict,
-    available_equipment: list[str],
-    energy_level: int,
-    level_max: str,
-) -> list[ExerciseBlock]:
+def _build_circuit_main(ctx: BuildContext) -> list[ExerciseBlock]:
     """
     Programmes en circuit (Préparation Athlétique, Lactate Focus).
 
@@ -89,31 +90,29 @@ def _build_circuit_main(
     enchaînement de complexes lestés, d'explosif et de conditionnement.
     """
     pool = select_exercises(
-        program["id"],
+        ctx.program["id"],
         categories=CIRCUIT_CATEGORIES,
-        level_max=level_max,
-        available_equipment=available_equipment,
+        level_max=ctx.level_max,
+        location=ctx.location,
     )
-    count = 5 if energy_level >= 3 else 4
-    reps = random.randint(
-        phase.get("rep_range_min") or 8,
-        phase.get("rep_range_max") or 10,
+    count = ctx.policy["compounds"] + ctx.policy["isolations"]
+    reps = round(
+        ((ctx.phase.get("rep_range_min") or 8) + (ctx.phase.get("rep_range_max") or 10)) / 2
     )
-    rest = phase.get("rest_sec_min") or 60
-    load_pct = _resolve_load_pct(phase, program)
-    if energy_level <= 2:
-        load_pct = max(load_pct - 10, 40)
+    rest = ctx.phase.get("rest_sec_min") or 60
+    load = max(_resolve_load_pct(ctx.phase, ctx.program) + ctx.policy["load_delta"], 40)
+    sets = max(2, 3 + ctx.policy["sets_delta"])
 
     blocks = []
-    for i, ex in enumerate(pick(pool, count)):
+    for i, ex in enumerate(pick(pool, count, ctx.rng, ctx.recent_ids)):
         is_cardio = ex.get("exercise_type") == "cardio"
         blocks.append(ExerciseBlock(
             exercise_id=ex["id"],
             name=ex["name"],
-            sets=3,
+            sets=sets,
             reps=None if is_cardio else reps,
             duration_sec=40 if is_cardio else None,
-            load_pct_1rm=None if is_cardio else load_pct,
+            load_pct_1rm=None if is_cardio else load,
             rest_sec=rest,
             notes=f"Circuit — tour {i + 1}",
             log_results=True,
@@ -121,119 +120,94 @@ def _build_circuit_main(
     return blocks
 
 
-def build_main_block(
-    focus: str,
-    phase: dict,
-    program: dict,
-    available_equipment: list[str],
-    energy_level: int,
-    level_max: str,
-) -> list[ExerciseBlock]:
+def build_main_block(ctx: BuildContext) -> list[ExerciseBlock]:
     """Bloc principal : compounds puis isolations, filtrés sur le programme."""
-    if program.get("session_structure") == "circuit":
-        return _build_circuit_main(
-            program, phase, available_equipment, energy_level, level_max
-        )
+    if ctx.program.get("session_structure") == "circuit":
+        return _build_circuit_main(ctx)
 
-    categories = FOCUS_CATEGORY_MAP.get(focus, ["push", "pull", "legs"])
-    bodyweight_only = program.get("load_intensity") == "bodyweight"
+    categories = FOCUS_CATEGORY_MAP.get(ctx.focus, ["push", "pull", "legs"])
+    bodyweight_only = ctx.program.get("load_intensity") == "bodyweight"
 
-    sets_compounds = phase.get("sets_compounds") or 4
-    sets_isolation = phase.get("sets_isolation") or 3
-    rep_min = phase.get("rep_range_min") or program.get("rep_range_min") or 8
-    rep_max = phase.get("rep_range_max") or program.get("rep_range_max") or 12
-    rest_min = phase.get("rest_sec_min") or program.get("rest_between_sets_sec_min") or 60
-    rest_max = phase.get("rest_sec_max") or program.get("rest_between_sets_sec_max") or 90
-    load_pct = _resolve_load_pct(phase, program)
-
-    if energy_level <= 2:
-        load_pct = max(load_pct - 10, 40)
-        sets_compounds = max(sets_compounds - 1, 2)
-    elif energy_level >= 5:
-        load_pct = min(load_pct + 5, 100)
-
-    common = dict(
-        level_max=level_max,
-        bodyweight_only=bodyweight_only,
-        available_equipment=available_equipment,
+    sets_compounds = max(2, (ctx.phase.get("sets_compounds") or 4) + ctx.policy["sets_delta"])
+    sets_isolation = max(2, (ctx.phase.get("sets_isolation") or 3) + ctx.policy["sets_delta"])
+    rep_min = ctx.phase.get("rep_range_min") or ctx.program.get("rep_range_min") or 8
+    rep_max = ctx.phase.get("rep_range_max") or ctx.program.get("rep_range_max") or 12
+    rest = ctx.phase.get("rest_sec_min") or ctx.program.get("rest_between_sets_sec_min") or 90
+    load = min(
+        max(_resolve_load_pct(ctx.phase, ctx.program) + ctx.policy["load_delta"], 40),
+        100,
     )
 
-    compounds = select_exercises(
-        program["id"], categories=categories, exercise_types=["compound"], **common
-    )
-    picked = pick(compounds, min(len(categories) + 1, 4))
-    used = {e["id"] for e in picked}
+    common = dict(level_max=ctx.level_max, location=ctx.location)
 
-    isolations = select_exercises(
-        program["id"],
-        categories=categories,
-        exercise_types=["isolation"],
-        exclude_ids=used,
-        **common,
+    compounds = pick(
+        select_exercises(ctx.program["id"], categories=categories,
+                         exercise_types=["compound"], **common),
+        ctx.policy["compounds"], ctx.rng, ctx.recent_ids,
     )
-    isolation_picks = pick(isolations, min(len(categories), 3))
+    used = {e["id"] for e in compounds}
 
-    reps = random.randint(rep_min, rep_max)
-    rest = random.randint(rest_min, rest_max)
+    isolations = pick(
+        select_exercises(ctx.program["id"], categories=categories,
+                         exercise_types=["isolation"], exclude_ids=used, **common),
+        ctx.policy["isolations"], ctx.rng, ctx.recent_ids,
+    )
+
+    reps = round((rep_min + rep_max) / 2)
+    iso_reps = min(reps + 2, rep_max + 2)
     blocks = []
 
-    for ex in picked:
+    for ex in compounds:
         blocks.append(ExerciseBlock(
             exercise_id=ex["id"],
             name=ex["name"],
             sets=sets_compounds,
             reps=reps,
-            load_pct_1rm=None if bodyweight_only else load_pct,
+            load_pct_1rm=None if bodyweight_only else load,
             rest_sec=rest,
             notes=f"Compound — {sets_compounds}x{reps}",
             log_results=True,
         ))
 
-    iso_reps = min(reps + 2, rep_max + 2)
-    for ex in isolation_picks:
+    for ex in isolations:
         blocks.append(ExerciseBlock(
             exercise_id=ex["id"],
             name=ex["name"],
             sets=sets_isolation,
             reps=iso_reps,
-            load_pct_1rm=None if bodyweight_only else max(load_pct - 10, 40),
+            load_pct_1rm=None if bodyweight_only else max(load - 10, 40),
             rest_sec=max(rest - 15, 30),
             notes=f"Isolation — {sets_isolation}x{iso_reps}",
             log_results=True,
         ))
 
-    superset_level = phase.get("superset_level") or program.get("superset_level") or "none"
+    superset_level = ctx.phase.get("superset_level") or ctx.program.get("superset_level") or "none"
     if superset_level in ("moderate", "heavy") and len(blocks) >= 4:
         blocks = _apply_supersets(blocks)
 
     return blocks
 
 
-def build_core_block(
-    program: dict,
-    available_equipment: list[str],
-    energy_level: int,
-    level_max: str,
-) -> list[ExerciseBlock]:
+def build_core_block(ctx: BuildContext) -> list[ExerciseBlock]:
     """Bloc core — uniquement sur les programmes qui le déclarent."""
-    if not program.get("has_core_block"):
+    if not ctx.program.get("has_core_block"):
         return []
 
     pool = select_exercises(
-        program["id"],
+        ctx.program["id"],
         exercise_types=["core"],
-        level_max=level_max,
-        available_equipment=available_equipment,
+        level_max=ctx.level_max,
+        location=ctx.location,
     )
-    count = 3 if energy_level >= 3 else 2
+    sets = max(2, 3 + ctx.policy["sets_delta"])
 
     blocks = []
-    for ex in pick(pool, count):
+    for ex in pick(pool, ctx.policy["core"], ctx.rng, ctx.recent_ids):
         is_endurance = ex.get("category") == "core_endurance"
         blocks.append(ExerciseBlock(
             exercise_id=ex["id"],
             name=ex["name"],
-            sets=3,
+            sets=sets,
             reps=None if is_endurance else 12,
             duration_sec=40 if is_endurance else None,
             rest_sec=45,
@@ -243,32 +217,27 @@ def build_core_block(
     return blocks
 
 
-def build_finisher_block(
-    program: dict,
-    available_equipment: list[str],
-    energy_level: int,
-    level_max: str,
-) -> list[ExerciseBlock]:
+def build_finisher_block(ctx: BuildContext) -> list[ExerciseBlock]:
     """Finisher / conditionnement. Aucun résultat à saisir."""
-    if energy_level <= 1:
+    # Énergie au plus bas : on supprime le finisher plutôt que de le bâcler.
+    if not ctx.policy["with_finisher"]:
         return []
 
     pool = select_exercises(
-        program["id"],
+        ctx.program["id"],
         categories=["finisher"],
-        level_max=level_max,
-        available_equipment=available_equipment,
+        level_max=ctx.level_max,
+        location=ctx.location,
         allow_universal=True,
     )
-    duration = program.get("emom_duration_min") or 6
 
     blocks = []
-    for ex in pick(pool, 2):
+    for ex in pick(pool, 2, ctx.rng, ctx.recent_ids):
         blocks.append(ExerciseBlock(
             exercise_id=ex["id"],
             name=ex["name"],
             sets=1,
-            duration_sec=min(duration, 10) * 60 // 2,
+            duration_sec=180,
             notes="Finisher",
             log_results=False,
         ))

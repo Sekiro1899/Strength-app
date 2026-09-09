@@ -5,11 +5,13 @@ Assemble les 4 blocs (warmup, main, core, finisher) en une séance complète.
 
 from database import supabase
 from engine.block_builder import (
+    BuildContext,
     build_core_block,
     build_finisher_block,
     build_main_block,
     build_warmup_block,
 )
+from engine.exercise_selector import session_rng
 from models.workout import WorkoutRequest, WorkoutResponse
 
 
@@ -51,38 +53,26 @@ async def generate_workout(request: WorkoutRequest) -> WorkoutResponse:
     # Générer le label de séance
     session_label = _build_session_label(protocol, focus)
 
-    equipment = request.available_equipment
+    # Exercices vus lors des dernières séances : la sélection les évite en
+    # priorité, ce qui fait varier le contenu d'une séance à l'autre.
+    recent_ids = _recent_exercise_ids(request.user_program_id, request.day_number)
+
+    ctx = BuildContext(
+        program=program,
+        phase=phase,
+        focus=focus,
+        level_max=level_max,
+        energy=request.energy_level,
+        location=request.location,
+        rng=session_rng(request.user_program_id, request.day_number),
+        recent_ids=recent_ids,
+    )
 
     # ── Construire les 4 blocs ──
-    warmup = build_warmup_block(
-        focus=focus,
-        program=program,
-        available_equipment=equipment,
-        energy_level=request.energy_level,
-    )
-
-    main = build_main_block(
-        focus=focus,
-        phase=phase,
-        program=program,
-        available_equipment=equipment,
-        energy_level=request.energy_level,
-        level_max=level_max,
-    )
-
-    core = build_core_block(
-        program=program,
-        available_equipment=equipment,
-        energy_level=request.energy_level,
-        level_max=level_max,
-    )
-
-    finisher = build_finisher_block(
-        program=program,
-        available_equipment=equipment,
-        energy_level=request.energy_level,
-        level_max=level_max,
-    )
+    warmup = build_warmup_block(ctx)
+    main = build_main_block(ctx)
+    core = build_core_block(ctx)
+    finisher = build_finisher_block(ctx)
 
     # ── Persister dans la table sessions ──
     session_row = {
@@ -96,6 +86,7 @@ async def generate_workout(request: WorkoutRequest) -> WorkoutResponse:
         "focus": focus,
         "status": "planned",
         "energy_level": request.energy_level,
+        "location": request.location,
         "warmup_block": [b.model_dump(exclude_none=True) for b in warmup],
         "main_block": [b.model_dump(exclude_none=True) for b in main],
         "core_block": [b.model_dump(exclude_none=True) for b in core],
@@ -123,6 +114,29 @@ async def generate_workout(request: WorkoutRequest) -> WorkoutResponse:
 
 
 # ─── Helpers ───
+
+
+ROTATION_WINDOW = 2
+
+
+def _recent_exercise_ids(user_program_id: str, day_number: int) -> set[str]:
+    """Exercices des dernières séances du programme, tous blocs confondus."""
+    result = (
+        supabase.table("sessions")
+        .select("warmup_block, main_block, core_block, finisher_block")
+        .eq("user_program_id", user_program_id)
+        .lt("day_number", day_number)
+        .order("day_number", desc=True)
+        .limit(ROTATION_WINDOW)
+        .execute()
+    )
+    ids: set[str] = set()
+    for row in result.data or []:
+        for key in ("warmup_block", "main_block", "core_block", "finisher_block"):
+            for block in row.get(key) or []:
+                if block.get("exercise_id"):
+                    ids.add(block["exercise_id"])
+    return ids
 
 
 def _fetch_program(program_id: str) -> dict:

@@ -46,6 +46,84 @@ PROGRAMS = {
 
 EMPTY = {"", "—", "-", "none", "n/a"}
 
+# ─── Matériel → tags, puis tags → lieux praticables ───
+#
+# La colonne Material Required est du texte libre ("barre olympique, banc plat,
+# rack"). On la réduit à un vocabulaire fermé, seul exploitable par le moteur
+# pour filtrer selon le lieu d'entraînement.
+EQUIPMENT_PATTERNS = [
+    ("barbell", ["barre olympique", "barre ez", "barre droite", "barre légère",
+                 "barre vide", "trap bar", "hex bar", "landmine", "barre angled"]),
+    ("plate", ["disque"]),
+    ("rack", ["rack"]),
+    ("cable", ["câble"]),
+    ("machine", ["machine", "roman chair", "captain's chair"]),
+    ("bench", ["banc"]),
+    ("dumbbell", ["haltère"]),
+    ("kettlebell", ["kettlebell"]),
+    ("pullup_bar", ["barre de traction", "barre fixe", "barres parallèles", "barre basse"]),
+    ("rings", ["anneaux", "trx", "sangles"]),
+    ("band", ["bande élastique", "élastique"]),
+    ("box", ["box", "plateforme", "step", "marche", "chaise"]),
+    ("rope", ["corde", "battle rope"]),
+    ("wheel", ["ab wheel"]),
+    ("ball", ["médecine ball", "swiss ball", "medecine ball"]),
+    ("mat", ["tapis", "foam roller", "pad"]),
+    # "barre" seul en dernier : trop générique pour primer sur les autres
+    ("barbell", ["barre"]),
+]
+
+# Où chaque matériel est disponible.
+#   gym     : salle équipée
+#   home    : maison, matériel minimal
+#   outdoor : plein air, parc
+TAG_LOCATIONS = {
+    "barbell": {"gym"},
+    "plate": {"gym"},
+    "rack": {"gym"},
+    "cable": {"gym"},
+    "machine": {"gym"},
+    "bench": {"gym", "home"},
+    "dumbbell": {"gym", "home"},
+    "box": {"gym", "home"},
+    "wheel": {"gym", "home"},
+    "kettlebell": {"gym", "home", "outdoor"},
+    "pullup_bar": {"gym", "home", "outdoor"},
+    "rings": {"gym", "home", "outdoor"},
+    "band": {"gym", "home", "outdoor"},
+    "rope": {"gym", "home", "outdoor"},
+    "ball": {"gym", "home", "outdoor"},
+    "mat": {"gym", "home", "outdoor"},
+}
+
+ALL_LOCATIONS = ["gym", "home", "outdoor"]
+
+
+def equipment_tags(materials: list[str]) -> list[str]:
+    tags: list[str] = []
+    for raw in materials:
+        low = raw.lower()
+        for tag, needles in EQUIPMENT_PATTERNS:
+            if any(n in low for n in needles):
+                if tag not in tags:
+                    tags.append(tag)
+                break
+    return tags
+
+
+def locations_for(tags: list[str], bodyweight: bool) -> list[str]:
+    """Un exercice est praticable là où TOUT son matériel est disponible."""
+    if not tags:
+        return list(ALL_LOCATIONS)
+    allowed = set(ALL_LOCATIONS)
+    for tag in tags:
+        allowed &= TAG_LOCATIONS.get(tag, {"gym"})
+    # Un mouvement au poids du corps reste faisable partout, le matériel
+    # listé n'étant qu'une facilité (banc, tapis...).
+    if bodyweight:
+        allowed |= {"outdoor", "home"}
+    return [loc for loc in ALL_LOCATIONS if loc in allowed]
+
 
 def strip_emoji(text: str) -> str:
     """Retire les pictogrammes ; la bibliothèque encode Intent en « 💪 Hypertrophie »."""
@@ -92,6 +170,10 @@ def convert(row) -> dict:
             raise ValueError(f"Programme inconnu : {name!r} (ligne {row[C_ID]})")
         targets.append(pid)
 
+    materials = split_list(cell(row, C_MAT), ",")
+    bodyweight = "oui" in cell(row, C_BW).lower()
+    tags = equipment_tags(materials)
+
     return {
         "id": cell(row, C_ID),
         "category": category,
@@ -100,8 +182,10 @@ def convert(row) -> dict:
         "muscles_secondary": split_list(cell(row, C_SEC), ","),
         "intent": [slug(i) for i in split_list(cell(row, C_INTENT), "|")],
         "level": LEVELS.get(cell(row, C_LEVEL).lower(), "debutant"),
-        "bodyweight_compatible": "oui" in cell(row, C_BW).lower(),
-        "material_required": split_list(cell(row, C_MAT), ","),
+        "bodyweight_compatible": bodyweight,
+        "material_required": materials,
+        "equipment_tags": tags,
+        "locations": locations_for(tags, bodyweight),
         "description": cell(row, C_DESC) or None,
         # Vide = universel : les warmups/finishers servent tous les programmes.
         "target_programs": targets,

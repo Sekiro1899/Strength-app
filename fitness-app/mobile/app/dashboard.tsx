@@ -23,7 +23,7 @@ import {
   initialsFromEmail,
   personaGradient,
 } from "../lib/theme";
-import { fetchDashboard, signOut, startSession } from "../lib/data";
+import { fetchDashboard, signOut } from "../lib/data";
 import type { DashboardData } from "../lib/types";
 
 /** "2026-09-14" -> "lun. 14 sept." */
@@ -36,18 +36,13 @@ function formatDate(iso: string): string {
   });
 }
 
-/** energy_level pilote le volume et la charge côté moteur (Pydantic : 1..5). */
-const ENERGY_LABELS = ["Épuisé", "Fatigué", "Normal", "En forme", "Au top"];
-
 export default function DashboardScreen() {
   const router = useRouter();
   const { userId, email, isLoading: authLoading, refresh } = useAuth();
 
   const [data, setData] = useState<DashboardData | null>(null);
-  const [energy, setEnergy] = useState(3);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [starting, setStarting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -76,25 +71,13 @@ export default function DashboardScreen() {
     }, [load, loading]),
   );
 
-  async function handleStart() {
-    if (!data || !userId) return;
-    setError(null);
-    setStarting(true);
-    try {
-      const workout = await startSession(userId, data, energy);
-      router.push({
-        pathname: "/session",
-        params: { sessionId: workout.session_id },
-      });
-    } catch (e) {
-      setError(
-        e instanceof Error
-          ? `Génération impossible — ${e.message}`
-          : "Génération impossible.",
-      );
-    } finally {
-      setStarting(false);
-    }
+  // Énergie et lieu sont demandés sur /prepare, juste avant la génération.
+  function handleStart() {
+    if (!data) return;
+    router.push({
+      pathname: "/prepare",
+      params: { payload: JSON.stringify(data) },
+    });
   }
 
   async function handleSignOut() {
@@ -302,35 +285,10 @@ export default function DashboardScreen() {
             <Button
               label="Démarrer la séance"
               onPress={handleStart}
-              loading={starting}
             />
           </Card>
           )}
 
-          {/* Niveau d'énergie */}
-          <Card className="mb-3">
-            <MonoLabel className="mb-3">Niveau d'énergie aujourd'hui</MonoLabel>
-            <View className="flex-row gap-1.5">
-              {[1, 2, 3, 4, 5].map((level) => {
-                const active = level <= energy;
-                return (
-                  <Pressable
-                    key={level}
-                    onPress={() => setEnergy(level)}
-                    accessibilityRole="radio"
-                    accessibilityState={{ checked: energy === level }}
-                    accessibilityLabel={ENERGY_LABELS[level - 1]}
-                    className={`flex-1 h-7 rounded-lg border ${
-                      active ? "bg-accent border-accent" : "bg-bg border-line"
-                    }`}
-                  />
-                );
-              })}
-            </View>
-            <Text className="font-mono text-[9px] uppercase tracking-label text-muted mt-2.5">
-              {ENERGY_LABELS[energy - 1]} · ajuste volume et charge
-            </Text>
-          </Card>
 
           {overdue > 0 && !cycleComplete ? (
             <View className="items-center py-3">

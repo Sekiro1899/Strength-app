@@ -25,6 +25,8 @@ class ExerciseBlock(BaseModel):
     rest_sec: int | None = None
     superset_with: str | None = None
     notes: str | None = None
+    # False sur warmup et finisher : le client n'y propose pas de saisie.
+    log_results: bool = True
 
 
 class WorkoutResponse(BaseModel):

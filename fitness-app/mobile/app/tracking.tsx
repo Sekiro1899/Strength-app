@@ -85,11 +85,13 @@ export default function TrackingScreen() {
   const current = exercises[cursor];
 
   // Initialise les lignes de séries au premier affichage de l'exercice.
+  // Warmup et finisher (log_results false) n'ont qu'une ligne de validation.
   useEffect(() => {
     if (!current) return;
     setEntries((prev) => {
       if (prev[current.uid]) return prev;
-      const rows: SetEntry[] = Array.from({ length: current.block.sets }, () => ({
+      const count = current.block.log_results === false ? 1 : current.block.sets;
+      const rows: SetEntry[] = Array.from({ length: count }, () => ({
         load: "",
         reps: current.block.reps !== undefined ? String(current.block.reps) : "",
         done: false,
@@ -165,6 +167,7 @@ export default function TrackingScreen() {
   }
 
   const rows = entries[current.uid] ?? [];
+  const logResults = current.block.log_results !== false;
   const doneCount = rows.filter((r) => r.done).length;
   const isLast = cursor === exercises.length - 1;
   const allSetsDone = rows.length > 0 && doneCount === rows.length;
@@ -209,8 +212,42 @@ export default function TrackingScreen() {
             </Text>
           </View>
 
-          {/* Lignes de séries */}
-          {rows.map((row, i) => (
+          {/* Bloc sans saisie : on valide, on ne mesure pas. */}
+          {logResults ? null : (
+            <Pressable
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked: Boolean(rows[0]?.done) }}
+              onPress={() => toggleSet(current.uid, 0, current.block.rest_sec)}
+              className={`flex-row items-center justify-between rounded-xl border px-4 py-5 ${
+                rows[0]?.done
+                  ? "bg-accent/10 border-accent"
+                  : "bg-surface border-line"
+              }`}
+            >
+              <View className="flex-1 pr-3">
+                <Text className="font-body-sb text-[14px] text-ink">
+                  {current.block.duration_sec
+                    ? `${current.block.sets} × ${current.block.duration_sec}s`
+                    : `${current.block.sets} × ${current.block.reps ?? "—"}`}
+                </Text>
+                <Text className="font-body text-[11px] text-muted mt-1">
+                  Pas de charge à noter — valide quand c'est fait.
+                </Text>
+              </View>
+              <View
+                className={`w-8 h-8 rounded-lg items-center justify-center border ${
+                  rows[0]?.done ? "bg-accent border-accent" : "bg-bg border-line"
+                }`}
+              >
+                <Text className={`text-[15px] ${rows[0]?.done ? "text-black" : "text-muted"}`}>
+                  {rows[0]?.done ? "✓" : "○"}
+                </Text>
+              </View>
+            </Pressable>
+          )}
+
+          {/* Lignes de séries — uniquement quand il y a des résultats à noter */}
+          {logResults && rows.map((row, i) => (
             <View
               key={i}
               className={`flex-row items-center gap-2.5 rounded-xl border px-3.5 py-3 mb-2 ${
@@ -337,7 +374,11 @@ export default function TrackingScreen() {
 
           <View className="items-center mt-4">
             <MonoLabel>
-              {doneCount}/{rows.length} séries validées
+              {logResults
+                ? `${doneCount}/${rows.length} séries validées`
+                : doneCount > 0
+                  ? "Bloc validé"
+                  : "À valider"}
             </MonoLabel>
           </View>
         </View>

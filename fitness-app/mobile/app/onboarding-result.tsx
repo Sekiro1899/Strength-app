@@ -88,7 +88,10 @@ export default function OnboardingResultScreen() {
       {/* Carte persona — dégradé plein, signature de l'écran 03 */}
       <View className="mb-5">
         <GradientCard colors={gradient} className="items-center py-7">
-          <Text className="text-[52px] mb-2">{persona.icon}</Text>
+          {/* Monogramme plutôt qu'un pictogramme : la typo porte l'identité. */}
+          <Text className="font-display text-white/90 text-[44px] mb-1">
+            {persona.code}
+          </Text>
           <View className="items-center">
             <Text
               className="font-display text-white uppercase text-[26px] text-center"

@@ -1,7 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 
 // Direction artistique : éditorial / brutaliste sportif.
-// Fond charbon, accent lime, display Archivo Black en capitales.
+// Fond charbon, accent lime, display Anton en capitales.
 // Référence : docs/ui-prototype.html
 module.exports = {
   content: ["./app/**/*.{js,jsx,ts,tsx}", "./components/**/*.{js,jsx,ts,tsx}"],
@@ -29,13 +29,13 @@ module.exports = {
       },
       fontFamily: {
         // React Native ne synthétise pas les graisses : une famille par poids.
-        display: ["Archivo_900Black"],
-        body: ["Inter_400Regular"],
-        "body-md": ["Inter_500Medium"],
-        "body-sb": ["Inter_600SemiBold"],
-        "body-b": ["Inter_700Bold"],
-        mono: ["JetBrainsMono_400Regular"],
-        "mono-md": ["JetBrainsMono_500Medium"],
+        display: ["Anton_400Regular"],
+        body: ["SpaceGrotesk_400Regular"],
+        "body-md": ["SpaceGrotesk_500Medium"],
+        "body-sb": ["SpaceGrotesk_600SemiBold"],
+        "body-b": ["SpaceGrotesk_700Bold"],
+        mono: ["IBMPlexMono_400Regular"],
+        "mono-md": ["IBMPlexMono_500Medium"],
       },
       letterSpacing: {
         display: "-0.01em",

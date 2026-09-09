@@ -31,7 +31,8 @@ p_out = [{k: p.get(k) for k in PERSONA_KEYS} for p in personas]
 PROGRAM_KEYS = ["id","code","name","slug","tagline","objective","duration_weeks","is_continuous",
                 "frequency_per_week_min","frequency_per_week_max","session_duration_min",
                 "session_duration_max","rep_range_min","rep_range_max",
-                "available_protocols","default_protocol","color","icon"]
+                "available_protocols","default_protocol","session_structure","has_core_block",
+                "color","icon"]
 prog_out = []
 phase_out = []
 PHASE_KEYS = ["id","phase_number","name","duration_weeks","objective","approach","rep_range_min",
@@ -40,6 +41,7 @@ PHASE_KEYS = ["id","phase_number","name","duration_weeks","objective","approach"
 for p in programs:
     row = {k: p.get(k) for k in PROGRAM_KEYS}
     row["is_continuous"] = bool(p.get("is_continuous"))
+    row["has_core_block"] = bool(p.get("has_core_block"))
     prog_out.append(row)
     for ph in (p.get("phases") or []):
         r = {k: ph.get(k) for k in PHASE_KEYS}
@@ -90,8 +92,9 @@ for q in quest["questions"]:
         })
 
 # ---- Exercises (champs utiles au rendu + à la sélection) ----
-EX_KEYS = ["id","category","name","muscles_primary","intent","level",
-           "bodyweight_compatible","material_required","warmup_target","description"]
+EX_KEYS = ["id","category","name","muscles_primary","muscles_secondary","intent","level",
+           "bodyweight_compatible","material_required","warmup_target","description",
+           "exercise_type","target_programs","image_url"]
 ex_out = [{k: e.get(k) for k in EX_KEYS} for e in exercises]
 
 # ---- Feedback poll : questions + options aplaties ----

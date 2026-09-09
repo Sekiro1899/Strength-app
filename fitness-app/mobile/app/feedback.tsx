@@ -282,9 +282,8 @@ export default function FeedbackScreen() {
                   active ? "bg-accent border-accent" : "bg-surface border-line"
                 }`}
               >
-                <Text className="text-[18px]">⭐</Text>
                 <Text
-                  className={`font-mono-md text-[10px] mt-1 ${
+                  className={`font-display text-[20px] ${
                     active ? "text-black" : "text-muted"
                   }`}
                 >

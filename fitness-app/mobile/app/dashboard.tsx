@@ -26,6 +26,16 @@ import {
 import { fetchDashboard, signOut, startSession } from "../lib/data";
 import type { DashboardData } from "../lib/types";
 
+/** "2026-09-14" -> "lun. 14 sept." */
+function formatDate(iso: string): string {
+  const d = new Date(`${iso}T00:00:00`);
+  return d.toLocaleDateString("fr-FR", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+  });
+}
+
 /** energy_level pilote le volume et la charge côté moteur (Pydantic : 1..5). */
 const ENERGY_LABELS = ["Épuisé", "Fatigué", "Normal", "En forme", "Au top"];
 
@@ -128,6 +138,9 @@ export default function DashboardScreen() {
     streak,
     completedCount,
     previewExercises,
+    totalPlanned,
+    cycleComplete,
+    overdue,
   } = data;
   const gradient = personaGradient(
     userProgram.persona_id?.replace("persona_", "").toUpperCase(),
@@ -190,15 +203,29 @@ export default function DashboardScreen() {
 
           <ErrorText message={error} />
 
-          {/* Streak */}
-          <Card className="flex-row justify-between items-center mb-4 py-3.5">
-            <View>
+          {/* Série et avancement du cycle */}
+          <Card className="flex-row mb-4 py-3.5">
+            <View className="flex-1">
               <MonoLabel className="text-[9px]">Série actuelle</MonoLabel>
               <Text className="font-display text-accent text-[24px] mt-0.5">
-                {streak} {streak > 1 ? "jours" : "jour"}
+                {streak}
+                <Text className="font-body text-[12px] text-muted">
+                  {" "}
+                  {streak > 1 ? "jours" : "jour"}
+                </Text>
               </Text>
             </View>
-            <Text className="text-[30px]">🔥</Text>
+            <View className="w-px bg-line mx-4" />
+            <View className="flex-1">
+              <MonoLabel className="text-[9px]">Cycle</MonoLabel>
+              <Text className="font-display text-ink text-[24px] mt-0.5">
+                {completedCount}
+                <Text className="font-body text-[12px] text-muted">
+                  {" "}
+                  / {totalPlanned}
+                </Text>
+              </Text>
+            </View>
           </Card>
 
           {/* Programme en cours */}
@@ -230,10 +257,31 @@ export default function DashboardScreen() {
             </GradientCard>
           </View>
 
-          {/* Prochaine séance */}
+          {cycleComplete ? (
+            /* Toutes les séances du plan sont faites : on bascule sur le bilan. */
+            <Card className="mb-3">
+              <MonoLabel tone="accent" className="mb-2">
+                Cycle terminé
+              </MonoLabel>
+              <Display size={22} className="mb-1.5">
+                {totalPlanned} séances{"\n"}bouclées
+              </Display>
+              <Body className="text-[12px] mb-4">
+                Ton bilan va calibrer le prochain cycle.
+              </Body>
+              <Button
+                label="Faire le bilan"
+                onPress={() => router.push("/feedback")}
+              />
+            </Card>
+          ) : (
+          /* Prochaine séance */
           <Card className="mb-3">
             <MonoLabel tone="accent" className="mb-2">
-              Prochaine séance · Jour {nextSession.day_number}
+              Séance {nextSession.day_number} / {totalPlanned}
+              {nextSession.scheduled_date
+                ? ` · ${formatDate(nextSession.scheduled_date)}`
+                : ""}
             </MonoLabel>
             <Display size={22} className="mb-1.5">
               {nextSession.session_label}
@@ -257,6 +305,7 @@ export default function DashboardScreen() {
               loading={starting}
             />
           </Card>
+          )}
 
           {/* Niveau d'énergie */}
           <Card className="mb-3">
@@ -283,13 +332,12 @@ export default function DashboardScreen() {
             </Text>
           </Card>
 
-          {completedCount > 0 ? (
-            <Pressable
-              onPress={() => router.push("/feedback")}
-              className="py-3 items-center"
-            >
-              <MonoLabel tone="accent">Donner mon feedback →</MonoLabel>
-            </Pressable>
+          {overdue > 0 && !cycleComplete ? (
+            <View className="items-center py-3">
+              <MonoLabel>
+                {overdue} séance{overdue > 1 ? "s" : ""} en retard
+              </MonoLabel>
+            </View>
           ) : null}
         </View>
       </ScrollView>

@@ -24,13 +24,9 @@ import {
   QUESTIONNAIRE_OPTIONS,
   QUESTIONNAIRE_QUESTIONS,
 } from "./fixtures";
-import {
-  FOCUS_CATEGORY_MAP,
-  buildSessionLabel,
-  nextDayNumber,
-  resolveFocus,
-  weekForDay,
-} from "./protocol";
+import { FOCUS_CATEGORY_MAP, buildSessionLabel, resolveFocus } from "./protocol";
+import { overdueCount } from "./plan";
+import type { PlannedSession } from "./plan";
 import { computeStreak, resolveProgramId } from "./scoring";
 import { isDemoMode, supabase } from "./supabase";
 import type {
@@ -185,6 +181,7 @@ export async function submitQuestionnaire(
       answers,
       scores,
       personaId,
+      new Date(),
     );
     return {
       persona: PERSONAS.find((p) => p.id === personaId)!,
@@ -314,33 +311,54 @@ export async function fetchOnboardingResult(
 // Dashboard
 // ─────────────────────────────────────────────
 
-/** Aperçu local de la prochaine séance — mêmes règles que le moteur. */
-function previewNextSession(
+/** Aperçu de la prochaine séance, lu dans le plan du cycle. */
+function previewFromPlan(
+  planned: PlannedSession | null,
   userProgram: UserProgram,
   program: Program,
 ): NextSessionPreview {
   const protocol: Protocol =
     userProgram.protocol ?? program.default_protocol ?? "full_body";
-  const day = nextDayNumber(userProgram.total_sessions_completed);
-  const focus = resolveFocus(protocol, day);
+  if (planned) {
+    return {
+      day_number: planned.day_number,
+      week_number: planned.week_number,
+      focus: planned.focus,
+      session_label: planned.session_label,
+      protocol: planned.protocol,
+      scheduled_date: planned.scheduled_date,
+    };
+  }
+  // Plan épuisé : le cycle est terminé.
+  const focus = resolveFocus(protocol, userProgram.total_sessions_completed + 1);
   return {
-    day_number: day,
-    week_number: weekForDay(day, program.frequency_per_week_min),
+    day_number: userProgram.total_sessions_completed + 1,
+    week_number: userProgram.current_week,
     focus,
     session_label: buildSessionLabel(focus),
     protocol,
+    scheduled_date: null,
   };
 }
 
 const PREVIEW_COUNT = 3;
 
 /** Noms d'exercices affichés en puces sur la carte « prochaine séance ». */
-async function previewExerciseNames(focus: string): Promise<string[]> {
+async function previewExerciseNames(
+  focus: string,
+  programId: string,
+): Promise<string[]> {
   const categories = FOCUS_CATEGORY_MAP[focus as keyof typeof FOCUS_CATEGORY_MAP] ?? [];
   if (categories.length === 0) return [];
 
   if (isDemoMode()) {
-    return EXERCISES.filter((e) => categories.includes(e.category))
+    // On montre les compounds : ce sont eux qui ouvrent la séance.
+    return EXERCISES.filter(
+      (e) =>
+        categories.includes(e.category) &&
+        e.exercise_type === "compound" &&
+        (e.target_programs.length === 0 || e.target_programs.includes(programId)),
+    )
       .sort((a, b) => a.id.localeCompare(b.id))
       .slice(0, PREVIEW_COUNT)
       .map((e) => e.name);
@@ -350,6 +368,8 @@ async function previewExerciseNames(focus: string): Promise<string[]> {
     .from("exercises")
     .select("name")
     .in("category", categories)
+    .eq("exercise_type", "compound")
+    .contains("target_programs", [programId])
     .order("id")
     .limit(PREVIEW_COUNT);
 
@@ -361,14 +381,16 @@ export async function fetchDashboard(
   now: Date,
 ): Promise<DashboardData | null> {
   if (isDemoMode()) {
-    const up = demo.demoActiveProgram();
+    const up = demo.demoProgram();
     if (!up) return null;
     const program = PROGRAMS.find((p) => p.id === up.program_id)!;
     const phase =
       PROGRAM_PHASES.find((ph) => ph.id === up.current_phase_id) ?? null;
     const sessions = demo.demoSessions();
     const completed = sessions.filter((s) => s.status === "completed");
-    const nextSession = previewNextSession(up, program);
+    const plan = demo.demoPlan();
+    const done = demo.demoCompletedDayNumbers();
+    const nextSession = previewFromPlan(demo.demoNextPlanned(), up, program);
     return {
       userProgram: up,
       program,
@@ -379,7 +401,10 @@ export async function fetchDashboard(
         now,
       ),
       completedCount: up.total_sessions_completed,
-      previewExercises: await previewExerciseNames(nextSession.focus),
+      previewExercises: await previewExerciseNames(nextSession.focus, program.id),
+      totalPlanned: plan.length,
+      cycleComplete: demo.demoCycleComplete(),
+      overdue: overdueCount(plan, done, now),
     };
   }
 
@@ -415,7 +440,7 @@ export async function fetchDashboard(
   if (programRes.error) throw new Error(programRes.error.message);
 
   const program = programRes.data as Program;
-  const nextSession = previewNextSession(userProgram, program);
+  const nextSession = previewFromPlan(null, userProgram, program);
 
   return {
     userProgram,
@@ -428,7 +453,10 @@ export async function fetchDashboard(
       now,
     ),
     completedCount: userProgram.total_sessions_completed,
-    previewExercises: await previewExerciseNames(nextSession.focus),
+    previewExercises: await previewExerciseNames(nextSession.focus, program.id),
+    totalPlanned: userProgram.total_sessions_planned ?? 0,
+    cycleComplete: userProgram.status === "completed",
+    overdue: 0,
   };
 }
 

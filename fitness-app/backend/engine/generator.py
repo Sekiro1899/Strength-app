@@ -56,7 +56,6 @@ async def generate_workout(request: WorkoutRequest) -> WorkoutResponse:
     # ── Construire les 4 blocs ──
     warmup = build_warmup_block(
         focus=focus,
-        phase=phase,
         program=program,
         available_equipment=equipment,
         energy_level=request.energy_level,
@@ -72,7 +71,6 @@ async def generate_workout(request: WorkoutRequest) -> WorkoutResponse:
     )
 
     core = build_core_block(
-        phase=phase,
         program=program,
         available_equipment=equipment,
         energy_level=request.energy_level,

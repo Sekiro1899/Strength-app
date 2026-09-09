@@ -45,6 +45,11 @@ CREATE TABLE programs (
     time_under_tension_sec      INTEGER,
     available_protocols         TEXT[],
     default_protocol            VARCHAR(30),
+    -- split : découpage PPL / Upper-Lower / Full Body
+    -- circuit : enchaînements complexes, aucun découpage possible
+    session_structure           VARCHAR(20)     DEFAULT 'split'
+                                    CHECK (session_structure IN ('split','circuit')),
+    has_core_block              BOOLEAN         DEFAULT TRUE,
     superset_types              TEXT[],
     warmup_method               VARCHAR(50),
     risky_exercises             TEXT[],
@@ -193,7 +198,13 @@ CREATE TABLE exercises (
     description                 TEXT,
     warmup_target               TEXT[],
     protocol                    VARCHAR(30),
+    -- Bibliothèque v2 : pilote la composition des blocs
+    exercise_type               VARCHAR(20)
+                                    CHECK (exercise_type IN ('compound','isolation','core','cardio')),
+    -- Vide = universel (warmups et finishers servent tous les programmes)
+    target_programs             TEXT[]          DEFAULT '{}',
     video_url                   TEXT,
+    image_url                   TEXT,
     is_custom                   BOOLEAN         DEFAULT FALSE,
     created_by_user_id          UUID            REFERENCES users(id),
     created_at                  TIMESTAMPTZ     DEFAULT NOW()

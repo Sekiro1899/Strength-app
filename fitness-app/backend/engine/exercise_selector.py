@@ -1,83 +1,18 @@
 """
-Sélection d'exercices depuis la base Supabase selon les critères du programme,
-de la phase, du focus et de l'équipement disponible.
+Sélection d'exercices depuis la bibliothèque.
+
+Deux colonnes de la bibliothèque pilotent tout :
+  - `target_programs` : à quels programmes l'exercice appartient.
+    Vide = universel (warmups et finishers servent tous les programmes).
+  - `exercise_type`   : compound | isolation | core | cardio.
+    C'est lui, et non la catégorie, qui décide dans quel bloc l'exercice tombe.
 """
 
 import random
 
 from database import supabase
 
-
-def fetch_exercises(
-    category: str | None = None,
-    intent: str | None = None,
-    level_max: str = "avance",
-    bodyweight_only: bool = False,
-    available_equipment: list[str] | None = None,
-    warmup_target: str | None = None,
-    limit: int = 50,
-) -> list[dict]:
-    """Récupère des exercices filtrés depuis Supabase."""
-    query = supabase.table("exercises").select("*")
-
-    if category:
-        query = query.eq("category", category)
-
-    if bodyweight_only:
-        query = query.eq("bodyweight_compatible", True)
-
-    if warmup_target:
-        query = query.contains("warmup_target", [warmup_target])
-
-    query = query.limit(limit)
-    result = query.execute()
-    exercises = result.data or []
-
-    # Filtres post-query (arrays non filtrables directement)
-    if intent:
-        exercises = [e for e in exercises if intent in (e.get("intent") or [])]
-
-    level_order = {"debutant": 0, "intermediaire": 1, "avance": 2}
-    max_lvl = level_order.get(level_max, 2)
-    exercises = [e for e in exercises if level_order.get(e.get("level"), 0) <= max_lvl]
-
-    if available_equipment and not bodyweight_only:
-        exercises = _filter_by_equipment(exercises, available_equipment)
-
-    return exercises
-
-
-def _filter_by_equipment(exercises: list[dict], available: list[str]) -> list[dict]:
-    """Garde les exercices réalisables avec l'équipement disponible."""
-    available_lower = {eq.lower() for eq in available}
-    result = []
-    for ex in exercises:
-        required = ex.get("material_required") or []
-        if not required:
-            result.append(ex)
-            continue
-        req_lower = {r.lower() for r in required}
-        if req_lower & available_lower or ex.get("bodyweight_compatible"):
-            result.append(ex)
-    return result
-
-
-def pick_exercises(
-    exercises: list[dict],
-    count: int,
-    already_picked: set[str] | None = None,
-) -> list[dict]:
-    """Sélectionne `count` exercices aléatoirement sans doublons."""
-    if already_picked is None:
-        already_picked = set()
-
-    available = [e for e in exercises if e["id"] not in already_picked]
-    random.shuffle(available)
-    picked = available[:count]
-    return picked
-
-
-# ─── Mappings focus → catégories ───
+# ─── Mappings focus → catégories (programmes en structure « split ») ───
 
 FOCUS_CATEGORY_MAP = {
     "push": ["push"],
@@ -85,14 +20,103 @@ FOCUS_CATEGORY_MAP = {
     "legs": ["legs"],
     "upper": ["push", "pull", "arms"],
     "lower": ["legs"],
-    "full_body": ["push", "pull", "legs"],
+    "full_body": ["push", "pull", "legs", "arms"],
 }
 
 FOCUS_WARMUP_TARGET_MAP = {
     "push": ["push", "bench", "ohp"],
     "pull": ["pull", "deadlift"],
-    "legs": ["legs", "squat", "single_leg"],
+    "legs": ["leg", "squat", "single_leg"],
     "upper": ["push", "pull", "bench", "ohp"],
-    "lower": ["legs", "squat", "deadlift", "single_leg"],
+    "lower": ["leg", "squat", "deadlift", "single_leg"],
     "full_body": ["all"],
 }
+
+# Programmes en structure « circuit » : pas de découpage par patron moteur,
+# la séance est un enchaînement de complexes / explosif / conditionnement.
+CIRCUIT_CATEGORIES = ["complex", "explosive", "conditioning"]
+
+LEVEL_ORDER = {"debutant": 0, "intermediaire": 1, "avance": 2}
+
+
+def _fetch_all() -> list[dict]:
+    """La bibliothèque tient en 109 lignes : un seul fetch, filtré en mémoire."""
+    result = supabase.table("exercises").select("*").execute()
+    return result.data or []
+
+
+def _matches_program(ex: dict, program_id: str, allow_universal: bool) -> bool:
+    targets = ex.get("target_programs") or []
+    if not targets:
+        # Exercice sans programme cible = universel (warmup / finisher).
+        return allow_universal
+    return program_id in targets
+
+
+def _matches_equipment(ex: dict, available: list[str]) -> bool:
+    """Sans équipement déclaré, on n'impose rien — l'utilisateur filtrera à l'usage."""
+    if not available:
+        return True
+    required = ex.get("material_required") or []
+    if not required:
+        return True
+    if ex.get("bodyweight_compatible"):
+        return True
+    have = {e.lower() for e in available}
+    return any(r.lower() in have for r in required)
+
+
+def select_exercises(
+    program_id: str,
+    *,
+    categories: list[str] | None = None,
+    exercise_types: list[str] | None = None,
+    level_max: str = "avance",
+    bodyweight_only: bool = False,
+    available_equipment: list[str] | None = None,
+    warmup_targets: list[str] | None = None,
+    intents: list[str] | None = None,
+    allow_universal: bool = False,
+    exclude_ids: set[str] | None = None,
+) -> list[dict]:
+    """Retourne les exercices de la bibliothèque satisfaisant tous les critères."""
+    exclude_ids = exclude_ids or set()
+    max_level = LEVEL_ORDER.get(level_max, 2)
+    pool = []
+
+    for ex in _fetch_all():
+        if ex["id"] in exclude_ids:
+            continue
+        if not _matches_program(ex, program_id, allow_universal):
+            continue
+        if categories and ex.get("category") not in categories:
+            continue
+        if exercise_types and ex.get("exercise_type") not in exercise_types:
+            continue
+        if LEVEL_ORDER.get(ex.get("level"), 0) > max_level:
+            continue
+        if bodyweight_only and not ex.get("bodyweight_compatible"):
+            continue
+        if intents and not set(intents) & set(ex.get("intent") or []):
+            continue
+        if warmup_targets:
+            targets = ex.get("warmup_target") or []
+            # "all" convient à toutes les séances.
+            if not (set(warmup_targets) & set(targets) or "all" in targets):
+                continue
+        if not _matches_equipment(ex, available_equipment or []):
+            continue
+        pool.append(ex)
+
+    return pool
+
+
+def pick(pool: list[dict], count: int, exclude_ids: set[str] | None = None) -> list[dict]:
+    """Tire `count` exercices distincts, en variant d'une séance à l'autre."""
+    exclude_ids = exclude_ids or set()
+    candidates = [e for e in pool if e["id"] not in exclude_ids]
+    if not candidates:
+        return []
+    if len(candidates) <= count:
+        return candidates
+    return random.sample(candidates, count)

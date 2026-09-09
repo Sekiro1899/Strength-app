@@ -1,54 +1,42 @@
 /**
  * Backend de démo — 100 % local, aucun réseau.
  *
- * Objectif : ouvrir la page web et parcourir tout le flux
- * (signup → questionnaire → persona → dashboard → séance → feedback)
- * sans clés Supabase ni FastAPI démarré.
+ * Rejoue les vraies données seed et les vraies règles du moteur
+ * (lib/engine.ts, miroir de backend/engine) pour que le mode démo montre ce
+ * que fera la production.
  *
- * Ce n'est PAS un stub : il rejoue les vraies données seed et le vrai
- * algorithme de sélection d'exercices (mêmes mappings que backend/engine),
- * pour que ce qu'on voit à l'écran ressemble à la production.
- *
- * L'état est persisté dans localStorage sur le web et en mémoire sur natif.
+ * État persisté en localStorage sur le web, en mémoire sur natif.
  */
 
-import {
-  EXERCISES,
-  PERSONAS,
-  PERSONA_PROGRAM_ELIGIBILITY,
-  PROGRAMS,
-  PROGRAM_PHASES,
-} from "./fixtures";
-import { buildSessionLabel, resolveFocus } from "./protocol";
+import { buildCore, buildFinisher, buildMain, buildWarmup } from "./engine";
+import { PERSONAS, PERSONA_PROGRAM_ELIGIBILITY, PROGRAMS, PROGRAM_PHASES } from "./fixtures";
+import { buildSessionPlan, isCycleComplete, nextPlanned, phaseForWeek } from "./plan";
+import type { PlannedSession } from "./plan";
 import { resolveProgramId } from "./scoring";
 import type {
   AppUser,
-  Exercise,
-  ExerciseBlock,
-  Focus,
   PersonaScores,
-  Program,
-  ProgramPhase,
   Protocol,
+  UserProgram,
   WorkoutRequest,
   WorkoutResponse,
   WorkoutSession,
-  UserProgram,
 } from "./types";
 
-// ─────────────────────────────────────────────
-// Persistance
-// ─────────────────────────────────────────────
-
-const STORAGE_KEY = "strength-app.demo.v1";
+const STORAGE_KEY = "strength-app.demo.v2";
 
 interface DemoState {
   user: AppUser | null;
-  userPrograms: UserProgram[];
+  userProgram: UserProgram | null;
+  /** Plan complet du cycle, généré au démarrage du programme. */
+  plan: PlannedSession[];
+  /** Séances matérialisées (contenu généré au lancement). */
   sessions: WorkoutSession[];
 }
 
-const EMPTY: DemoState = { user: null, userPrograms: [], sessions: [] };
+const EMPTY: DemoState = { user: null, userProgram: null, plan: [], sessions: [] };
+
+let memory: DemoState = { ...EMPTY };
 
 function hasLocalStorage(): boolean {
   try {
@@ -57,8 +45,6 @@ function hasLocalStorage(): boolean {
     return false;
   }
 }
-
-let memory: DemoState = { ...EMPTY };
 
 function read(): DemoState {
   if (!hasLocalStorage()) return memory;
@@ -76,21 +62,15 @@ function write(state: DemoState): void {
   try {
     globalThis.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   } catch {
-    /* quota plein ou storage bloqué — on garde la copie mémoire */
+    /* quota plein ou storage bloqué — la copie mémoire suffit à la session */
   }
 }
 
 export function resetDemo(): void {
-  write({ ...EMPTY, userPrograms: [], sessions: [] });
+  write({ ...EMPTY });
 }
 
-// ─────────────────────────────────────────────
-// Identifiants déterministes
-// ─────────────────────────────────────────────
-
 let counter = 0;
-
-/** uuid-like stable, sans Math.random (rejouabilité des captures d'écran). */
 function nextId(prefix: string): string {
   counter += 1;
   return `${prefix}_${counter.toString().padStart(6, "0")}`;
@@ -101,7 +81,6 @@ function nextId(prefix: string): string {
 // ─────────────────────────────────────────────
 
 export function demoSignUp(email: string): AppUser {
-  const state = read();
   const user: AppUser = {
     id: nextId("demo_user"),
     email,
@@ -114,13 +93,12 @@ export function demoSignUp(email: string): AppUser {
     session_duration_target: null,
     onboarding_completed: false,
   };
-  write({ ...state, user, userPrograms: [], sessions: [] });
+  write({ ...EMPTY, user });
   return user;
 }
 
 export function demoSignIn(email: string): AppUser {
   const state = read();
-  // Reconnexion : on garde la progression si c'est le même email.
   if (state.user && state.user.email === email) return state.user;
   return demoSignUp(email);
 }
@@ -134,26 +112,27 @@ export function demoCurrentUser(): AppUser | null {
 }
 
 // ─────────────────────────────────────────────
-// Onboarding
+// Onboarding — crée le programme ET son plan complet
 // ─────────────────────────────────────────────
 
 export function demoCompleteOnboarding(
   answers: Record<string, string | string[]>,
   scores: PersonaScores,
   personaId: string,
+  today: Date,
 ): { user: AppUser; userProgram: UserProgram } {
   const state = read();
   const persona = PERSONAS.find((p) => p.id === personaId);
   if (!persona) throw new Error(`Persona inconnu : ${personaId}`);
 
   const programId = resolveProgramId(persona, PERSONA_PROGRAM_ELIGIBILITY);
-  if (!programId) {
-    throw new Error(`Aucun programme éligible pour ${persona.code}`);
-  }
+  if (!programId) throw new Error(`Aucun programme éligible pour ${persona.code}`);
 
   const program = PROGRAMS.find((p) => p.id === programId)!;
-  const firstPhase = PROGRAM_PHASES.filter((ph) => ph.program_id === programId)
-    .sort((a, b) => a.phase_number - b.phase_number)[0];
+  const phases = PROGRAM_PHASES.filter((ph) => ph.program_id === programId);
+  const protocol: Protocol = program.default_protocol ?? "full_body";
+
+  const plan = buildSessionPlan(program, phases, protocol, today);
 
   const user: AppUser = {
     ...(state.user ?? demoSignUp("demo@strength.app")),
@@ -168,206 +147,124 @@ export function demoCompleteOnboarding(
     user_id: user.id,
     program_id: programId,
     persona_id: persona.id,
-    protocol: program.default_protocol,
+    protocol,
     status: "active",
-    current_phase_id: firstPhase?.id ?? null,
+    current_phase_id: plan[0]?.phase_id ?? null,
     current_week: 1,
-    start_date: new Date().toISOString().slice(0, 10),
-    total_sessions_planned: null,
+    start_date: today.toISOString().slice(0, 10),
+    total_sessions_planned: plan.length,
     total_sessions_completed: 0,
   };
 
-  write({ user, userPrograms: [userProgram], sessions: [] });
+  write({ user, userProgram, plan, sessions: [] });
   return { user, userProgram };
 }
 
 export function demoActiveProgram(): UserProgram | null {
-  const state = read();
-  return state.userPrograms.find((up) => up.status === "active") ?? null;
+  const up = read().userProgram;
+  return up && up.status === "active" ? up : null;
+}
+
+export function demoProgram(): UserProgram | null {
+  return read().userProgram;
+}
+
+export function demoPlan(): PlannedSession[] {
+  return read().plan;
 }
 
 export function demoSessions(): WorkoutSession[] {
   return read().sessions;
 }
 
+export function demoCompletedDayNumbers(): Set<number> {
+  return new Set(
+    read().sessions.filter((s) => s.status === "completed").map((s) => s.day_number),
+  );
+}
+
+/** Prochaine séance du plan non encore complétée. */
+export function demoNextPlanned(): PlannedSession | null {
+  const state = read();
+  return nextPlanned(state.plan, demoCompletedDayNumbers());
+}
+
+/** Le cycle est-il intégralement terminé ? Déclenche le feedback. */
+export function demoCycleComplete(): boolean {
+  const state = read();
+  return isCycleComplete(state.plan, demoCompletedDayNumbers());
+}
+
 // ─────────────────────────────────────────────
-// Génération de séance (miroir de backend/engine)
+// Génération de séance
 // ─────────────────────────────────────────────
 
-/** exercise_selector.py::FOCUS_CATEGORY_MAP */
-const FOCUS_CATEGORY_MAP: Record<Focus, string[]> = {
-  push: ["push"],
-  pull: ["pull"],
-  legs: ["legs"],
-  upper: ["push", "pull", "arms"],
-  lower: ["legs"],
-  full_body: ["push", "pull", "legs"],
-};
-
-const LEVEL_ORDER: Record<string, number> = {
-  debutant: 0,
-  intermediaire: 1,
-  avance: 2,
-};
-
-/** Sélection déterministe : tri par id puis pas régulier dans la liste. */
-function pick(pool: Exercise[], count: number, seed: number): Exercise[] {
-  if (pool.length === 0) return [];
-  const sorted = [...pool].sort((a, b) => a.id.localeCompare(b.id));
-  const out: Exercise[] = [];
-  const step = Math.max(1, Math.floor(sorted.length / Math.max(1, count)));
-  for (let i = 0; i < count; i++) {
-    out.push(sorted[(seed + i * step) % sorted.length]);
-  }
-  // dédoublonne sans retomber en dessous du compte demandé quand c'est possible
-  const seen = new Set<string>();
-  const unique = out.filter((e) => !seen.has(e.id) && seen.add(e.id));
-  if (unique.length < count) {
-    for (const e of sorted) {
-      if (unique.length >= count) break;
-      if (!seen.has(e.id)) {
-        seen.add(e.id);
-        unique.push(e);
-      }
-    }
-  }
-  return unique;
+function levelForPersona(personaId: string): string {
+  const persona = PERSONAS.find((p) => p.id === personaId);
+  if (persona?.experience_level === "advanced") return "avance";
+  if (persona?.experience_level === "beginner_intermediate") return "intermediaire";
+  return "intermediaire";
 }
 
-function byLevel(pool: Exercise[], levelMax: string): Exercise[] {
-  const max = LEVEL_ORDER[levelMax] ?? 2;
-  return pool.filter((e) => (LEVEL_ORDER[e.level] ?? 0) <= max);
-}
-
-function buildWarmup(focus: Focus, seed: number): ExerciseBlock[] {
-  const pool = EXERCISES.filter((e) => e.category === "warmup");
-  return pick(pool, 4, seed).map((ex) => {
-    const isMobility = ex.intent.includes("mobilite");
-    return {
-      exercise_id: ex.id,
-      name: ex.name,
-      sets: isMobility ? 2 : 1,
-      ...(isMobility ? { duration_sec: 30 } : { reps: 10 }),
-      notes: isMobility ? "Mobilité" : "Activation musculaire",
-    };
-  });
-}
-
-function buildMain(
-  focus: Focus,
-  phase: ProgramPhase | null,
-  program: Program,
-  levelMax: string,
-  seed: number,
-): ExerciseBlock[] {
-  const categories = FOCUS_CATEGORY_MAP[focus] ?? ["push", "pull", "legs"];
-  const pool = byLevel(
-    EXERCISES.filter((e) => categories.includes(e.category)),
-    levelMax,
-  );
-
-  const sets = phase?.sets_compounds ?? 4;
-  const repMin = phase?.rep_range_min ?? program.rep_range_min ?? 8;
-  const repMax = phase?.rep_range_max ?? program.rep_range_max ?? 12;
-  const reps = Math.round((repMin + repMax) / 2);
-  const rest = phase?.rest_sec_min ?? 90;
-  const load = phase?.load_pct_1rm ?? null;
-
-  return pick(pool, 5, seed).map((ex, i) => ({
-    exercise_id: ex.id,
-    name: ex.name,
-    sets: i < 2 ? sets : Math.max(2, sets - 1),
-    reps,
-    ...(load ? { load_pct_1rm: load } : {}),
-    rest_sec: rest,
-    notes: i < 2 ? `Compound — ${sets}x${reps}` : `Accessoire — ${reps} reps`,
-  }));
-}
-
-function buildCore(levelMax: string, seed: number): ExerciseBlock[] {
-  const pool = byLevel(
-    EXERCISES.filter(
-      (e) => e.category === "core_strength" || e.category === "core_endurance",
-    ),
-    levelMax,
-  );
-  return pick(pool, 2, seed).map((ex) => ({
-    exercise_id: ex.id,
-    name: ex.name,
-    sets: 3,
-    ...(ex.category === "core_endurance"
-      ? { duration_sec: 40 }
-      : { reps: 12 }),
-    rest_sec: 45,
-    notes: "Gainage",
-  }));
-}
-
-function buildFinisher(levelMax: string, seed: number): ExerciseBlock[] {
-  const pool = byLevel(
-    EXERCISES.filter(
-      (e) => e.category === "finisher" || e.category === "conditioning",
-    ),
-    levelMax,
-  );
-  return pick(pool, 2, seed).map((ex) => ({
-    exercise_id: ex.id,
-    name: ex.name,
-    sets: 1,
-    duration_sec: 60,
-    notes: "Finisher",
-  }));
-}
-
-/**
- * Équivalent local de POST /workout/generate.
- * Persiste la séance dans le store démo, comme le fait le vrai générateur
- * dans la table `sessions`.
- */
+/** Équivalent local de POST /workout/generate. */
 export function demoGenerateWorkout(request: WorkoutRequest): WorkoutResponse {
   const state = read();
   const program = PROGRAMS.find((p) => p.id === request.program_id);
   if (!program) throw new Error(`Programme introuvable : ${request.program_id}`);
 
-  const persona = PERSONAS.find((p) => p.id === request.persona_id);
-  const levelMax =
-    persona?.experience_level === "advanced"
-      ? "avance"
-      : persona?.experience_level === "beginner_intermediate"
-        ? "intermediaire"
-        : "intermediaire";
+  const dayNumber = request.day_number ?? 1;
+  const planned = state.plan.find((s) => s.day_number === dayNumber);
 
+  const weekNumber = planned?.week_number ?? request.week_number ?? 1;
+  const phases = PROGRAM_PHASES.filter((ph) => ph.program_id === program.id);
   const phase =
-    PROGRAM_PHASES.find((ph) => ph.id === request.phase_id) ??
-    PROGRAM_PHASES.filter((ph) => ph.program_id === program.id).sort(
-      (a, b) => a.phase_number - b.phase_number,
-    )[0] ??
-    null;
+    phases.find((ph) => ph.id === (planned?.phase_id ?? request.phase_id)) ??
+    phaseForWeek(phases, weekNumber);
 
   const protocol: Protocol =
-    request.protocol ?? program.default_protocol ?? "full_body";
-  const dayNumber = request.day_number ?? 1;
-  const focus: Focus = request.focus ?? resolveFocus(protocol, dayNumber);
-  const sessionLabel = buildSessionLabel(focus);
+    planned?.protocol ?? request.protocol ?? program.default_protocol ?? "full_body";
+  const focus = planned?.focus ?? request.focus ?? "full_body";
+  const label = planned?.session_label ?? focus;
+
+  const levelMax = levelForPersona(request.persona_id);
+  const energy = request.energy_level ?? 3;
   const seed = dayNumber * 7;
+
+  // Une séance déjà matérialisée est renvoyée telle quelle : relancer ne doit
+  // pas régénérer un contenu différent.
+  const existing = state.sessions.find((s) => s.day_number === dayNumber);
+  if (existing) {
+    return {
+      session_id: existing.id,
+      program_id: program.id,
+      phase_id: existing.phase_id,
+      protocol: existing.protocol ?? protocol,
+      focus: existing.focus ?? focus,
+      session_label: existing.session_label ?? label,
+      warmup_block: existing.warmup_block ?? [],
+      main_block: existing.main_block ?? [],
+      core_block: existing.core_block ?? [],
+      finisher_block: existing.finisher_block ?? [],
+    };
+  }
 
   const session: WorkoutSession = {
     id: nextId("demo_session"),
     user_id: request.user_id,
     user_program_id: request.user_program_id,
     phase_id: phase?.id ?? null,
-    week_number: request.week_number ?? 1,
+    week_number: weekNumber,
     day_number: dayNumber,
-    session_label: sessionLabel,
+    session_label: label,
     protocol,
     focus,
-    status: "planned",
-    energy_level: request.energy_level ?? 3,
-    warmup_block: buildWarmup(focus, seed),
-    main_block: buildMain(focus, phase, program, levelMax, seed),
-    core_block: buildCore(levelMax, seed),
-    finisher_block: buildFinisher(levelMax, seed),
-    scheduled_date: null,
+    status: "in_progress",
+    energy_level: energy,
+    warmup_block: buildWarmup(program, focus, energy, seed),
+    main_block: buildMain(program, phase, focus, levelMax, energy, seed),
+    core_block: buildCore(program, levelMax, energy, seed),
+    finisher_block: buildFinisher(program, levelMax, energy, seed),
+    scheduled_date: planned?.scheduled_date ?? null,
     started_at: null,
     completed_at: null,
     actual_duration_min: null,
@@ -381,7 +278,7 @@ export function demoGenerateWorkout(request: WorkoutRequest): WorkoutResponse {
     phase_id: session.phase_id,
     protocol,
     focus,
-    session_label: sessionLabel,
+    session_label: label,
     warmup_block: session.warmup_block!,
     main_block: session.main_block!,
     core_block: session.core_block!,
@@ -393,11 +290,11 @@ export function demoGetSession(sessionId: string): WorkoutSession | null {
   return read().sessions.find((s) => s.id === sessionId) ?? null;
 }
 
-/** Marque la séance terminée et incrémente le compteur du programme. */
-export function demoCompleteSession(
-  sessionId: string,
-  completedAt: string,
-): void {
+/**
+ * Clôture une séance. Si c'était la dernière du plan, le programme passe en
+ * `completed` — c'est ce qui déclenche l'écran de fin de cycle et le feedback.
+ */
+export function demoCompleteSession(sessionId: string, completedAt: string): void {
   const state = read();
   const sessions = state.sessions.map((s) =>
     s.id === sessionId
@@ -405,17 +302,21 @@ export function demoCompleteSession(
       : s,
   );
   const target = sessions.find((s) => s.id === sessionId);
-  const userPrograms = state.userPrograms.map((up) =>
-    up.id === target?.user_program_id
-      ? {
-          ...up,
-          total_sessions_completed: up.total_sessions_completed + 1,
-          current_week: Math.max(
-            up.current_week,
-            target.week_number ?? up.current_week,
-          ),
-        }
-      : up,
+  const completed = new Set(
+    sessions.filter((s) => s.status === "completed").map((s) => s.day_number),
   );
-  write({ ...state, sessions, userPrograms });
+  const done = isCycleComplete(state.plan, completed);
+
+  const next = nextPlanned(state.plan, completed);
+  const userProgram = state.userProgram
+    ? {
+        ...state.userProgram,
+        total_sessions_completed: completed.size,
+        current_week: next?.week_number ?? target?.week_number ?? state.userProgram.current_week,
+        current_phase_id: next?.phase_id ?? state.userProgram.current_phase_id,
+        status: done ? ("completed" as const) : state.userProgram.status,
+      }
+    : null;
+
+  write({ ...state, sessions, userProgram });
 }

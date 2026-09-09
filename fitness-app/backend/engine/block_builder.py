@@ -1,70 +1,123 @@
 """
-Construit les 4 blocs d'une séance (warmup, main, core, finisher)
-selon les paramètres du programme et de la phase.
+Construit les 4 blocs d'une séance.
+
+Structure imposée :
+  1. Warmup   — jamais de saisie de résultats
+  2. Main     — compound puis isolation (ou circuit selon le programme)
+  3. Core     — seulement si le programme le déclare (has_core_block)
+  4. Finisher — jamais de saisie de résultats
+
+`log_results` porte cette règle jusqu'au client : l'écran de suivi n'affiche
+de lignes de séries que pour les blocs où il vaut True.
 """
 
 import random
 
 from engine.exercise_selector import (
+    CIRCUIT_CATEGORIES,
     FOCUS_CATEGORY_MAP,
     FOCUS_WARMUP_TARGET_MAP,
-    fetch_exercises,
-    pick_exercises,
+    pick,
+    select_exercises,
 )
 from models.workout import ExerciseBlock
+
+WARMUP_COUNT = {"very_light": 2, "light": 3, "moderate": 4, "heavy": 5}
+
+
+def _resolve_load_pct(phase: dict, program: dict) -> int:
+    for key in ("load_pct_1rm", "load_pct_1rm_start"):
+        if phase.get(key):
+            return phase[key]
+    return program.get("load_pct_1rm_min") or 65
 
 
 def build_warmup_block(
     focus: str,
-    phase: dict,
     program: dict,
     available_equipment: list[str],
     energy_level: int,
 ) -> list[ExerciseBlock]:
-    """
-    Construit le bloc warmup.
-    - warmup_focus: very_light (2-3 exos) / light (3) / moderate (4) / heavy (5)
-    """
-    warmup_focus = program.get("warmup_focus", "moderate")
-    count_map = {"very_light": 2, "light": 3, "moderate": 4, "heavy": 5}
-    count = count_map.get(warmup_focus, 3)
-
-    # Ajustement énergie basse → warmup plus long
+    """Activation + mobilité. Aucun résultat à saisir."""
+    count = WARMUP_COUNT.get(program.get("warmup_focus", "moderate"), 3)
     if energy_level <= 2:
         count = min(count + 1, 5)
 
-    warmup_targets = FOCUS_WARMUP_TARGET_MAP.get(focus, ["all"])
-    target = random.choice(warmup_targets)
-
-    exercises = fetch_exercises(
-        category="warmup",
-        warmup_target=target,
+    targets = FOCUS_WARMUP_TARGET_MAP.get(focus, ["all"])
+    pool = select_exercises(
+        program["id"],
+        categories=["warmup"],
+        warmup_targets=targets,
         available_equipment=available_equipment,
+        allow_universal=True,
     )
-    # Fallback sur "all" si pas assez
-    if len(exercises) < count:
-        exercises += fetch_exercises(
-            category="warmup",
-            warmup_target="all",
+    if len(pool) < count:
+        pool += select_exercises(
+            program["id"],
+            categories=["warmup"],
             available_equipment=available_equipment,
+            allow_universal=True,
+            exclude_ids={e["id"] for e in pool},
         )
 
-    picked = pick_exercises(exercises, count)
-
     blocks = []
-    for ex in picked:
-        intent_list = ex.get("intent", [])
-        is_mobility = "mobilite" in intent_list
-
+    for ex in pick(pool, count):
+        is_mobility = "mobilite" in (ex.get("intent") or [])
         blocks.append(ExerciseBlock(
             exercise_id=ex["id"],
             name=ex["name"],
             sets=2 if is_mobility else 1,
             reps=None if is_mobility else 10,
             duration_sec=30 if is_mobility else None,
-            notes="Activation musculaire" if not is_mobility else "Mobilité",
+            notes="Mobilité" if is_mobility else "Activation musculaire",
+            log_results=False,
         ))
+    return blocks
 
+
+def _build_circuit_main(
+    program: dict,
+    phase: dict,
+    available_equipment: list[str],
+    energy_level: int,
+    level_max: str,
+) -> list[ExerciseBlock]:
+    """
+    Programmes en circuit (Préparation Athlétique, Lactate Focus).
+
+    Ces programmes n'ont aucun exercice push/pull/legs : la séance est un
+    enchaînement de complexes lestés, d'explosif et de conditionnement.
+    """
+    pool = select_exercises(
+        program["id"],
+        categories=CIRCUIT_CATEGORIES,
+        level_max=level_max,
+        available_equipment=available_equipment,
+    )
+    count = 5 if energy_level >= 3 else 4
+    reps = random.randint(
+        phase.get("rep_range_min") or 8,
+        phase.get("rep_range_max") or 10,
+    )
+    rest = phase.get("rest_sec_min") or 60
+    load_pct = _resolve_load_pct(phase, program)
+    if energy_level <= 2:
+        load_pct = max(load_pct - 10, 40)
+
+    blocks = []
+    for i, ex in enumerate(pick(pool, count)):
+        is_cardio = ex.get("exercise_type") == "cardio"
+        blocks.append(ExerciseBlock(
+            exercise_id=ex["id"],
+            name=ex["name"],
+            sets=3,
+            reps=None if is_cardio else reps,
+            duration_sec=40 if is_cardio else None,
+            load_pct_1rm=None if is_cardio else load_pct,
+            rest_sec=rest,
+            notes=f"Circuit — tour {i + 1}",
+            log_results=True,
+        ))
     return blocks
 
 
@@ -76,156 +129,117 @@ def build_main_block(
     energy_level: int,
     level_max: str,
 ) -> list[ExerciseBlock]:
-    """
-    Construit le bloc principal.
-    Sélectionne des exercices compound + isolation selon la phase.
-    """
+    """Bloc principal : compounds puis isolations, filtrés sur le programme."""
+    if program.get("session_structure") == "circuit":
+        return _build_circuit_main(
+            program, phase, available_equipment, energy_level, level_max
+        )
+
     categories = FOCUS_CATEGORY_MAP.get(focus, ["push", "pull", "legs"])
+    bodyweight_only = program.get("load_intensity") == "bodyweight"
 
-    sets_compounds = phase.get("sets_compounds", 4)
-    sets_isolation = phase.get("sets_isolation", 3)
-    rep_min = phase.get("rep_range_min", program.get("rep_range_min", 8))
-    rep_max = phase.get("rep_range_max", program.get("rep_range_max", 12))
-    rest_min = phase.get("rest_sec_min", program.get("rest_between_sets_sec_min", 60))
-    rest_max = phase.get("rest_sec_max", program.get("rest_between_sets_sec_max", 90))
-
-    # Déterminer le %1RM selon la phase
+    sets_compounds = phase.get("sets_compounds") or 4
+    sets_isolation = phase.get("sets_isolation") or 3
+    rep_min = phase.get("rep_range_min") or program.get("rep_range_min") or 8
+    rep_max = phase.get("rep_range_max") or program.get("rep_range_max") or 12
+    rest_min = phase.get("rest_sec_min") or program.get("rest_between_sets_sec_min") or 60
+    rest_max = phase.get("rest_sec_max") or program.get("rest_between_sets_sec_max") or 90
     load_pct = _resolve_load_pct(phase, program)
 
-    # Ajustement énergie
     if energy_level <= 2:
         load_pct = max(load_pct - 10, 40)
         sets_compounds = max(sets_compounds - 1, 2)
     elif energy_level >= 5:
         load_pct = min(load_pct + 5, 100)
 
-    bodyweight_only = program.get("load_intensity") == "bodyweight"
+    common = dict(
+        level_max=level_max,
+        bodyweight_only=bodyweight_only,
+        available_equipment=available_equipment,
+    )
 
-    # Nombre d'exercices : 2-3 compounds + 1-2 isolation par catégorie focus
-    compound_count = min(len(categories) * 2, 4)
-    isolation_count = min(len(categories), 3)
+    compounds = select_exercises(
+        program["id"], categories=categories, exercise_types=["compound"], **common
+    )
+    picked = pick(compounds, min(len(categories) + 1, 4))
+    used = {e["id"] for e in picked}
 
-    # Fetch compounds (force/hypertrophie intent)
-    all_compounds = []
-    for cat in categories:
-        exs = fetch_exercises(
-            category=cat,
-            intent="force" if program.get("objective") == "max_strength" else "hypertrophie",
-            level_max=level_max,
-            bodyweight_only=bodyweight_only,
-            available_equipment=available_equipment,
-        )
-        # Fallback sans filtre intent
-        if not exs:
-            exs = fetch_exercises(
-                category=cat,
-                level_max=level_max,
-                bodyweight_only=bodyweight_only,
-                available_equipment=available_equipment,
-            )
-        all_compounds.extend(exs)
+    isolations = select_exercises(
+        program["id"],
+        categories=categories,
+        exercise_types=["isolation"],
+        exclude_ids=used,
+        **common,
+    )
+    isolation_picks = pick(isolations, min(len(categories), 3))
 
-    picked_ids: set[str] = set()
-    compound_picks = pick_exercises(all_compounds, compound_count, picked_ids)
-    picked_ids.update(e["id"] for e in compound_picks)
-
-    # Fetch isolation (arms + catégories secondaires)
-    isolation_cats = ["arms"] if "arms" not in categories else categories
-    all_isolation = []
-    for cat in isolation_cats:
-        exs = fetch_exercises(
-            category=cat,
-            level_max=level_max,
-            bodyweight_only=bodyweight_only,
-            available_equipment=available_equipment,
-        )
-        all_isolation.extend(exs)
-
-    isolation_picks = pick_exercises(all_isolation, isolation_count, picked_ids)
-    picked_ids.update(e["id"] for e in isolation_picks)
-
-    # Construire les blocs
-    blocks = []
     reps = random.randint(rep_min, rep_max)
     rest = random.randint(rest_min, rest_max)
+    blocks = []
 
-    superset_level = phase.get("superset_level", program.get("superset_level", "none"))
-
-    for ex in compound_picks:
+    for ex in picked:
         blocks.append(ExerciseBlock(
             exercise_id=ex["id"],
             name=ex["name"],
             sets=sets_compounds,
             reps=reps,
-            load_pct_1rm=load_pct if not bodyweight_only else None,
+            load_pct_1rm=None if bodyweight_only else load_pct,
             rest_sec=rest,
             notes=f"Compound — {sets_compounds}x{reps}",
+            log_results=True,
         ))
 
+    iso_reps = min(reps + 2, rep_max + 2)
     for ex in isolation_picks:
         blocks.append(ExerciseBlock(
             exercise_id=ex["id"],
             name=ex["name"],
             sets=sets_isolation,
-            reps=min(reps + 2, rep_max + 2),
-            load_pct_1rm=max(load_pct - 10, 40) if not bodyweight_only else None,
+            reps=iso_reps,
+            load_pct_1rm=None if bodyweight_only else max(load_pct - 10, 40),
             rest_sec=max(rest - 15, 30),
-            notes=f"Isolation — {sets_isolation}x{min(reps + 2, rep_max + 2)}",
+            notes=f"Isolation — {sets_isolation}x{iso_reps}",
+            log_results=True,
         ))
 
-    # Appliquer supersets si applicable
+    superset_level = phase.get("superset_level") or program.get("superset_level") or "none"
     if superset_level in ("moderate", "heavy") and len(blocks) >= 4:
-        blocks = _apply_supersets(blocks, superset_level)
+        blocks = _apply_supersets(blocks)
 
     return blocks
 
 
 def build_core_block(
-    phase: dict,
     program: dict,
     available_equipment: list[str],
     energy_level: int,
     level_max: str,
 ) -> list[ExerciseBlock]:
-    """Construit le bloc core (2-3 exercices)."""
+    """Bloc core — uniquement sur les programmes qui le déclarent."""
+    if not program.get("has_core_block"):
+        return []
+
+    pool = select_exercises(
+        program["id"],
+        exercise_types=["core"],
+        level_max=level_max,
+        available_equipment=available_equipment,
+    )
     count = 3 if energy_level >= 3 else 2
 
-    strength_exs = fetch_exercises(
-        category="core_strength",
-        level_max=level_max,
-        available_equipment=available_equipment,
-    )
-    endurance_exs = fetch_exercises(
-        category="core_endurance",
-        level_max=level_max,
-        available_equipment=available_equipment,
-    )
-
-    picked_ids: set[str] = set()
-    # 1-2 core_strength + 1 core_endurance
-    strength_count = min(count - 1, 2)
-    endurance_count = count - strength_count
-
-    picks = pick_exercises(strength_exs, strength_count, picked_ids)
-    picked_ids.update(e["id"] for e in picks)
-    picks += pick_exercises(endurance_exs, endurance_count, picked_ids)
-
-    rep_min = phase.get("rep_range_min", 8)
-    rep_max = phase.get("rep_range_max", 12)
-
     blocks = []
-    for ex in picks:
+    for ex in pick(pool, count):
         is_endurance = ex.get("category") == "core_endurance"
         blocks.append(ExerciseBlock(
             exercise_id=ex["id"],
             name=ex["name"],
             sets=3,
-            reps=None if is_endurance else random.randint(rep_min, rep_max + 4),
-            duration_sec=30 if is_endurance else None,
-            rest_sec=30,
-            notes="Core endurance" if is_endurance else "Core strength",
+            reps=None if is_endurance else 12,
+            duration_sec=40 if is_endurance else None,
+            rest_sec=45,
+            notes="Gainage" if is_endurance else "Core — force",
+            log_results=True,
         ))
-
     return blocks
 
 
@@ -235,98 +249,35 @@ def build_finisher_block(
     energy_level: int,
     level_max: str,
 ) -> list[ExerciseBlock]:
-    """
-    Construit le bloc finisher.
-    - Si has_emom_finisher → EMOM/AMRAP finisher
-    - Sinon → conditioning ou finisher classique
-    """
+    """Finisher / conditionnement. Aucun résultat à saisir."""
     if energy_level <= 1:
-        return []  # Pas de finisher si énergie très basse
+        return []
 
-    has_emom = program.get("has_emom_finisher", False)
-    emom_duration = program.get("emom_duration_min", 10)
-
-    if has_emom:
-        # Chercher exercices finisher avec protocol EMOM/AMRAP
-        exercises = fetch_exercises(
-            category="finisher",
-            level_max=level_max,
-            available_equipment=available_equipment,
-        )
-        if not exercises:
-            exercises = fetch_exercises(
-                category="conditioning",
-                level_max=level_max,
-                available_equipment=available_equipment,
-            )
-
-        picked = pick_exercises(exercises, 1)
-        if picked:
-            ex = picked[0]
-            protocol = ex.get("protocol", "EMOM")
-            return [ExerciseBlock(
-                exercise_id=ex["id"],
-                name=ex["name"],
-                sets=1,
-                duration_sec=emom_duration * 60,
-                rest_sec=0,
-                notes=f"{protocol} — {emom_duration} min",
-            )]
-
-    # Fallback : conditioning classique
-    exercises = fetch_exercises(
-        category="conditioning",
+    pool = select_exercises(
+        program["id"],
+        categories=["finisher"],
         level_max=level_max,
         available_equipment=available_equipment,
+        allow_universal=True,
     )
-    if not exercises:
-        exercises = fetch_exercises(
-            category="finisher",
-            level_max=level_max,
-            available_equipment=available_equipment,
-        )
+    duration = program.get("emom_duration_min") or 6
 
-    picked = pick_exercises(exercises, 1)
-    if picked:
-        ex = picked[0]
-        return [ExerciseBlock(
+    blocks = []
+    for ex in pick(pool, 2):
+        blocks.append(ExerciseBlock(
             exercise_id=ex["id"],
             name=ex["name"],
-            sets=3,
-            reps=15,
-            rest_sec=30,
-            notes="Finisher — cardio/conditioning",
-        )]
-
-    return []
-
-
-# ─── Helpers internes ───
+            sets=1,
+            duration_sec=min(duration, 10) * 60 // 2,
+            notes="Finisher",
+            log_results=False,
+        ))
+    return blocks
 
 
-def _resolve_load_pct(phase: dict, program: dict) -> int:
-    """Détermine le %1RM à utiliser selon phase."""
-    if phase.get("load_pct_1rm"):
-        return phase["load_pct_1rm"]
-    if phase.get("load_pct_1rm_start") and phase.get("load_pct_1rm_end"):
-        return (phase["load_pct_1rm_start"] + phase["load_pct_1rm_end"]) // 2
-    if program.get("load_pct_1rm_min") and program.get("load_pct_1rm_max"):
-        return (program["load_pct_1rm_min"] + program["load_pct_1rm_max"]) // 2
-    return 70  # Défaut
-
-
-def _apply_supersets(blocks: list[ExerciseBlock], level: str) -> list[ExerciseBlock]:
-    """Crée des paires de supersets parmi les exercices."""
-    pair_count = 2 if level == "heavy" else 1
-
-    paired = 0
+def _apply_supersets(blocks: list[ExerciseBlock]) -> list[ExerciseBlock]:
+    """Apparie les exercices deux à deux pour densifier la séance."""
     for i in range(0, len(blocks) - 1, 2):
-        if paired >= pair_count:
-            break
         blocks[i].superset_with = blocks[i + 1].exercise_id
-        blocks[i].notes = (blocks[i].notes or "") + " [Superset]"
-        blocks[i + 1].notes = (blocks[i + 1].notes or "") + " [Superset]"
-        blocks[i + 1].rest_sec = 0
-        paired += 1
-
+        blocks[i].notes = f"{blocks[i].notes} [Superset]"
     return blocks

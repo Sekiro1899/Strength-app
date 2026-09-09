@@ -6,7 +6,11 @@
     "slug": "muscle-building-focus",
     "tagline": "Construire du muscle via surcharge progressive et volume élevé",
     "objective": "hypertrophy",
-    "target_personas": ["SMB", "BF", "SAV"],
+    "target_personas": [
+      "SMB",
+      "BF",
+      "SAV"
+    ],
     "duration_weeks": 10,
     "frequency_per_week_min": 4,
     "frequency_per_week_max": 5,
@@ -30,9 +34,17 @@
     "progression_rule": "+2.5-5kg/week on compounds",
     "tempo": "2-1-2",
     "time_under_tension_sec": 40,
-    "available_protocols": ["full_body", "push_pull_leg", "upper_lower"],
+    "available_protocols": [
+      "full_body",
+      "push_pull_leg",
+      "upper_lower"
+    ],
     "default_protocol": "upper_lower",
-    "superset_types": ["antagonist", "pre_fatigue", "same_group"],
+    "superset_types": [
+      "antagonist",
+      "pre_fatigue",
+      "same_group"
+    ],
     "color": "#E91E8C",
     "icon": "💪",
     "phases": [
@@ -97,7 +109,9 @@
         "progression_rule": "Max weight for rep range, test PRs",
         "notes": "Reduce volume, increase intensity"
       }
-    ]
+    ],
+    "session_structure": "split",
+    "has_core_block": true
   },
   {
     "id": "program_bodyweight",
@@ -106,7 +120,12 @@
     "slug": "bodyweight-focus",
     "tagline": "Maximiser l'output avec poids du corps uniquement",
     "objective": "bodyweight_hypertrophy",
-    "target_personas": ["SMB", "AW", "CR", "SAV"],
+    "target_personas": [
+      "SMB",
+      "AW",
+      "CR",
+      "SAV"
+    ],
     "duration_weeks": 9,
     "frequency_per_week_min": 3,
     "frequency_per_week_max": 4,
@@ -130,10 +149,20 @@
     "progression_rule": "Increase reps or progress to harder variation each week",
     "tempo": "2-0-2",
     "time_under_tension_sec": 35,
-    "available_protocols": ["full_body", "push_pull"],
+    "available_protocols": [
+      "full_body",
+      "push_pull"
+    ],
     "default_protocol": "full_body",
-    "superset_types": ["antagonist", "same_group"],
-    "equipment_required": ["none", "optional_dumbbell", "optional_weight_belt"],
+    "superset_types": [
+      "antagonist",
+      "same_group"
+    ],
+    "equipment_required": [
+      "none",
+      "optional_dumbbell",
+      "optional_weight_belt"
+    ],
     "color": "#FF6F00",
     "icon": "🤸",
     "phases": [
@@ -176,11 +205,17 @@
         "superset_level": "moderate",
         "has_emom": true,
         "emom_format": "TABATA bodyweight leg exercises",
-        "target_skills": ["muscle-ups", "handstand-pushups", "front-lever-progression"],
+        "target_skills": [
+          "muscle-ups",
+          "handstand-pushups",
+          "front-lever-progression"
+        ],
         "progression_rule": "5x5 weighted dips/pullups with belt",
         "notes": "Phase de dépassement — weighted ceinture obligatoire"
       }
-    ]
+    ],
+    "session_structure": "split",
+    "has_core_block": true
   },
   {
     "id": "program_strength",
@@ -189,7 +224,10 @@
     "slug": "strength-focus",
     "tagline": "Développer la force maximale via charges lourdes et progressions structurées",
     "objective": "max_strength",
-    "target_personas": ["BF", "SAV"],
+    "target_personas": [
+      "BF",
+      "SAV"
+    ],
     "duration_weeks": 14,
     "frequency_per_week_min": 3,
     "frequency_per_week_max": 3,
@@ -213,11 +251,19 @@
     "progression_rule": "+2.5kg upper / +5kg lower per session (Starting Strength / StrongLifts)",
     "tempo": "controlled",
     "time_under_tension_sec": 20,
-    "available_protocols": ["full_body"],
+    "available_protocols": [
+      "full_body"
+    ],
     "default_protocol": "full_body",
-    "superset_types": ["none"],
+    "superset_types": [
+      "none"
+    ],
     "warmup_method": "heavy_per_big_set",
-    "references": ["Starting Strength - Mark Rippetoe", "StrongLifts 5x5", "Westside Barbell"],
+    "references": [
+      "Starting Strength - Mark Rippetoe",
+      "StrongLifts 5x5",
+      "Westside Barbell"
+    ],
     "color": "#B71C1C",
     "icon": "🏋️",
     "phases": [
@@ -252,7 +298,10 @@
         "rep_range_min": 5,
         "rep_range_max": 5,
         "sets_main_protocol": "5x5",
-        "sets_alternatives": ["3x5", "4x6+1"],
+        "sets_alternatives": [
+          "3x5",
+          "4x6+1"
+        ],
         "load_pct_1rm": 85,
         "load_pct_1rm_peak": 95,
         "rest_sec_min": 180,
@@ -264,13 +313,31 @@
         "deload_reduction_pct": 20,
         "notes": "Starting Strength / StrongLifts logic — échec = retour 10% charge",
         "warmup_sets_per_lift": [
-          {"set": 1, "pct_working_weight": 40, "reps": 5},
-          {"set": 2, "pct_working_weight": 60, "reps": 3},
-          {"set": 3, "pct_working_weight": 80, "reps": 2},
-          {"set": 4, "pct_working_weight": 90, "reps": 1}
+          {
+            "set": 1,
+            "pct_working_weight": 40,
+            "reps": 5
+          },
+          {
+            "set": 2,
+            "pct_working_weight": 60,
+            "reps": 3
+          },
+          {
+            "set": 3,
+            "pct_working_weight": 80,
+            "reps": 2
+          },
+          {
+            "set": 4,
+            "pct_working_weight": 90,
+            "reps": 1
+          }
         ]
       }
-    ]
+    ],
+    "session_structure": "split",
+    "has_core_block": true
   },
   {
     "id": "program_athletic",
@@ -279,7 +346,10 @@
     "slug": "preparation-athletique",
     "tagline": "Performance athlétique : explosivité, cardio, mobilité, musculation fonctionnelle",
     "objective": "athletic_performance",
-    "target_personas": ["AW", "SAV"],
+    "target_personas": [
+      "AW",
+      "SAV"
+    ],
     "duration_weeks": 8,
     "frequency_per_week_min": 3,
     "frequency_per_week_max": 3,
@@ -303,13 +373,29 @@
     "progression_rule": "Augmentation intensité → Peak → Deload cycle",
     "tempo": "explosive",
     "time_under_tension_sec": null,
-    "available_protocols": ["full_body", "upper_lower"],
+    "available_protocols": [
+      "full_body"
+    ],
     "default_protocol": "full_body",
-    "superset_types": ["complex_loaded"],
+    "superset_types": [
+      "complex_loaded"
+    ],
     "warmup_method": "heavy_dedicated_per_risky_exercise",
-    "risky_exercises": ["box_squat_jump", "hex_bar_jump_deadlift", "alternating_rotational_swings"],
-    "conditioning_work": ["sprints_30m", "sled_push", "battle_rope"],
-    "references": ["AthleanX", "NSCA Athletic Training", "Knees Over Toes"],
+    "risky_exercises": [
+      "box_squat_jump",
+      "hex_bar_jump_deadlift",
+      "alternating_rotational_swings"
+    ],
+    "conditioning_work": [
+      "sprints_30m",
+      "sled_push",
+      "battle_rope"
+    ],
+    "references": [
+      "AthleanX",
+      "NSCA Athletic Training",
+      "Knees Over Toes"
+    ],
     "color": "#1565C0",
     "icon": "⚡",
     "phases": [
@@ -373,7 +459,9 @@
         "progression_rule": "Reduce load by 30-40%, maintain movement quality",
         "notes": "Active recovery week — mobility heavy, intensity low"
       }
-    ]
+    ],
+    "session_structure": "circuit",
+    "has_core_block": false
   },
   {
     "id": "program_lactate",
@@ -382,9 +470,13 @@
     "slug": "lactate-focus",
     "tagline": "Efficacité cardiovasculaire et circulation sanguine en temps très limité",
     "objective": "cardio_efficiency",
-    "target_personas": ["CR", "AW", "SAV"],
-    "duration_weeks": null,
-    "is_continuous": true,
+    "target_personas": [
+      "CR",
+      "AW",
+      "SAV"
+    ],
+    "duration_weeks": 8,
+    "is_continuous": false,
     "frequency_per_week_min": 3,
     "frequency_per_week_max": 5,
     "session_duration_min": 30,
@@ -404,14 +496,20 @@
     "warmup_focus": "very_light",
     "warmup_note": "Le corps se réchauffe pendant la séance (2-3 min seulement)",
     "cardio_integrated": true,
-    "periodization_type": "none",
-    "periodization_note": "Séances indépendantes, pas de phases — chaque séance = cycle complet",
+    "periodization_type": "density",
+    "periodization_note": "Cycle de 8 semaines rejouable — la progression porte sur la densité, pas sur la charge",
     "progression_rule": "No linear progression — focus on density and consistency",
     "tempo": "fast",
     "time_under_tension_sec": 30,
-    "available_protocols": ["full_body"],
+    "available_protocols": [
+      "full_body"
+    ],
     "default_protocol": "full_body",
-    "superset_types": ["antagonist", "pre_fatigue", "same_group"],
+    "superset_types": [
+      "antagonist",
+      "pre_fatigue",
+      "same_group"
+    ],
     "has_loaded_complexes": true,
     "loaded_complex_examples": [
       "Squat + Deadlift",
@@ -425,6 +523,76 @@
     ],
     "color": "#2E7D32",
     "icon": "🫀",
-    "phases": []
+    "phases": [
+      {
+        "id": "lcf_phase_1",
+        "phase_number": 1,
+        "name": "Base Lactique",
+        "slug": "base-lactique",
+        "duration_weeks": 2,
+        "objective": "Installer la tolérance à l'accumulation lactique",
+        "approach": "Densité modérée, apprentissage des enchaînements",
+        "rep_range_min": 8,
+        "rep_range_max": 10,
+        "sets_compounds": 3,
+        "sets_isolation": 2,
+        "load_pct_1rm_start": 50,
+        "load_pct_1rm_end": 55,
+        "rest_sec_min": 60,
+        "rest_sec_max": 75,
+        "superset_level": "light",
+        "has_emom": false,
+        "progression_rule": "Maîtriser les enchaînements avant d'augmenter la densité",
+        "notes": "Repos plus longs le temps d'installer la technique"
+      },
+      {
+        "id": "lcf_phase_2",
+        "phase_number": 2,
+        "name": "Densification",
+        "slug": "densification",
+        "duration_weeks": 4,
+        "objective": "Réduire les temps de repos à volume constant",
+        "approach": "Supersets lourds, repos décroissants",
+        "rep_range_min": 8,
+        "rep_range_max": 10,
+        "sets_compounds": 4,
+        "sets_isolation": 3,
+        "load_pct_1rm_start": 55,
+        "load_pct_1rm_end": 65,
+        "rest_sec_min": 45,
+        "rest_sec_max": 60,
+        "superset_level": "heavy",
+        "has_emom": true,
+        "emom_format": "10 min EMOM : 5 box jumps, 10 KB swings, 15 burpees",
+        "progression_rule": "-5s de repos par semaine, charge constante",
+        "notes": "Cœur du cycle — la densité est la variable de progression"
+      },
+      {
+        "id": "lcf_phase_3",
+        "phase_number": 3,
+        "name": "Peak & Deload",
+        "slug": "peak-deload",
+        "duration_weeks": 2,
+        "objective": "Pic de densité puis récupération",
+        "approach": "1 semaine de pic, 1 semaine allégée",
+        "rep_range_min": 8,
+        "rep_range_max": 10,
+        "sets_compounds": 4,
+        "sets_isolation": 2,
+        "load_pct_1rm_start": 65,
+        "load_pct_1rm_end": 50,
+        "rest_sec_min": 45,
+        "rest_sec_max": 90,
+        "superset_level": "heavy",
+        "has_emom": true,
+        "emom_format": "10 min EMOM au choix",
+        "deload_every_n_weeks": 2,
+        "deload_reduction_pct": 40,
+        "progression_rule": "Semaine 7 = pic, semaine 8 = deload -40%",
+        "notes": "Clôture le cycle et prépare le feedback"
+      }
+    ],
+    "session_structure": "circuit",
+    "has_core_block": false
   }
 ]

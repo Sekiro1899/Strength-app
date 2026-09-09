@@ -66,6 +66,9 @@ export interface Program {
   rep_range_max: number | null;
   available_protocols: Protocol[] | null;
   default_protocol: Protocol | null;
+  /** split : découpage PPL / Upper-Lower / Full Body. circuit : complexes full body. */
+  session_structure: SessionStructure;
+  has_core_block: boolean;
   color: string | null;
   icon: string | null;
 }
@@ -167,17 +170,27 @@ export type ExerciseCategory =
 
 export type ExerciseLevel = "debutant" | "intermediaire" | "avance";
 
+export type SessionStructure = "split" | "circuit";
+
+/** Décide dans quel bloc l'exercice tombe — prime sur la catégorie. */
+export type ExerciseType = "compound" | "isolation" | "core" | "cardio";
+
 export interface Exercise {
   id: string;
   category: ExerciseCategory;
   name: string;
   muscles_primary: string[];
+  muscles_secondary: string[];
   intent: string[];
   level: ExerciseLevel;
   bodyweight_compatible: boolean;
   material_required: string[] | null;
   warmup_target: string[] | null;
   description: string | null;
+  exercise_type: ExerciseType | null;
+  /** Vide = universel (warmups et finishers servent tous les programmes). */
+  target_programs: string[];
+  image_url: string | null;
 }
 
 export interface FeedbackPollQuestion {
@@ -297,6 +310,8 @@ export interface ExerciseBlock {
   rest_sec?: number;
   superset_with?: string;
   notes?: string;
+  /** False sur warmup et finisher : pas de saisie de résultats côté client. */
+  log_results?: boolean;
 }
 
 /** Miroir de models.workout.WorkoutRequest (defaults Pydantic inclus). */
@@ -361,6 +376,12 @@ export interface DashboardData {
   completedCount: number;
   /** Quelques noms d'exercices du focus à venir, pour l'aperçu du dashboard. */
   previewExercises: string[];
+  /** Nombre total de séances du cycle. */
+  totalPlanned: number;
+  /** Toutes les séances sont faites -> écran de fin de cycle + feedback. */
+  cycleComplete: boolean;
+  /** Séances dont la date est passée sans avoir été réalisées. */
+  overdue: number;
 }
 
 /** Prochaine séance dérivée de user_programs — pas encore générée en base. */
@@ -370,4 +391,6 @@ export interface NextSessionPreview {
   focus: Focus;
   session_label: string;
   protocol: Protocol;
+  /** Date planifiée (YYYY-MM-DD), null si le cycle est terminé. */
+  scheduled_date: string | null;
 }

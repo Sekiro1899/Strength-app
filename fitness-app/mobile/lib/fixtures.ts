@@ -1487,7 +1487,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "ARM-029",
@@ -1526,7 +1527,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "ARM-030",
@@ -1567,7 +1569,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "ARM-031",
@@ -1607,7 +1610,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "ARM-032",
@@ -1647,7 +1651,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "ARM-033",
@@ -1687,7 +1692,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "ARM-034",
@@ -1725,7 +1731,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "ARM-035",
@@ -1764,7 +1771,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "ARM-036",
@@ -1806,7 +1814,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "ARM-037",
@@ -1851,7 +1860,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "COM-074",
@@ -1896,7 +1906,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "COM-075",
@@ -1942,7 +1953,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "COM-076",
@@ -1989,7 +2001,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "COM-077",
@@ -2034,7 +2047,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "COM-078",
@@ -2081,7 +2095,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": true
   },
   {
     "id": "COM-079",
@@ -2128,7 +2143,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "COM-080",
@@ -2175,7 +2191,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "CON-081",
@@ -2222,7 +2239,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "CON-082",
@@ -2269,7 +2287,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "CON-083",
@@ -2317,7 +2336,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "CON-084",
@@ -2361,7 +2381,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": 1,
-    "prescribed_duration_sec": 600
+    "prescribed_duration_sec": 600,
+    "unilateral": false
   },
   {
     "id": "CON-131",
@@ -2404,7 +2425,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": 1,
-    "prescribed_duration_sec": 1200
+    "prescribed_duration_sec": 1200,
+    "unilateral": false
   },
   {
     "id": "CON-132",
@@ -2446,7 +2468,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": 3,
-    "prescribed_duration_sec": 180
+    "prescribed_duration_sec": 180,
+    "unilateral": false
   },
   {
     "id": "CON-133",
@@ -2489,7 +2512,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": 1,
-    "prescribed_duration_sec": 1800
+    "prescribed_duration_sec": 1800,
+    "unilateral": false
   },
   {
     "id": "CON-134",
@@ -2530,7 +2554,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": 4,
-    "prescribed_duration_sec": 200
+    "prescribed_duration_sec": 200,
+    "unilateral": false
   },
   {
     "id": "COR-055",
@@ -2569,7 +2594,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "COR-056",
@@ -2612,7 +2638,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "COR-057",
@@ -2655,7 +2682,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "COR-058",
@@ -2696,7 +2724,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "COR-059",
@@ -2736,7 +2765,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "COR-060",
@@ -2780,7 +2810,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "COR-061",
@@ -2825,7 +2856,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "COR-062",
@@ -2862,7 +2894,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "COR-063",
@@ -2904,7 +2937,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "COR-064",
@@ -2945,7 +2979,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "COR-065",
@@ -2986,7 +3021,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "COR-066",
@@ -3025,7 +3061,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "COR-067",
@@ -3066,7 +3103,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "COR-110",
@@ -3113,7 +3151,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "COR-111",
@@ -3158,7 +3197,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "COR-112",
@@ -3202,7 +3242,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "COR-113",
@@ -3245,7 +3286,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "COR-114",
@@ -3288,7 +3330,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "COR-115",
@@ -3330,7 +3373,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "COR-116",
@@ -3373,7 +3417,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": true
   },
   {
     "id": "COR-117",
@@ -3416,7 +3461,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": true
   },
   {
     "id": "COR-118",
@@ -3461,7 +3507,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": true
   },
   {
     "id": "COR-119",
@@ -3507,7 +3554,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": true
   },
   {
     "id": "COR-120",
@@ -3554,7 +3602,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "COR-121",
@@ -3599,7 +3648,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "EXP-068",
@@ -3644,7 +3694,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "EXP-069",
@@ -3688,7 +3739,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "EXP-070",
@@ -3733,7 +3785,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "EXP-071",
@@ -3778,7 +3831,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "EXP-072",
@@ -3824,7 +3878,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "EXP-073",
@@ -3868,7 +3923,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "FIN-102",
@@ -3904,7 +3960,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "FIN-103",
@@ -3940,7 +3997,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "FIN-104",
@@ -3977,7 +4035,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "FIN-105",
@@ -4018,7 +4077,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "FIN-106",
@@ -4060,7 +4120,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "FIN-107",
@@ -4100,7 +4161,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "FIN-108",
@@ -4140,7 +4202,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "FIN-109",
@@ -4180,7 +4243,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "LEG-038",
@@ -4223,7 +4287,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "LEG-039",
@@ -4269,7 +4334,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "LEG-040",
@@ -4312,7 +4378,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": true
   },
   {
     "id": "LEG-041",
@@ -4352,7 +4419,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "LEG-042",
@@ -4399,7 +4467,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "LEG-043",
@@ -4444,7 +4513,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "LEG-044",
@@ -4490,7 +4560,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "LEG-045",
@@ -4536,7 +4607,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "LEG-046",
@@ -4580,7 +4652,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": true
   },
   {
     "id": "LEG-047",
@@ -4625,7 +4698,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "LEG-048",
@@ -4669,7 +4743,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "LEG-049",
@@ -4715,7 +4790,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": true
   },
   {
     "id": "LEG-050",
@@ -4755,7 +4831,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "LEG-051",
@@ -4795,7 +4872,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "LEG-052",
@@ -4836,7 +4914,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": true
   },
   {
     "id": "LEG-053",
@@ -4874,7 +4953,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "LEG-054",
@@ -4915,7 +4995,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": true
   },
   {
     "id": "LEG-126",
@@ -4960,7 +5041,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "LEG-127",
@@ -5001,7 +5083,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "LEG-128",
@@ -5042,7 +5125,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": true
   },
   {
     "id": "LEG-129",
@@ -5083,7 +5167,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": true
   },
   {
     "id": "LEG-130",
@@ -5122,7 +5207,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "PUL-015",
@@ -5164,7 +5250,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "PUL-016",
@@ -5209,7 +5296,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "PUL-017",
@@ -5252,7 +5340,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "PUL-018",
@@ -5296,7 +5385,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "PUL-019",
@@ -5341,7 +5431,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "PUL-020",
@@ -5384,7 +5475,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "PUL-021",
@@ -5428,7 +5520,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "PUL-022",
@@ -5474,7 +5567,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "PUL-023",
@@ -5517,7 +5611,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": true
   },
   {
     "id": "PUL-024",
@@ -5561,7 +5656,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "PUL-025",
@@ -5605,7 +5701,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "PUL-026",
@@ -5650,7 +5747,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "PUL-027",
@@ -5689,7 +5787,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "PUL-125",
@@ -5732,7 +5831,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "PUS-001",
@@ -5777,7 +5877,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "PUS-002",
@@ -5819,7 +5920,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "PUS-003",
@@ -5864,7 +5966,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "PUS-004",
@@ -5908,7 +6011,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "PUS-005",
@@ -5953,7 +6057,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "PUS-006",
@@ -5996,7 +6101,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "PUS-007",
@@ -6037,7 +6143,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "PUS-008",
@@ -6082,7 +6189,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "PUS-009",
@@ -6122,7 +6230,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "PUS-010",
@@ -6168,7 +6277,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "PUS-011",
@@ -6212,7 +6322,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "PUS-012",
@@ -6254,7 +6365,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "PUS-013",
@@ -6294,7 +6406,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "PUS-014",
@@ -6338,7 +6451,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "PUS-122",
@@ -6379,7 +6493,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "PUS-123",
@@ -6422,7 +6537,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "PUS-124",
@@ -6463,7 +6579,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": true
   },
   {
     "id": "WAR-085",
@@ -6501,7 +6618,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "WAR-086",
@@ -6539,7 +6657,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "WAR-087",
@@ -6580,7 +6699,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "WAR-088",
@@ -6623,7 +6743,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "WAR-089",
@@ -6660,7 +6781,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "WAR-090",
@@ -6698,7 +6820,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "WAR-091",
@@ -6740,7 +6863,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "WAR-092",
@@ -6784,7 +6908,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "WAR-093",
@@ -6822,7 +6947,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "WAR-094",
@@ -6860,7 +6986,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "WAR-095",
@@ -6902,7 +7029,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "WAR-096",
@@ -6945,7 +7073,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "WAR-097",
@@ -6986,7 +7115,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "WAR-098",
@@ -7029,7 +7159,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "WAR-099",
@@ -7071,7 +7202,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "WAR-100",
@@ -7111,7 +7243,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   },
   {
     "id": "WAR-101",
@@ -7152,7 +7285,8 @@ export const EXERCISES: Exercise[] = [
     "video_url": null,
     "image_url": null,
     "prescribed_sets": null,
-    "prescribed_duration_sec": null
+    "prescribed_duration_sec": null,
+    "unilateral": false
   }
 ];
 

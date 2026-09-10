@@ -239,6 +239,20 @@ def convert(row) -> dict:
     }
 
 
+# Champs que la feuille ne produit PAS : renseignés par des scripts séparés ou
+# à la main dans le JSON. Un import doit les reprendre du fichier précédent,
+# sinon chaque réimport les effacerait silencieusement — c'est ce qui serait
+# arrivé aux familles de mouvement et aux régressions, sur lesquelles reposent
+# la règle d'adjacence et le filtrage par profil.
+ENRICHED_FIELDS = (
+    "image_url",        # docs/fetch_exercise_images.py
+    "video_url",        # data/09_exercise_videos.json
+    "movement_family",  # familles de mouvement (règle de non-répétition)
+    "is_regression",    # variantes allégées, réservées débutants et 60+
+    "unilateral",       # un côté à la fois : pas de repos entre les côtés
+)
+
+
 def main() -> None:
     src = Path(sys.argv[1] if len(sys.argv) > 1 else "")
     if not src.exists():
@@ -269,12 +283,10 @@ def main() -> None:
         by_id = {e["id"]: e for e in exercises}
         for old in previous:
             if old["id"] in by_id:
-                # image_url est rempli par un script séparé : ne pas le perdre.
-                if old.get("image_url") and not by_id[old["id"]].get("image_url"):
-                    by_id[old["id"]]["image_url"] = old["image_url"]
-                # video_url est maintenu dans data/09_exercise_videos.json.
-                if old.get("video_url") and not by_id[old["id"]].get("video_url"):
-                    by_id[old["id"]]["video_url"] = old["video_url"]
+                for field in ENRICHED_FIELDS:
+                    # Vide côté feuille : la valeur enrichie fait autorité.
+                    if field in old and by_id[old["id"]].get(field) in (None, ""):
+                        by_id[old["id"]][field] = old[field]
             else:
                 exercises.append(old)
                 kept += 1

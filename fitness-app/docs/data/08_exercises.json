@@ -38,7 +38,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "elbow_flexion",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "ARM-029",
@@ -77,7 +78,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "elbow_flexion",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "ARM-030",
@@ -118,7 +120,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "elbow_flexion",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "ARM-031",
@@ -158,7 +161,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "elbow_flexion",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "ARM-032",
@@ -198,7 +202,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "elbow_flexion",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "ARM-033",
@@ -238,7 +243,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "elbow_extension",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "ARM-034",
@@ -276,7 +282,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "elbow_extension",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "ARM-035",
@@ -315,7 +322,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "elbow_extension",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "ARM-036",
@@ -357,7 +365,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "elbow_extension",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "ARM-037",
@@ -402,7 +411,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "elbow_extension",
-    "is_regression": true
+    "is_regression": true,
+    "unilateral": false
   },
   {
     "id": "COM-074",
@@ -447,7 +457,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "COM-075",
@@ -493,7 +504,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "COM-076",
@@ -540,7 +552,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "COM-077",
@@ -585,7 +598,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "COM-078",
@@ -632,7 +646,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": true
   },
   {
     "id": "COM-079",
@@ -679,7 +694,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "COM-080",
@@ -726,7 +742,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "CON-081",
@@ -773,7 +790,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "CON-082",
@@ -820,7 +838,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "CON-083",
@@ -868,7 +887,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "CON-084",
@@ -912,7 +932,8 @@
     "prescribed_sets": 1,
     "prescribed_duration_sec": 600,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "CON-131",
@@ -955,7 +976,8 @@
     "prescribed_sets": 1,
     "prescribed_duration_sec": 1200,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "CON-132",
@@ -997,7 +1019,8 @@
     "prescribed_sets": 3,
     "prescribed_duration_sec": 180,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "CON-133",
@@ -1040,7 +1063,8 @@
     "prescribed_sets": 1,
     "prescribed_duration_sec": 1800,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "CON-134",
@@ -1081,7 +1105,8 @@
     "prescribed_sets": 4,
     "prescribed_duration_sec": 200,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "COR-055",
@@ -1120,7 +1145,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "COR-056",
@@ -1163,7 +1189,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "COR-057",
@@ -1206,7 +1233,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "COR-058",
@@ -1247,7 +1275,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "COR-059",
@@ -1287,7 +1316,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "COR-060",
@@ -1331,7 +1361,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "COR-061",
@@ -1376,7 +1407,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "COR-062",
@@ -1413,7 +1445,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "COR-063",
@@ -1455,7 +1488,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "COR-064",
@@ -1496,7 +1530,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "COR-065",
@@ -1537,7 +1572,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "COR-066",
@@ -1576,7 +1612,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "COR-067",
@@ -1617,7 +1654,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "COR-110",
@@ -1664,7 +1702,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "COR-111",
@@ -1709,7 +1748,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "COR-112",
@@ -1753,7 +1793,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "COR-113",
@@ -1796,7 +1837,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "COR-114",
@@ -1839,7 +1881,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "COR-115",
@@ -1881,7 +1924,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "COR-116",
@@ -1924,7 +1968,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": true
   },
   {
     "id": "COR-117",
@@ -1967,7 +2012,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": true
   },
   {
     "id": "COR-118",
@@ -2012,7 +2058,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": true
   },
   {
     "id": "COR-119",
@@ -2058,7 +2105,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": true
   },
   {
     "id": "COR-120",
@@ -2105,7 +2153,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "COR-121",
@@ -2150,7 +2199,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "EXP-068",
@@ -2195,7 +2245,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "EXP-069",
@@ -2239,7 +2290,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "EXP-070",
@@ -2284,7 +2336,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "EXP-071",
@@ -2329,7 +2382,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "EXP-072",
@@ -2375,7 +2429,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "EXP-073",
@@ -2419,7 +2474,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "FIN-102",
@@ -2455,7 +2511,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "FIN-103",
@@ -2491,7 +2548,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "FIN-104",
@@ -2528,7 +2586,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "FIN-105",
@@ -2569,7 +2628,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "FIN-106",
@@ -2611,7 +2671,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "FIN-107",
@@ -2651,7 +2712,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "FIN-108",
@@ -2691,7 +2753,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "FIN-109",
@@ -2731,7 +2794,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "LEG-038",
@@ -2774,7 +2838,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "squat",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "LEG-039",
@@ -2820,7 +2885,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "squat",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "LEG-040",
@@ -2863,7 +2929,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "hinge",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": true
   },
   {
     "id": "LEG-041",
@@ -2903,7 +2970,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "squat",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "LEG-042",
@@ -2950,7 +3018,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "squat",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "LEG-043",
@@ -2995,7 +3064,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "hip_extension",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "LEG-044",
@@ -3041,7 +3111,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "hinge",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "LEG-045",
@@ -3087,7 +3158,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "hinge",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "LEG-046",
@@ -3131,7 +3203,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "hinge",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": true
   },
   {
     "id": "LEG-047",
@@ -3176,7 +3249,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "squat",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "LEG-048",
@@ -3220,7 +3294,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "hinge",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "LEG-049",
@@ -3266,7 +3341,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "lunge",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": true
   },
   {
     "id": "LEG-050",
@@ -3306,7 +3382,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "calf",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "LEG-051",
@@ -3346,7 +3423,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "calf",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "LEG-052",
@@ -3387,7 +3465,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "hip_extension",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": true
   },
   {
     "id": "LEG-053",
@@ -3425,7 +3504,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "hip_extension",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "LEG-054",
@@ -3466,7 +3546,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "abduction",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": true
   },
   {
     "id": "LEG-126",
@@ -3511,7 +3592,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "squat",
-    "is_regression": true
+    "is_regression": true,
+    "unilateral": false
   },
   {
     "id": "LEG-127",
@@ -3552,7 +3634,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "lunge",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "LEG-128",
@@ -3593,7 +3676,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "lunge",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": true
   },
   {
     "id": "LEG-129",
@@ -3634,7 +3718,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "lunge",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": true
   },
   {
     "id": "LEG-130",
@@ -3673,7 +3758,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "hinge",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "PUL-015",
@@ -3715,7 +3801,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "pullover",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "PUL-016",
@@ -3760,7 +3847,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "vertical_pull",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "PUL-017",
@@ -3803,7 +3891,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "vertical_pull",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "PUL-018",
@@ -3847,7 +3936,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "vertical_pull",
-    "is_regression": true
+    "is_regression": true,
+    "unilateral": false
   },
   {
     "id": "PUL-019",
@@ -3892,7 +3982,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "vertical_pull",
-    "is_regression": true
+    "is_regression": true,
+    "unilateral": false
   },
   {
     "id": "PUL-020",
@@ -3935,7 +4026,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "horizontal_pull",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "PUL-021",
@@ -3979,7 +4071,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "horizontal_pull",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "PUL-022",
@@ -4025,7 +4118,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "horizontal_pull",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "PUL-023",
@@ -4068,7 +4162,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "horizontal_pull",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": true
   },
   {
     "id": "PUL-024",
@@ -4112,7 +4207,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "rear_delt",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "PUL-025",
@@ -4156,7 +4252,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "rear_delt",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "PUL-026",
@@ -4201,7 +4298,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "horizontal_pull",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "PUL-027",
@@ -4240,7 +4338,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "pullover",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "PUL-125",
@@ -4283,7 +4382,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "horizontal_pull",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "PUS-001",
@@ -4328,7 +4428,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "horizontal_push",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "PUS-002",
@@ -4370,7 +4471,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "horizontal_push",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "PUS-003",
@@ -4415,7 +4517,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "dip",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "PUS-004",
@@ -4459,7 +4562,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "dip",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "PUS-005",
@@ -4504,7 +4608,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "dip",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "PUS-006",
@@ -4547,7 +4652,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "vertical_push",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "PUS-007",
@@ -4588,7 +4694,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "horizontal_push",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "PUS-008",
@@ -4633,7 +4740,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "horizontal_push",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "PUS-009",
@@ -4673,7 +4781,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "horizontal_push",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "PUS-010",
@@ -4719,7 +4828,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "muscle_up",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "PUS-011",
@@ -4763,7 +4873,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "muscle_up",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "PUS-012",
@@ -4805,7 +4916,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "dip",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "PUS-013",
@@ -4845,7 +4957,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "horizontal_push",
-    "is_regression": true
+    "is_regression": true,
+    "unilateral": false
   },
   {
     "id": "PUS-014",
@@ -4889,7 +5002,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "shoulder_isolation",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "PUS-122",
@@ -4930,7 +5044,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "vertical_push",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "PUS-123",
@@ -4973,7 +5088,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "horizontal_push",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "PUS-124",
@@ -5014,7 +5130,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": "horizontal_push",
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": true
   },
   {
     "id": "WAR-085",
@@ -5052,7 +5169,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "WAR-086",
@@ -5090,7 +5208,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "WAR-087",
@@ -5131,7 +5250,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "WAR-088",
@@ -5174,7 +5294,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "WAR-089",
@@ -5211,7 +5332,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "WAR-090",
@@ -5249,7 +5371,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "WAR-091",
@@ -5291,7 +5414,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "WAR-092",
@@ -5335,7 +5459,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "WAR-093",
@@ -5373,7 +5498,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "WAR-094",
@@ -5411,7 +5537,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "WAR-095",
@@ -5453,7 +5580,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "WAR-096",
@@ -5496,7 +5624,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "WAR-097",
@@ -5537,7 +5666,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "WAR-098",
@@ -5580,7 +5710,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "WAR-099",
@@ -5622,7 +5753,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "WAR-100",
@@ -5662,7 +5794,8 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   },
   {
     "id": "WAR-101",
@@ -5703,6 +5836,7 @@
     "prescribed_sets": null,
     "prescribed_duration_sec": null,
     "movement_family": null,
-    "is_regression": false
+    "is_regression": false,
+    "unilateral": false
   }
 ]

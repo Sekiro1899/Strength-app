@@ -13,6 +13,24 @@ import type { AppUser, ExerciseLevel } from "./types";
 /** Tranches d'âge du questionnaire (q1). */
 export type AgeBand = "18_25" | "26_45" | "45_60" | "60_plus";
 
+/** Objectif principal déclaré (q3). */
+export type Objective =
+  | "aesthetics"
+  | "strength"
+  | "performance"
+  | "efficiency"
+  | "complete_athlete";
+
+/**
+ * Rapport à l'intensité (q9) — « quand tu penses à transpirer, tu te dis… ».
+ * `prefers_strength_style` est la réponse « pas vraiment mon truc, je préfère
+ * la contraction pure et les temps de repos ».
+ */
+export type IntensityStyle =
+  | "loves_intensity"
+  | "accepts_intensity"
+  | "prefers_strength_style";
+
 export interface Profile {
   /** Plafond de difficulté des exercices proposés. */
   level: ExerciseLevel;
@@ -24,6 +42,17 @@ export interface Profile {
    * on leur préfère un goblet squat ou une barre.
    */
   allowRegressions: boolean;
+  objective: Objective | null;
+  intensityStyle: IntensityStyle | null;
+  /**
+   * Vient chercher de la charge et de la masse, pas de la sueur.
+   *
+   * Deux réponses le disent ensemble : un objectif de musculation (esthétique
+   * ou force pure) et un refus de l'intensité cardio. À ce profil, un finisher
+   * en AMRAP n'apporte rien qu'il ait demandé — et un programme de force
+   * classique lui parle bien davantage qu'un tirage.
+   */
+  strengthOriented: boolean;
 }
 
 const LEVEL_BY_ANSWER: Record<string, ExerciseLevel> = {
@@ -33,6 +62,20 @@ const LEVEL_BY_ANSWER: Record<string, ExerciseLevel> = {
 };
 
 const AGE_BANDS: AgeBand[] = ["18_25", "26_45", "45_60", "60_plus"];
+
+const OBJECTIVES: Objective[] = [
+  "aesthetics",
+  "strength",
+  "performance",
+  "efficiency",
+  "complete_athlete",
+];
+
+const INTENSITY_STYLES: IntensityStyle[] = [
+  "loves_intensity",
+  "accepts_intensity",
+  "prefers_strength_style",
+];
 
 function answer(
   answers: Record<string, string | string[]> | null | undefined,
@@ -49,6 +92,9 @@ export const DEFAULT_PROFILE: Profile = {
   level: "intermediaire",
   ageBand: null,
   allowRegressions: false,
+  objective: null,
+  intensityStyle: null,
+  strengthOriented: false,
 };
 
 export function profileFromAnswers(
@@ -56,9 +102,17 @@ export function profileFromAnswers(
 ): Profile {
   const rawLevel = answer(answers, "q7");
   const rawAge = answer(answers, "q1");
+  const rawObjective = answer(answers, "q3");
+  const rawIntensity = answer(answers, "q9");
 
   const level = (rawLevel && LEVEL_BY_ANSWER[rawLevel]) || DEFAULT_PROFILE.level;
   const ageBand = AGE_BANDS.includes(rawAge as AgeBand) ? (rawAge as AgeBand) : null;
+  const objective = OBJECTIVES.includes(rawObjective as Objective)
+    ? (rawObjective as Objective)
+    : null;
+  const intensityStyle = INTENSITY_STYLES.includes(rawIntensity as IntensityStyle)
+    ? (rawIntensity as IntensityStyle)
+    : null;
 
   return {
     level,
@@ -66,6 +120,11 @@ export function profileFromAnswers(
     // Un débutant apprend le mouvement ; après 60 ans, l'entrée en charge se
     // fait plus progressivement. Dans les deux cas la régression a sa place.
     allowRegressions: level === "debutant" || ageBand === "60_plus",
+    objective,
+    intensityStyle,
+    strengthOriented:
+      (objective === "aesthetics" || objective === "strength") &&
+      intensityStyle === "prefers_strength_style",
   };
 }
 

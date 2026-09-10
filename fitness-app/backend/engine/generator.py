@@ -5,6 +5,7 @@ Assemble les 4 blocs (warmup, main, core, finisher) en une séance complète.
 
 from database import supabase
 from engine.block_builder import (
+    textbook_label,
     BuildContext,
     build_core_block,
     build_finisher_block,
@@ -72,11 +73,19 @@ async def generate_workout(request: WorkoutRequest) -> WorkoutResponse:
         day_number=request.day_number,
         time_budget=request.time_budget,
         persona_id=request.persona_id,
+        user_program_id=request.user_program_id,
+        week_number=request.week_number,
+        objective=profile["objective"],
+        strength_oriented=profile["strength_oriented"],
+        age_band=profile["age_band"],
     )
 
     # ── Construire les 4 blocs ──
     warmup = build_warmup_block(ctx)
     main = build_main_block(ctx)
+    # Une séance récitée porte le nom de son programme : le focus prévu au plan
+    # ne décrit plus ce qu'elle contient.
+    session_label = textbook_label(ctx) or session_label
     core = build_core_block(ctx)
     finisher = build_finisher_block(ctx)
 
@@ -151,6 +160,8 @@ def _fetch_profile(user_id: str, persona: dict) -> dict:
         # Sans réponse exploitable, on retombe sur le persona.
         level = LEVEL_MAP.get(persona.get("experience_level", ""), "intermediaire")
     age_band = one("q1")
+    objective = one("q3")
+    intensity_style = one("q9")
 
     return {
         "level": level,
@@ -158,6 +169,15 @@ def _fetch_profile(user_id: str, persona: dict) -> dict:
         # Un débutant apprend le mouvement ; après 60 ans, l'entrée en charge
         # se fait plus progressivement. La régression a sa place.
         "allow_regressions": level == "debutant" or age_band == "60_plus",
+        "objective": objective,
+        "intensity_style": intensity_style,
+        # Vient chercher de la charge et de la masse, pas de la sueur : un
+        # objectif de musculation (q3) ET un refus de l'intensité cardio (q9).
+        # À ce profil, un finisher en AMRAP n'apporte rien qu'il ait demandé.
+        "strength_oriented": (
+            objective in ("aesthetics", "strength")
+            and intensity_style == "prefers_strength_style"
+        ),
     }
 
 

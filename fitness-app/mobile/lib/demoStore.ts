@@ -15,6 +15,7 @@ import {
   buildWarmup,
   createRng,
   sessionSeed,
+  textbookLabel,
 } from "./engine";
 import type { BuildContext } from "./engine";
 import { PERSONAS, PERSONA_PROGRAM_ELIGIBILITY, PROGRAMS, PROGRAM_PHASES } from "./fixtures";
@@ -283,7 +284,6 @@ export function demoGenerateWorkout(request: WorkoutRequest): WorkoutResponse {
   const protocol: Protocol =
     planned?.protocol ?? request.protocol ?? program.default_protocol ?? "full_body";
   const focus = planned?.focus ?? request.focus ?? "full_body";
-  const label = planned?.session_label ?? focus;
 
   // Le profil du pratiquant prime sur celui du persona : le persona dit une
   // motivation, le questionnaire dit un niveau réel et un âge.
@@ -295,8 +295,10 @@ export function demoGenerateWorkout(request: WorkoutRequest): WorkoutResponse {
 
   const ctx: BuildContext = {
     program,
+    userProgramId: request.user_program_id,
     personaId: state.user?.persona_id ?? request.persona_id ?? null,
     phase,
+    weekNumber,
     focus,
     profile,
     dayNumber,
@@ -307,6 +309,10 @@ export function demoGenerateWorkout(request: WorkoutRequest): WorkoutResponse {
     recentIds: recentExerciseIds(state.sessions),
     rng: createRng(sessionSeed(request.user_program_id, dayNumber)),
   };
+
+  // Une séance récitée porte le nom de son programme : le focus prévu au plan
+  // ne décrit plus ce qu'elle contient.
+  const label = textbookLabel(ctx) ?? planned?.session_label ?? focus;
 
   // Une séance déjà matérialisée est renvoyée telle quelle, SAUF si l'énergie
   // ou le lieu déclarés ont changé : la séance doit alors être recomposée.

@@ -25,8 +25,16 @@ from engine.exercise_selector import (
     fit_to_pool,
     select_varied,
     volume_for_energy,
+    fetch_exercises_by_ids,
+    _matches_location,
 )
 from engine.scaling import scaling_for
+from engine.textbook import (
+    LEARNING_LOAD_PCT,
+    LEARNING_NOTE,
+    LEARNING_WEEKS,
+    TEXTBOOK_PROGRAMS,
+)
 from models.workout import ExerciseBlock
 
 
@@ -36,7 +44,10 @@ class BuildContext:
     def __init__(self, program, phase, focus, level_max, energy, location,
                  rng: random.Random, recent_ids: set[str] | None = None,
                  allow_regressions: bool = False, day_number: int = 1,
-                 time_budget: str = "standard", persona_id: str | None = None):
+                 time_budget: str = "standard", persona_id: str | None = None,
+                 user_program_id: str = "", week_number: int = 1,
+                 objective: str | None = None, strength_oriented: bool = False,
+                 age_band: str | None = None):
         self.program = program
         self.phase = phase or {}
         self.focus = focus
@@ -55,6 +66,15 @@ class BuildContext:
         self.time_budget = time_budget
         # Le persona décide de l'ampleur du travail de force (voir _strength_plan).
         self.persona_id = persona_id
+        # Cycle en cours : graine STABLE du programme textbook attribué, qui ne
+        # doit pas changer d'une séance à l'autre.
+        self.user_program_id = user_program_id
+        # Semaine du cycle — décide des semaines d'apprentissage d'un débutant.
+        self.week_number = week_number
+        self.objective = objective
+        self.age_band = age_band
+        # Vient chercher de la charge et de la masse, pas de la sueur (q3 + q9).
+        self.strength_oriented = strength_oriented
         self.policy = apply_time_budget(volume_for_energy(energy), time_budget)
 
 
@@ -95,6 +115,26 @@ ISOLATION_REST_SHORT = 60
 
 # Créneau court : une série de moins sur les compounds, pas un repos de moins.
 SETS_COMPOUND_SHORT = 3
+
+CORE_REST = 45
+
+# Repos d'un mouvement unilatéral. Le côté qui attend récupère pendant que
+# l'autre travaille : une pause ENTRE les deux ne sert à rien — on change de
+# jambe et on enchaîne. Reste la pause après la paire : nulle sur une isolation
+# légère, courte sur tout le reste.
+UNILATERAL_REST = 30
+UNILATERAL_REST_ISOLATION = 0
+
+
+def _unilateral_rest(exercise: dict) -> int:
+    if exercise.get("exercise_type") == "isolation":
+        return UNILATERAL_REST_ISOLATION
+    return UNILATERAL_REST
+
+
+def _rest_for(exercise: dict, base: int) -> int:
+    """Repos d'un bloc : le barème unilatéral prime sur celui de la séance."""
+    return _unilateral_rest(exercise) if exercise.get("unilateral") else base
 
 # Plafond de séries, tous reports compris. Quand le pool est étroit, le volume
 # perdu se reporte sur les séries (`fit_to_pool` puis `compensate`) ; les deux
@@ -137,6 +177,11 @@ STRENGTH_PROTOCOLS = [
 # Personas orientés charge : barème complet, sur les deux premiers compounds.
 STRENGTH_PERSONAS = {"persona_smb", "persona_bf"}
 
+# Objectifs qui justifient de charger. Le 5x5 sert à prendre du muscle ET de la
+# force ; sur un objectif d'efficacité ou de performance athlétique, il mange le
+# temps de la séance sans servir ce qui a été demandé.
+STRENGTH_OBJECTIVES = {"aesthetics", "strength", "complete_athlete"}
+
 # Une séance sur trois porte du travail de force.
 STRENGTH_EVERY = 3
 
@@ -160,10 +205,19 @@ def _strength_plan(ctx: "BuildContext") -> dict | None:
     # Du lourd sur un jour sans jus, c'est comme ça qu'on se blesse.
     if ctx.energy < 3:
         return None
-    if ctx.day_number % STRENGTH_EVERY != 0:
+    # Le 5x5 suppose une technique déjà en place. Un débutant a d'abord des
+    # mouvements à apprendre — c'est le rôle des semaines d'apprentissage des
+    # séances textbook, pas d'une série lourde greffée sur une séance ordinaire.
+    if ctx.level_max == "debutant":
         return None
 
     dedicated = ctx.persona_id in STRENGTH_PERSONAS
+    # Hors des deux personas de force, encore faut-il que la charge fasse
+    # partie de ce que le pratiquant est venu chercher.
+    if not dedicated and ctx.objective not in STRENGTH_OBJECTIVES:
+        return None
+    if ctx.day_number % STRENGTH_EVERY != 0:
+        return None
     cycle = ctx.day_number // STRENGTH_EVERY
     return {
         # Ailleurs que chez les deux personas de force, on s'en tient au 5x5 :
@@ -181,6 +235,12 @@ def _apply_strength(block, exercise, protocol, bodyweight_only: bool) -> bool:
     prescription d'hypertrophie.
     """
     if exercise.get("movement_family") not in HEAVY_FAMILIES:
+        return False
+    # Le barème est écrit pour des mouvements bilatéraux chargés à la barre. Un
+    # « 5x5 à 82 % » sur des pompes archer ou un soulevé de terre unijambiste
+    # ne veut rien dire, et réimposerait trois minutes de repos là où la règle
+    # est justement d'enchaîner les côtés.
+    if exercise.get("unilateral"):
         return False
 
     block.sets = protocol["sets"]
@@ -305,7 +365,8 @@ def _build_circuit_main(ctx: BuildContext) -> list[ExerciseBlock]:
             reps=None if (is_cardio or imposed) else reps,
             duration_sec=imposed if imposed else (40 if is_cardio else None),
             load_pct_1rm=None if (is_cardio or imposed) else load,
-            rest_sec=rest,
+            rest_sec=_rest_for(ex, rest),
+            unilateral=bool(ex.get("unilateral")),
             notes="Circuit — format imposé" if imposed else f"Circuit — tour {i + 1}",
             # Un circuit au poids de corps enchaîne tractions et dips : la même
             # question de progression s'y pose qu'en séance de musculation.
@@ -315,10 +376,132 @@ def _build_circuit_main(ctx: BuildContext) -> list[ExerciseBlock]:
     return blocks
 
 
+def _int32(value: int) -> int:
+    """Repasse en entier signé 32 bits, comme le fait JavaScript."""
+    value &= 0xFFFFFFFF
+    return value - 0x100000000 if value & 0x80000000 else value
+
+
+def _hash_seed(key: str) -> int:
+    """FNV-1a 32 bits — miroir de `hashSeed` dans mobile/lib/engine.ts."""
+    h = 0x811C9DC5
+    for ch in key:
+        h = _int32(h ^ ord(ch))
+        h = _int32(h * 0x01000193)
+    return h & 0xFFFFFFFF
+
+
+def _first_random(seed: int) -> float:
+    """
+    Première valeur d'un mulberry32 — miroir de `createRng(seed)()`.
+
+    Le tirage d'exercices, lui, diverge déjà entre les deux moteurs (sha256
+    côté serveur, mulberry32 côté client). Ce n'est pas gênant pour un
+    exercice : les deux respectent les mêmes règles. Ça le serait ici — le
+    programme textbook attribué est visible et doit être LE MÊME des deux
+    côtés, sinon le pratiquant change de méthode selon d'où vient sa séance.
+    """
+    a = (seed + 0x6D2B79F5) & 0xFFFFFFFF
+    t = _int32(_int32(a ^ (a >> 15)) * _int32(1 | a))
+    t = _int32(t + _int32(_int32(t ^ ((t & 0xFFFFFFFF) >> 7)) * _int32(61 | t))) ^ t
+    return ((t ^ ((t & 0xFFFFFFFF) >> 14)) & 0xFFFFFFFF) / 4294967296
+
+
+# Chances qu'une séance soit RÉCITÉE plutôt que tirée. Plus hautes chez les
+# jeunes et les débutants : ce sont eux qui gagnent le plus à suivre un
+# programme écrit, où la charge monte séance après séance, plutôt qu'un
+# assemblage qui change à chaque fois.
+TEXTBOOK_ODDS = 0.3
+TEXTBOOK_ODDS_YOUNG_OR_NOVICE = 0.6
+
+
+def _textbook_odds(ctx: BuildContext) -> float:
+    if ctx.level_max == "debutant" or ctx.age_band == "18_25":
+        return TEXTBOOK_ODDS_YOUNG_OR_NOVICE
+    return TEXTBOOK_ODDS
+
+
+def _build_textbook_main(ctx: BuildContext) -> list[ExerciseBlock] | None:
+    """
+    Séance de force classique, servie telle qu'elle est écrite.
+
+    Retourne None dès qu'une condition manque — la séance repasse alors par le
+    tirage. C'est vrai en particulier du matériel : un poste sans candidat
+    praticable au lieu déclaré écarte le programme entier plutôt que de le
+    bricoler.
+    """
+    # Réservé à qui vient chercher de la charge et pas de la sueur (q3 + q9).
+    if not ctx.strength_oriented:
+        return None
+    # Trois mouvements lourds à trois minutes de repos : il faut le temps.
+    if ctx.time_budget == "short":
+        return None
+
+    # Tirage à part : consulter `ctx.rng` ici décalerait toutes les séances
+    # ordinaires, alors que rien n'a changé pour elles.
+    roll = _first_random(_hash_seed(f"textbook#{ctx.user_program_id}#{ctx.day_number}"))
+    if roll >= _textbook_odds(ctx):
+        return None
+
+    # Le programme attribué est stable sur tout le cycle : changer de méthode
+    # chaque semaine, c'est n'en suivre aucune.
+    program = TEXTBOOK_PROGRAMS[_hash_seed(ctx.user_program_id) % len(TEXTBOOK_PROGRAMS)]
+    # L'alternance des deux jours EST le programme.
+    day = program["days"][ctx.day_number % len(program["days"])]
+
+    wanted = {i for lift in day["lifts"] for i in lift["ids"]}
+    library = {e["id"]: e for e in fetch_exercises_by_ids(sorted(wanted))}
+
+    # Un débutant qui découvre le squat barre n'a pas de charge à chercher, il
+    # a un mouvement à installer.
+    learning = ctx.level_max == "debutant" and ctx.week_number <= LEARNING_WEEKS
+
+    blocks: list[ExerciseBlock] = []
+    for lift in day["lifts"]:
+        ex = next(
+            (library[i] for i in lift["ids"]
+             if i in library and _matches_location(library[i], ctx.location)),
+            None,
+        )
+        if ex is None:
+            return None
+        blocks.append(ExerciseBlock(
+            exercise_id=ex["id"],
+            name=ex["name"],
+            sets=lift["sets"],
+            reps=lift["reps"],
+            load_pct_1rm=min(lift["load"], LEARNING_LOAD_PCT) if learning else lift["load"],
+            rest_sec=lift["rest"],
+            protocol_label=f"{program['name']} · {day['label']}",
+            notes=LEARNING_NOTE if learning else f"{lift['sets']}x{lift['reps']} — {program['name']}",
+            scaling=scaling_for(ex["id"]),
+            unilateral=bool(ex.get("unilateral")),
+            log_results=True,
+        ))
+    return blocks
+
+
+def textbook_label(ctx: BuildContext) -> str | None:
+    """
+    Nom de la séance quand elle est récitée plutôt que composée.
+
+    Une séance textbook remplace le focus prévu au plan : l'alternance jour A /
+    jour B EST le programme. Afficher « Push » au-dessus d'un squat et d'un
+    soulevé de terre ferait douter du reste.
+    """
+    blocks = _build_textbook_main(ctx)
+    return blocks[0].protocol_label if blocks else None
+
+
 def build_main_block(ctx: BuildContext) -> list[ExerciseBlock]:
     """Bloc principal : compounds puis isolations, filtrés sur le programme."""
     if ctx.program.get("session_structure") == "circuit":
         return _build_circuit_main(ctx)
+
+    # Certaines séances ne se composent pas : elles se récitent.
+    textbook = _build_textbook_main(ctx)
+    if textbook is not None:
+        return textbook
 
     categories = FOCUS_CATEGORY_MAP.get(ctx.focus, ["push", "pull", "legs"])
     bodyweight_only = ctx.program.get("load_intensity") == "bodyweight"
@@ -418,7 +601,8 @@ def build_main_block(ctx: BuildContext) -> list[ExerciseBlock]:
             reps=reps,
             reps_max=reps_max,
             load_pct_1rm=None if bodyweight_only else load,
-            rest_sec=rest,
+            rest_sec=_rest_for(ex, rest),
+            unilateral=bool(ex.get("unilateral")),
             notes=f"Compound — {sets_compounds}x{rng_label(reps, reps_max)}",
             # Sur des tractions ou des dips, la prescription seule ne suffit
             # pas : il faut dire par où monter et par où descendre.
@@ -450,7 +634,8 @@ def build_main_block(ctx: BuildContext) -> list[ExerciseBlock]:
             reps=iso_reps,
             reps_max=iso_reps_max,
             load_pct_1rm=None if bodyweight_only else max(load - 10, 40),
-            rest_sec=rest_isolation,
+            rest_sec=_rest_for(ex, rest_isolation),
+            unilateral=bool(ex.get("unilateral")),
             notes=f"Isolation — {sets_isolation}x{rng_label(iso_reps, iso_reps_max)}",
             scaling=scaling_for(ex["id"]),
             # Pas de saisie de charge sur l'isolation : on coche et on enchaîne.
@@ -500,7 +685,10 @@ def apply_supersets(blocks, can_pair):
             continue
         second = remaining.pop(index)
         first.superset_with = second.exercise_id
-        second.rest_sec = first.rest_sec
+        # Le repos de la PAIRE est le plus long des deux : apparier une
+        # isolation unilatérale, qui n'a pas de repos propre, ne doit pas
+        # supprimer celui que l'autre mouvement réclame.
+        second.rest_sec = max(first.rest_sec or 0, second.rest_sec or 0)
         first.rest_sec = 0
         out.extend([first, second])
     return out
@@ -539,7 +727,8 @@ def build_core_block(ctx: BuildContext) -> list[ExerciseBlock]:
             sets=sets,
             reps=None if is_endurance else 12,
             duration_sec=40 if is_endurance else None,
-            rest_sec=45,
+            rest_sec=_rest_for(ex, CORE_REST),
+            unilateral=bool(ex.get("unilateral")),
             notes="Gainage" if is_endurance else "Core — force",
             log_results=True,
         ))
@@ -548,6 +737,12 @@ def build_core_block(ctx: BuildContext) -> list[ExerciseBlock]:
 
 def build_finisher_block(ctx: BuildContext) -> list[ExerciseBlock]:
     """Finisher / conditionnement. Aucun résultat à saisir."""
+    # Ce profil a répondu que transpirer n'était pas son sujet, et qu'il
+    # préférait la contraction et les temps de repos (q9). Un finisher en AMRAP
+    # ne lui apporte rien qu'il soit venu chercher — on lui rend le temps.
+    if ctx.strength_oriented:
+        return []
+
     # Énergie au plus bas : on supprime le finisher plutôt que de le bâcler.
     if not ctx.policy["with_finisher"]:
         return []

@@ -22,8 +22,15 @@
  */
 
 import { EXERCISES } from "./fixtures";
-import type { Profile } from "./profile";
+import type { Objective, Profile } from "./profile";
 import { scalingFor } from "./scaling";
+import {
+  LEARNING_LOAD_PCT,
+  LEARNING_NOTE,
+  LEARNING_WEEKS,
+  TEXTBOOK_PROGRAMS,
+  resolveLift,
+} from "./textbook";
 import type {
   Exercise,
   ExerciseBlock,
@@ -77,6 +84,34 @@ const COMPOUND_REST_FLOOR = 120;
 const COMPOUND_REST_SHORT = 90;
 const ISOLATION_REST = 75;
 const ISOLATION_REST_SHORT = 60;
+
+/**
+ * Repos d'un mouvement unilatéral.
+ *
+ * Le côté qui attend récupère pendant que l'autre travaille : une pause ENTRE
+ * les deux ne sert à rien — on change de jambe et on enchaîne. Reste la pause
+ * après la paire : nulle sur une isolation légère (des élévations de jambe
+ * s'enchaînent), courte sur tout le reste, où la charge ou le gainage
+ * demandent de souffler.
+ */
+const CORE_REST = 45;
+
+const UNILATERAL_REST = 30;
+const UNILATERAL_REST_ISOLATION = 0;
+
+function unilateralRest(ex: Exercise): number {
+  return ex.exercise_type === "isolation" ? UNILATERAL_REST_ISOLATION : UNILATERAL_REST;
+}
+
+/** Repos d'un bloc : le barème unilatéral prime sur celui de la séance. */
+function restFor(ex: Exercise, base: number): number {
+  return ex.unilateral ? unilateralRest(ex) : base;
+}
+
+/** Champs portés jusqu'au client quand l'exercice se travaille un côté à la fois. */
+function unilateralFields(ex: Exercise): { unilateral?: true } {
+  return ex.unilateral ? { unilateral: true } : {};
+}
 
 /** Créneau court : une série de moins sur les compounds, pas un repos de moins. */
 const SETS_COMPOUND_SHORT = 3;
@@ -466,7 +501,10 @@ function applySupersets(
     }
     const [second] = remaining.splice(index, 1);
     first.superset_with = second.exercise_id;
-    second.rest_sec = first.rest_sec;
+    // Le repos de la PAIRE est le plus long des deux : apparier une isolation
+    // unilatérale, qui n'a pas de repos propre, ne doit pas supprimer celui
+    // que l'autre mouvement réclame.
+    second.rest_sec = Math.max(first.rest_sec ?? 0, second.rest_sec ?? 0);
     first.rest_sec = 0;
     out.push(first, second);
   }
@@ -481,9 +519,16 @@ function compensate(sets: number, wanted: number, actual: number): number {
 
 export interface BuildContext {
   program: Program;
+  /**
+   * Cycle en cours. Sert de graine STABLE : le programme textbook attribué au
+   * pratiquant ne doit pas changer d'une séance à l'autre.
+   */
+  userProgramId: string;
   /** Persona : décide de l'ampleur du travail de force (voir STRENGTH). */
   personaId: string | null;
   phase: ProgramPhase | null;
+  /** Semaine du cycle — décide des semaines d'apprentissage d'un débutant. */
+  weekNumber: number;
   focus: Focus;
   /** Profil du pratiquant — plafond de niveau et tolérance aux régressions. */
   profile: Profile;
@@ -550,6 +595,17 @@ const STRENGTH_PROTOCOLS: StrengthProtocol[] = [
 /** Personas orientés charge : barème complet, sur les deux premiers compounds. */
 const STRENGTH_PERSONAS = new Set(["persona_smb", "persona_bf"]);
 
+/**
+ * Objectifs qui justifient de charger. Le 5x5 sert à prendre du muscle ET de
+ * la force ; sur un objectif d'efficacité ou de performance athlétique, il
+ * mange le temps de la séance sans servir ce qui a été demandé.
+ */
+const STRENGTH_OBJECTIVES = new Set<Objective>([
+  "aesthetics",
+  "strength",
+  "complete_athlete",
+]);
+
 /** Une séance sur trois porte du travail de force. */
 const STRENGTH_EVERY = 3;
 
@@ -581,9 +637,18 @@ function strengthPlan(ctx: BuildContext): StrengthPlan | null {
   if (ctx.timeBudget === "short") return null;
   // Du lourd sur un jour sans jus, c'est comme ça qu'on se blesse.
   if (ctx.energy < 3) return null;
-  if (ctx.dayNumber % STRENGTH_EVERY !== 0) return null;
+  // Le 5x5 suppose une technique déjà en place. Un débutant a d'abord des
+  // mouvements à apprendre — c'est le rôle des semaines d'apprentissage des
+  // séances textbook, pas d'une série lourde greffée sur une séance ordinaire.
+  if (ctx.profile.level === "debutant") return null;
 
   const dedicated = STRENGTH_PERSONAS.has(ctx.personaId ?? "");
+  // Hors des deux personas de force, encore faut-il que la charge fasse
+  // partie de ce que le pratiquant est venu chercher.
+  if (!dedicated && !STRENGTH_OBJECTIVES.has(ctx.profile.objective as Objective)) {
+    return null;
+  }
+  if (ctx.dayNumber % STRENGTH_EVERY !== 0) return null;
   const cycle = Math.floor(ctx.dayNumber / STRENGTH_EVERY);
   return {
     // Ailleurs que chez les deux personas de force, on s'en tient au 5x5 :
@@ -606,6 +671,11 @@ function applyStrength(
   bodyweightOnly: boolean,
 ): boolean {
   if (!HEAVY_FAMILIES.has(exercise.movement_family ?? "")) return false;
+  // Le barème est écrit pour des mouvements bilatéraux chargés à la barre. Un
+  // « 5x5 à 82 % » sur des pompes archer ou un soulevé de terre unijambiste ne
+  // veut rien dire, et réimposerait trois minutes de repos là où la règle est
+  // justement d'enchaîner les côtés.
+  if (exercise.unilateral) return false;
 
   block.sets = protocol.sets;
   block.reps = protocol.reps;
@@ -741,7 +811,8 @@ function buildCircuitMain(ctx: BuildContext): ExerciseBlock[] {
         : isCardio
           ? { duration_sec: 40 }
           : { reps, load_pct_1rm: load }),
-      rest_sec: rest,
+      rest_sec: restFor(ex, rest),
+      ...unilateralFields(ex),
       notes: imposed ? "Circuit — format imposé" : `Circuit — tour ${i + 1}`,
       // Un circuit au poids de corps enchaîne tractions et dips : la même
       // question de progression s'y pose qu'en séance de musculation.
@@ -751,8 +822,101 @@ function buildCircuitMain(ctx: BuildContext): ExerciseBlock[] {
   });
 }
 
+/**
+ * Chances qu'une séance soit RÉCITÉE plutôt que tirée.
+ *
+ * Plus hautes chez les jeunes et les débutants : ce sont eux qui gagnent le
+ * plus à suivre un programme écrit, où la charge monte séance après séance,
+ * plutôt qu'un assemblage qui change à chaque fois. Un pratiquant avancé, lui,
+ * sait déjà ce qu'il cherche — on le laisse surtout sur le tirage.
+ */
+const TEXTBOOK_ODDS = 0.3;
+const TEXTBOOK_ODDS_YOUNG_OR_NOVICE = 0.6;
+
+function textbookOdds(profile: Profile): number {
+  return profile.level === "debutant" || profile.ageBand === "18_25"
+    ? TEXTBOOK_ODDS_YOUNG_OR_NOVICE
+    : TEXTBOOK_ODDS;
+}
+
+function practicableAt(id: string, location: TrainingLocation): boolean {
+  const ex = findExercise(id);
+  return Boolean(ex && (ex.locations ?? ["gym"]).includes(location));
+}
+
+/**
+ * Séance de force classique, servie telle qu'elle est écrite.
+ *
+ * Retourne null dès qu'une condition manque — la séance repasse alors par le
+ * tirage. C'est vrai en particulier du matériel : un poste sans candidat
+ * praticable au lieu déclaré écarte le programme entier plutôt que de le
+ * bricoler. Starting Strength sans barre n'est pas Starting Strength.
+ */
+function buildTextbookMain(ctx: BuildContext): ExerciseBlock[] | null {
+  // Réservé à qui vient chercher de la charge et pas de la sueur (q3 + q9).
+  if (!ctx.profile.strengthOriented) return null;
+  // Trois mouvements lourds à trois minutes de repos : il faut le temps.
+  if (ctx.timeBudget === "short") return null;
+
+  // Tirage à part : consulter le hasard du tirage d'exercices ici décalerait
+  // toutes les séances ordinaires, alors que rien n'a changé pour elles.
+  const roll = createRng(hashSeed(`textbook#${ctx.userProgramId}#${ctx.dayNumber}`))();
+  if (roll >= textbookOdds(ctx.profile)) return null;
+
+  // Le programme attribué est stable sur tout le cycle : changer de méthode
+  // chaque semaine, c'est n'en suivre aucune.
+  const program =
+    TEXTBOOK_PROGRAMS[hashSeed(ctx.userProgramId) % TEXTBOOK_PROGRAMS.length];
+  // L'alternance des deux jours EST le programme.
+  const day = program.days[ctx.dayNumber % program.days.length];
+
+  // Un débutant qui découvre le squat barre n'a pas de charge à chercher, il a
+  // un mouvement à installer.
+  const learning =
+    ctx.profile.level === "debutant" && ctx.weekNumber <= LEARNING_WEEKS;
+
+  const blocks: ExerciseBlock[] = [];
+  for (const lift of day.lifts) {
+    const id = resolveLift(lift, ctx.location, practicableAt);
+    if (!id) return null;
+    const ex = findExercise(id);
+    if (!ex) return null;
+
+    blocks.push({
+      exercise_id: ex.id,
+      name: ex.name,
+      sets: lift.sets,
+      reps: lift.reps,
+      load_pct_1rm: learning ? Math.min(lift.loadPct, LEARNING_LOAD_PCT) : lift.loadPct,
+      rest_sec: lift.restSec,
+      protocol_label: `${program.name} · ${day.label}`,
+      notes: learning ? LEARNING_NOTE : `${lift.sets}x${lift.reps} — ${program.name}`,
+      ...(scalingFor(ex.id) ? { scaling: scalingFor(ex.id)! } : {}),
+      ...unilateralFields(ex),
+      log_results: true,
+    });
+  }
+  return blocks;
+}
+
+/**
+ * Nom de la séance quand elle est récitée plutôt que composée.
+ *
+ * Une séance textbook remplace le focus prévu au plan : l'alternance jour A /
+ * jour B EST le programme. Afficher « Push » au-dessus d'un squat et d'un
+ * soulevé de terre ne tromperait personne longtemps, mais ferait douter du
+ * reste. On recompose donc l'étiquette depuis le programme servi.
+ */
+export function textbookLabel(ctx: BuildContext): string | null {
+  return buildTextbookMain(ctx)?.[0]?.protocol_label ?? null;
+}
+
 export function buildMain(ctx: BuildContext): ExerciseBlock[] {
   if (ctx.program.session_structure === "circuit") return buildCircuitMain(ctx);
+
+  // Certaines séances ne se composent pas : elles se récitent.
+  const textbook = buildTextbookMain(ctx);
+  if (textbook) return textbook;
 
   const policy = sessionPolicy(ctx);
   const categories = FOCUS_CATEGORY_MAP[ctx.focus] ?? ["push", "pull", "legs"];
@@ -867,7 +1031,8 @@ export function buildMain(ctx: BuildContext): ExerciseBlock[] {
     reps,
     ...(repsMax ? { reps_max: repsMax } : {}),
     ...(bodyweightOnly ? {} : { load_pct_1rm: load }),
-    rest_sec: rest,
+    rest_sec: restFor(ex, rest),
+    ...unilateralFields(ex),
     notes: `Compound — ${compoundSets}x${range(reps, repsMax)}`,
     // Sur des tractions ou des dips, la prescription seule ne suffit pas :
     // il faut dire par où monter et par où descendre.
@@ -899,7 +1064,8 @@ export function buildMain(ctx: BuildContext): ExerciseBlock[] {
     reps: isoReps,
     ...(isoRepsMax ? { reps_max: isoRepsMax } : {}),
     ...(bodyweightOnly ? {} : { load_pct_1rm: Math.max(load - 10, 40) }),
-    rest_sec: restIsolation,
+    rest_sec: restFor(ex, restIsolation),
+    ...unilateralFields(ex),
     notes: `Isolation — ${isolationSets}x${range(isoReps, isoRepsMax)}`,
     ...(scalingFor(ex.id) ? { scaling: scalingFor(ex.id)! } : {}),
     // Pas de saisie de charge sur l'isolation : on coche la série et on
@@ -969,7 +1135,8 @@ export function buildCore(ctx: BuildContext): ExerciseBlock[] {
       name: ex.name,
       sets: coreFit.sets,
       ...(isEndurance ? { duration_sec: 40 } : { reps: 12 }),
-      rest_sec: 45,
+      rest_sec: restFor(ex, CORE_REST),
+      ...unilateralFields(ex),
       notes: isEndurance ? "Gainage" : "Core — force",
       log_results: true,
     };
@@ -977,6 +1144,11 @@ export function buildCore(ctx: BuildContext): ExerciseBlock[] {
 }
 
 export function buildFinisher(ctx: BuildContext): ExerciseBlock[] {
+  // Ce profil a répondu que transpirer n'était pas son sujet, et qu'il
+  // préférait la contraction et les temps de repos (q9). Un finisher en AMRAP
+  // ne lui apporte rien qu'il soit venu chercher — on lui rend le temps.
+  if (ctx.profile.strengthOriented) return [];
+
   const policy = sessionPolicy(ctx);
   // Énergie au plus bas : on supprime le finisher plutôt que de le bâcler.
   if (!policy.withFinisher) return [];

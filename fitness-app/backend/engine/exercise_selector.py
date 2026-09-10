@@ -68,6 +68,19 @@ def _matches_location(ex: dict, location: str) -> bool:
     return location in (ex.get("locations") or ["gym"])
 
 
+def fetch_exercises_by_ids(ids: list[str]) -> list[dict]:
+    """
+    Récupère des exercices NOMMÉMENT, hors de toute règle de sélection.
+
+    Les séances textbook désignent leurs mouvements par identifiant : il ne
+    s'agit pas de choisir dans un pool mais de servir un programme écrit.
+    """
+    if not ids:
+        return []
+    result = supabase.table("exercises").select("*").in_("id", ids).execute()
+    return result.data or []
+
+
 def session_rng(user_program_id: str, day_number: int) -> random.Random:
     """
     Tirage reproductible par séance.

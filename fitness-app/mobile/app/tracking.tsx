@@ -26,6 +26,19 @@ import {
 } from "../lib/data";
 import type { BlockType, ExerciseBlock, WorkoutSession } from "../lib/types";
 
+/**
+ * Les deux côtés d'un mouvement unilatéral, dans l'ordre où on les enchaîne.
+ * L'ordre est fixe : c'est ce qui permet de reprendre une série interrompue
+ * sans se demander quel côté a déjà été fait.
+ */
+const SIDES = [
+  { short: "G", long: "Gauche" },
+  { short: "D", long: "Droite" },
+] as const;
+
+/** Index d'un second côté — celui après lequel le repos s'ouvre. */
+const isSecondSide = (index: number) => index % SIDES.length === SIDES.length - 1;
+
 /** Sur l'écran de suivi la prescription porte son unité : « 10-12 reps ». */
 const targetWithUnit = (block: ExerciseBlock) => formatTarget(block, true);
 
@@ -116,7 +129,11 @@ export default function TrackingScreen() {
     if (!current) return;
     setEntries((prev) => {
       if (prev[current.uid]) return prev;
-      const count = current.block.sets;
+      // Un mouvement unilatéral se coche deux fois par série : un côté, puis
+      // l'autre. Le côté qui attend récupère pendant que l'autre travaille.
+      const count = current.block.unilateral
+        ? current.block.sets * SIDES.length
+        : current.block.sets;
       const rows: SetEntry[] = Array.from({ length: count }, () => ({
         load: "",
         reps: current.block.reps !== undefined ? String(current.block.reps) : "",
@@ -158,8 +175,11 @@ export default function TrackingScreen() {
     const rows = entries[uid] ?? [];
     const wasDone = rows[index]?.done;
     updateSet(uid, index, { done: !wasDone });
+    // Sur un mouvement unilatéral, valider le premier côté n'ouvre pas de
+    // repos : on enchaîne sur l'autre jambe. Le minuteur attend la paire.
+    const opensRest = !current?.block.unilateral || isSecondSide(index);
     // Valider une série lance le repos ; la dévalider l'annule.
-    setRestLeft(!wasDone && restSec ? restSec : null);
+    setRestLeft(!wasDone && opensRest && restSec ? restSec : null);
   }
 
   async function handleFinish() {
@@ -194,6 +214,12 @@ export default function TrackingScreen() {
 
   const rows = entries[current.uid] ?? [];
   const logResults = current.block.log_results !== false;
+  const unilateral = Boolean(current.block.unilateral);
+  /** « S2 » en bilatéral, « S2 G » puis « S2 D » quand on travaille par côté. */
+  const setLabel = (i: number) =>
+    unilateral
+      ? `S${Math.floor(i / SIDES.length) + 1} ${SIDES[i % SIDES.length].short}`
+      : `S${i + 1}`;
   // Sur un superset le repos se prend après la paire, pas entre les deux.
   const restAfter = current.partner?.rest_sec ?? current.block.rest_sec;
   const doneCount = rows.filter((r) => r.done).length;
@@ -260,6 +286,7 @@ export default function TrackingScreen() {
             <Text className="font-mono text-[10px] uppercase tracking-label text-muted mt-2.5">
               {current.blockName}
               {` · ${current.block.sets}×${targetWithUnit(current.block)}`}
+              {current.block.unilateral ? " par côté" : ""}
               {current.block.load_pct_1rm !== undefined
                 ? ` · ${current.block.load_pct_1rm}% 1RM`
                 : ""}
@@ -292,14 +319,18 @@ export default function TrackingScreen() {
                   key={i}
                   accessibilityRole="checkbox"
                   accessibilityState={{ checked: row.done }}
-                  accessibilityLabel={`Valider la série ${i + 1}`}
+                  accessibilityLabel={
+                    unilateral
+                      ? `Valider la série ${Math.floor(i / SIDES.length) + 1}, côté ${SIDES[i % SIDES.length].long}`
+                      : `Valider la série ${i + 1}`
+                  }
                   onPress={() => toggleSet(current.uid, i, restAfter)}
                   className={`flex-row items-center gap-2.5 rounded-xl border px-3.5 py-3.5 mb-2 ${
                     row.done ? "bg-accent/10 border-accent" : "bg-surface border-line"
                   }`}
                 >
-                  <Text className="w-7 font-mono-md text-[11px] text-accent">
-                    S{i + 1}
+                  <Text className="w-9 font-mono-md text-[11px] text-accent">
+                    {setLabel(i)}
                   </Text>
                   <View className="flex-1 pr-2">
                     <Text className="font-body-sb text-[14px] text-ink">
@@ -308,9 +339,13 @@ export default function TrackingScreen() {
                         : targetWithUnit(current.block)}
                     </Text>
                     <Text className="font-body text-[11px] text-muted mt-1">
-                      {current.partner
-                        ? "Enchaîne les deux, repos après la paire."
-                        : "Rien à noter — coche quand c'est fait."}
+                      {unilateral
+                        ? isSecondSide(i)
+                          ? "Série terminée."
+                          : "Enchaîne sur l'autre côté, sans pause."
+                        : current.partner
+                          ? "Enchaîne les deux, repos après la paire."
+                          : "Rien à noter — coche quand c'est fait."}
                     </Text>
                   </View>
                   <View
@@ -333,8 +368,8 @@ export default function TrackingScreen() {
                 row.done ? "bg-accent/10 border-accent" : "bg-surface border-line"
               }`}
             >
-              <Text className="w-7 font-mono-md text-[11px] text-accent">
-                S{i + 1}
+              <Text className="w-9 font-mono-md text-[11px] text-accent">
+                {setLabel(i)}
               </Text>
 
               {/* minWidth:0 — sur react-native-web le <input> a une largeur
@@ -457,7 +492,9 @@ export default function TrackingScreen() {
 
           <View className="items-center mt-4">
             <MonoLabel>
-              {`${doneCount}/${rows.length} séries validées`}
+              {unilateral
+                ? `${Math.floor(doneCount / SIDES.length)}/${current.block.sets} séries validées · ${doneCount % SIDES.length ? "un côté fait" : "les deux côtés"}`
+                : `${doneCount}/${rows.length} séries validées`}
             </MonoLabel>
           </View>
         </View>

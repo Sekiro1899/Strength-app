@@ -54,6 +54,9 @@ class ExerciseBlock(BaseModel):
     protocol_label: str | None = None
     # Comment monter ou descendre en difficulté — voir engine/scaling.py.
     scaling: ExerciseScaling | None = None
+    # Un côté à la fois : l'écran de suivi dédouble chaque série en gauche puis
+    # droite, et ne lance le minuteur qu'une fois les deux côtés passés.
+    unilateral: bool = False
 
 
 class WorkoutResponse(BaseModel):

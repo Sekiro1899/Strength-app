@@ -231,6 +231,12 @@ export interface Exercise {
    * débutant ou d'un pratiquant âgé ; pour les autres elle ne charge pas assez.
    */
   is_regression: boolean;
+  /**
+   * Se travaille un côté à la fois. Le côté au repos récupère pendant que
+   * l'autre travaille : il n'y a donc pas de pause à prendre ENTRE les deux
+   * côtés, seulement après la paire.
+   */
+  unilateral: boolean;
   /** Démonstration YouTube. Null = repli sur une recherche par nom. */
   video_url: string | null;
   /**
@@ -374,6 +380,11 @@ export interface ExerciseBlock {
   protocol_label?: string;
   /** Comment monter ou descendre en difficulté — voir lib/scaling.ts. */
   scaling?: ExerciseScaling;
+  /**
+   * Un côté à la fois : l'écran de suivi dédouble chaque série en gauche puis
+   * droite, et ne lance le minuteur qu'une fois les deux côtés passés.
+   */
+  unilateral?: boolean;
 }
 
 /**

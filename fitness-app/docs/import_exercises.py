@@ -157,6 +157,33 @@ def is_separator(row) -> bool:
     return not cell(row, C_NAME) or "▌" in str(row[C_ID] or "")
 
 
+# ─── Patron de mouvement (exercices de core) ───
+
+# Le moteur tire un patron différent par exercice de core, pour éviter deux
+# gainages d'affilée. La feuille ne porte pas cette information : elle est
+# maintenue ici, indexée par id.
+MOVEMENT_PATTERNS = {
+    # Anti-extension : résister à l'ouverture du tronc
+    "COR-057": "anti_extension", "COR-110": "anti_extension",
+    "COR-111": "anti_extension", "COR-112": "anti_extension",
+    "COR-121": "anti_extension", "COR-065": "anti_extension",
+    "COR-067": "anti_extension",
+    # Flexion du rachis
+    "COR-059": "flexion", "COR-113": "flexion", "COR-114": "flexion",
+    "COR-115": "flexion", "COR-062": "flexion", "COR-066": "flexion",
+    # Plan transverse : rotation ET anti-rotation
+    "COR-116": "rotation", "COR-117": "rotation",
+    "COR-058": "rotation", "COR-063": "rotation",
+    # Anti-flexion latérale
+    "COR-118": "anti_lateral_flexion", "COR-119": "anti_lateral_flexion",
+    # Flexion de hanche
+    "COR-055": "hip_flexion", "COR-056": "hip_flexion",
+    "COR-120": "hip_flexion", "COR-061": "hip_flexion", "COR-064": "hip_flexion",
+    # Extension / chaîne postérieure
+    "COR-060": "extension",
+}
+
+
 def convert(row) -> dict:
     raw_cat = cell(row, C_CAT).lower()
     category = CATEGORIES.get(raw_cat)
@@ -190,6 +217,7 @@ def convert(row) -> dict:
         # Vide = universel : les warmups/finishers servent tous les programmes.
         "target_programs": targets,
         "exercise_type": TYPES.get(cell(row, C_TYPE).lower()),
+        "movement_pattern": MOVEMENT_PATTERNS.get(cell(row, C_ID)),
         "warmup_target": [slug(w) for w in split_list(cell(row, C_WARMUP), ",")],
         "video_url": cell(row, C_VIDEO) or None,
         "image_url": None,  # rempli par docs/fetch_exercise_images.py
@@ -217,9 +245,28 @@ def main() -> None:
     if len(ids) != len(set(ids)):
         sys.exit("IDs dupliqués dans la bibliothèque")
 
+    # La feuille n'est pas la seule source : certains exercices ont été ajoutés
+    # directement au JSON (les 12 core orientés séries). Un import les
+    # écraserait ; on les conserve, ainsi que les champs enrichis hors feuille.
+    kept = 0
+    if OUT.exists():
+        previous = json.loads(OUT.read_text(encoding="utf-8"))
+        by_id = {e["id"]: e for e in exercises}
+        for old in previous:
+            if old["id"] in by_id:
+                # image_url est rempli par un script séparé : ne pas le perdre.
+                if old.get("image_url") and not by_id[old["id"]].get("image_url"):
+                    by_id[old["id"]]["image_url"] = old["image_url"]
+            else:
+                exercises.append(old)
+                kept += 1
+
+    exercises.sort(key=lambda e: e["id"])
+
     OUT.write_text(json.dumps(exercises, ensure_ascii=False, indent=2) + "\n",
                    encoding="utf-8")
-    print(f"OK  {len(exercises)} exercices  ({skipped} séparateurs ignorés)")
+    print(f"OK  {len(exercises)} exercices  "
+          f"({skipped} séparateurs ignorés, {kept} conservés hors feuille)")
     print(f"->  {OUT}")
 
 

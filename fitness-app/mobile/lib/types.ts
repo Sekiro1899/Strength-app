@@ -178,6 +178,18 @@ export type TrainingLocation = "gym" | "home" | "outdoor";
 /** Décide dans quel bloc l'exercice tombe — prime sur la catégorie. */
 export type ExerciseType = "compound" | "isolation" | "core" | "cardio";
 
+/**
+ * Patron de mouvement — renseigné sur les exercices de core uniquement.
+ * Sert à tirer un bloc varié plutôt que deux gainages d'affilée.
+ */
+export type MovementPattern =
+  | "anti_extension"
+  | "flexion"
+  | "extension"
+  | "rotation"
+  | "anti_lateral_flexion"
+  | "hip_flexion";
+
 export interface Exercise {
   id: string;
   category: ExerciseCategory;
@@ -195,6 +207,8 @@ export interface Exercise {
   warmup_target: string[] | null;
   description: string | null;
   exercise_type: ExerciseType | null;
+  /** Non-null sur les exercices de core — pilote la diversité du bloc. */
+  movement_pattern: MovementPattern | null;
   /** Vide = universel (warmups et finishers servent tous les programmes). */
   target_programs: string[];
   image_url: string | null;

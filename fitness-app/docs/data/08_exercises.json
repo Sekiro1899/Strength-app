@@ -37,7 +37,8 @@
     "exercise_type": "compound",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "PUS-002",
@@ -74,7 +75,8 @@
     "exercise_type": "compound",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "PUS-003",
@@ -113,7 +115,8 @@
     "exercise_type": "compound",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "PUS-004",
@@ -152,7 +155,8 @@
     "exercise_type": "compound",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "PUS-005",
@@ -191,7 +195,8 @@
     "exercise_type": "compound",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "PUS-006",
@@ -229,7 +234,8 @@
     "exercise_type": "compound",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "PUS-007",
@@ -264,7 +270,8 @@
     "exercise_type": "compound",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "PUS-008",
@@ -304,7 +311,8 @@
     "exercise_type": "compound",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "PUS-009",
@@ -338,7 +346,8 @@
     "exercise_type": "compound",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "PUS-010",
@@ -379,7 +388,8 @@
     "exercise_type": "compound",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "PUS-011",
@@ -418,7 +428,8 @@
     "exercise_type": "compound",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "PUS-012",
@@ -455,7 +466,8 @@
     "exercise_type": "compound",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "PUS-013",
@@ -489,7 +501,8 @@
     "exercise_type": "compound",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "PUS-014",
@@ -528,7 +541,8 @@
     "exercise_type": "isolation",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "PUL-015",
@@ -565,7 +579,8 @@
     "exercise_type": "compound",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "PUL-016",
@@ -605,7 +620,8 @@
     "exercise_type": "compound",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "PUL-017",
@@ -642,7 +658,8 @@
     "exercise_type": "compound",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "PUL-018",
@@ -680,7 +697,8 @@
     "exercise_type": "compound",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "PUL-019",
@@ -719,7 +737,8 @@
     "exercise_type": "compound",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "PUL-020",
@@ -757,7 +776,8 @@
     "exercise_type": "compound",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "PUL-021",
@@ -796,7 +816,8 @@
     "exercise_type": "compound",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "PUL-022",
@@ -836,7 +857,8 @@
     "exercise_type": "compound",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "PUL-023",
@@ -874,7 +896,8 @@
     "exercise_type": "compound",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "PUL-024",
@@ -913,7 +936,8 @@
     "exercise_type": "isolation",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "PUL-025",
@@ -952,7 +976,8 @@
     "exercise_type": "isolation",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "PUL-026",
@@ -992,7 +1017,8 @@
     "exercise_type": "compound",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "PUL-027",
@@ -1026,7 +1052,8 @@
     "exercise_type": "compound",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "ARM-028",
@@ -1062,7 +1089,8 @@
     "exercise_type": "isolation",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "ARM-029",
@@ -1096,7 +1124,8 @@
     "exercise_type": "isolation",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "ARM-030",
@@ -1132,7 +1161,8 @@
     "exercise_type": "isolation",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "ARM-031",
@@ -1167,7 +1197,8 @@
     "exercise_type": "isolation",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "ARM-032",
@@ -1202,7 +1233,8 @@
     "exercise_type": "isolation",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "ARM-033",
@@ -1237,7 +1269,8 @@
     "exercise_type": "isolation",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "ARM-034",
@@ -1270,7 +1303,8 @@
     "exercise_type": "isolation",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "ARM-035",
@@ -1304,7 +1338,8 @@
     "exercise_type": "isolation",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "ARM-036",
@@ -1341,7 +1376,8 @@
     "exercise_type": "isolation",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "ARM-037",
@@ -1380,7 +1416,8 @@
     "exercise_type": "isolation",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "LEG-038",
@@ -1418,7 +1455,8 @@
     "exercise_type": "compound",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "LEG-039",
@@ -1459,7 +1497,8 @@
     "exercise_type": "compound",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "LEG-040",
@@ -1497,7 +1536,8 @@
     "exercise_type": "compound",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "LEG-041",
@@ -1532,7 +1572,8 @@
     "exercise_type": "compound",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "LEG-042",
@@ -1574,7 +1615,8 @@
     "exercise_type": "compound",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "LEG-043",
@@ -1614,7 +1656,8 @@
     "exercise_type": "compound",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "LEG-044",
@@ -1655,7 +1698,8 @@
     "exercise_type": "compound",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "LEG-045",
@@ -1696,7 +1740,8 @@
     "exercise_type": "compound",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "LEG-046",
@@ -1735,7 +1780,8 @@
     "exercise_type": "compound",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "LEG-047",
@@ -1775,7 +1821,8 @@
     "exercise_type": "compound",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "LEG-048",
@@ -1814,7 +1861,8 @@
     "exercise_type": "compound",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "LEG-049",
@@ -1855,7 +1903,8 @@
     "exercise_type": "compound",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "LEG-050",
@@ -1890,7 +1939,8 @@
     "exercise_type": "isolation",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "LEG-051",
@@ -1925,7 +1975,8 @@
     "exercise_type": "isolation",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "LEG-052",
@@ -1960,7 +2011,8 @@
     "exercise_type": "compound",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "LEG-053",
@@ -1993,7 +2045,8 @@
     "exercise_type": "compound",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "LEG-054",
@@ -2028,7 +2081,8 @@
     "exercise_type": "isolation",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "COR-055",
@@ -2062,7 +2116,8 @@
     "exercise_type": "core",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": "hip_flexion"
   },
   {
     "id": "COR-056",
@@ -2099,7 +2154,8 @@
     "exercise_type": "core",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": "hip_flexion"
   },
   {
     "id": "COR-057",
@@ -2137,7 +2193,8 @@
     "exercise_type": "core",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": "anti_extension"
   },
   {
     "id": "COR-058",
@@ -2173,7 +2230,8 @@
     "exercise_type": "core",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": "rotation"
   },
   {
     "id": "COR-059",
@@ -2208,7 +2266,8 @@
     "exercise_type": "core",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": "flexion"
   },
   {
     "id": "COR-060",
@@ -2247,7 +2306,8 @@
     "exercise_type": "core",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": "extension"
   },
   {
     "id": "COR-061",
@@ -2287,7 +2347,8 @@
     "exercise_type": "core",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": "hip_flexion"
   },
   {
     "id": "COR-062",
@@ -2319,7 +2380,8 @@
     "exercise_type": "core",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": "flexion"
   },
   {
     "id": "COR-063",
@@ -2356,7 +2418,8 @@
     "exercise_type": "core",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": "rotation"
   },
   {
     "id": "COR-064",
@@ -2392,7 +2455,8 @@
     "exercise_type": "core",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": "hip_flexion"
   },
   {
     "id": "COR-065",
@@ -2428,7 +2492,8 @@
     "exercise_type": "core",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": "anti_extension"
   },
   {
     "id": "COR-066",
@@ -2462,7 +2527,8 @@
     "exercise_type": "core",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": "flexion"
   },
   {
     "id": "COR-067",
@@ -2498,7 +2564,8 @@
     "exercise_type": "core",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": "anti_extension"
   },
   {
     "id": "EXP-068",
@@ -2538,7 +2605,8 @@
     "exercise_type": "compound",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "EXP-069",
@@ -2577,7 +2645,8 @@
     "exercise_type": "compound",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "EXP-070",
@@ -2617,7 +2686,8 @@
     "exercise_type": "compound",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "EXP-071",
@@ -2657,7 +2727,8 @@
     "exercise_type": "compound",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "EXP-072",
@@ -2698,7 +2769,8 @@
     "exercise_type": "compound",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "EXP-073",
@@ -2737,7 +2809,8 @@
     "exercise_type": "compound",
     "warmup_target": [],
     "video_url": "https://youtube.com/results?search_query=jump+rope+beginner+tutorial",
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "COM-074",
@@ -2777,7 +2850,8 @@
     "exercise_type": "compound",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "COM-075",
@@ -2818,7 +2892,8 @@
     "exercise_type": "compound",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "COM-076",
@@ -2860,7 +2935,8 @@
     "exercise_type": "compound",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "COM-077",
@@ -2900,7 +2976,8 @@
     "exercise_type": "compound",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "COM-078",
@@ -2942,7 +3019,8 @@
     "exercise_type": "compound",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "COM-079",
@@ -2984,7 +3062,8 @@
     "exercise_type": "compound",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "COM-080",
@@ -3026,7 +3105,8 @@
     "exercise_type": "compound",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "CON-081",
@@ -3068,7 +3148,8 @@
     "exercise_type": "cardio",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "CON-082",
@@ -3110,7 +3191,8 @@
     "exercise_type": "cardio",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "CON-083",
@@ -3153,7 +3235,8 @@
     "exercise_type": "cardio",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "CON-084",
@@ -3192,7 +3275,8 @@
     "exercise_type": "cardio",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "WAR-085",
@@ -3225,7 +3309,8 @@
       "leg"
     ],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "WAR-086",
@@ -3258,7 +3343,8 @@
       "leg"
     ],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "WAR-087",
@@ -3294,7 +3380,8 @@
       "single_leg"
     ],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "WAR-088",
@@ -3332,7 +3419,8 @@
       "squat"
     ],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "WAR-089",
@@ -3364,7 +3452,8 @@
       "deadlift"
     ],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "WAR-090",
@@ -3397,7 +3486,8 @@
       "deadlift"
     ],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "WAR-091",
@@ -3434,7 +3524,8 @@
       "deadlift"
     ],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "WAR-092",
@@ -3473,7 +3564,8 @@
       "bench"
     ],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "WAR-093",
@@ -3506,7 +3598,8 @@
       "bench"
     ],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "WAR-094",
@@ -3539,7 +3632,8 @@
       "ohp"
     ],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "WAR-095",
@@ -3576,7 +3670,8 @@
       "ohp"
     ],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "WAR-096",
@@ -3614,7 +3709,8 @@
       "pull"
     ],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "WAR-097",
@@ -3650,7 +3746,8 @@
       "pull"
     ],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "WAR-098",
@@ -3688,7 +3785,8 @@
       "ohp"
     ],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "WAR-099",
@@ -3725,7 +3823,8 @@
       "all"
     ],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "WAR-100",
@@ -3760,7 +3859,8 @@
       "push"
     ],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "WAR-101",
@@ -3796,7 +3896,8 @@
       "ohp"
     ],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "FIN-102",
@@ -3827,7 +3928,8 @@
     "exercise_type": null,
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "FIN-103",
@@ -3858,7 +3960,8 @@
     "exercise_type": null,
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "FIN-104",
@@ -3890,7 +3993,8 @@
     "exercise_type": null,
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "FIN-105",
@@ -3926,7 +4030,8 @@
     "exercise_type": null,
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "FIN-106",
@@ -3963,7 +4068,8 @@
     "exercise_type": null,
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "FIN-107",
@@ -3998,7 +4104,8 @@
     "exercise_type": null,
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "FIN-108",
@@ -4033,7 +4140,8 @@
     "exercise_type": null,
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "FIN-109",
@@ -4068,7 +4176,8 @@
     "exercise_type": null,
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": null
   },
   {
     "id": "COR-110",
@@ -4110,7 +4219,8 @@
     "exercise_type": "core",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": "anti_extension"
   },
   {
     "id": "COR-111",
@@ -4150,7 +4260,8 @@
     "exercise_type": "core",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": "anti_extension"
   },
   {
     "id": "COR-112",
@@ -4189,7 +4300,8 @@
     "exercise_type": "core",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": "anti_extension"
   },
   {
     "id": "COR-113",
@@ -4227,7 +4339,8 @@
     "exercise_type": "core",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": "flexion"
   },
   {
     "id": "COR-114",
@@ -4265,7 +4378,8 @@
     "exercise_type": "core",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": "flexion"
   },
   {
     "id": "COR-115",
@@ -4302,7 +4416,8 @@
     "exercise_type": "core",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": "flexion"
   },
   {
     "id": "COR-116",
@@ -4340,7 +4455,8 @@
     "exercise_type": "core",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": "rotation"
   },
   {
     "id": "COR-117",
@@ -4378,7 +4494,8 @@
     "exercise_type": "core",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": "rotation"
   },
   {
     "id": "COR-118",
@@ -4418,7 +4535,8 @@
     "exercise_type": "core",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": "anti_lateral_flexion"
   },
   {
     "id": "COR-119",
@@ -4459,7 +4577,8 @@
     "exercise_type": "core",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": "anti_lateral_flexion"
   },
   {
     "id": "COR-120",
@@ -4501,7 +4620,8 @@
     "exercise_type": "core",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": "hip_flexion"
   },
   {
     "id": "COR-121",
@@ -4541,6 +4661,7 @@
     "exercise_type": "core",
     "warmup_target": [],
     "video_url": null,
-    "image_url": null
+    "image_url": null,
+    "movement_pattern": "anti_extension"
   }
 ]

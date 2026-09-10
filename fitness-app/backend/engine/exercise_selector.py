@@ -15,9 +15,12 @@ from database import supabase
 
 # ─── Mappings focus → catégories (programmes en structure « split ») ───
 
+# Sur un split PPL, le travail de bras suit le patron moteur : les triceps
+# poussent, les biceps tirent. Sans `arms` ici, un jour push d'un programme
+# d'hypertrophie ne disposait que d'UNE isolation — donc toujours la même.
 FOCUS_CATEGORY_MAP = {
-    "push": ["push"],
-    "pull": ["pull"],
+    "push": ["push", "arms"],
+    "pull": ["pull", "arms"],
     "legs": ["legs"],
     "upper": ["push", "pull", "arms"],
     "lower": ["legs"],
@@ -38,6 +41,12 @@ FOCUS_WARMUP_TARGET_MAP = {
 CIRCUIT_CATEGORIES = ["complex", "explosive", "conditioning"]
 
 LEVEL_ORDER = {"debutant": 0, "intermediaire": 1, "avance": 2}
+
+
+def arm_group(ex: dict) -> str:
+    """Extenseurs du coude = jour push ; tout le reste des bras = jour pull."""
+    muscles = ex.get("muscles_primary") or []
+    return "triceps" if any("triceps" in m.lower() for m in muscles) else "biceps"
 
 
 def _fetch_all() -> list[dict]:
@@ -84,6 +93,7 @@ def select_exercises(
     intents: list[str] | None = None,
     allow_universal: bool = False,
     exclude_ids: set[str] | None = None,
+    arm_group_only: str | None = None,
 ) -> list[dict]:
     """Retourne les exercices de la bibliothèque satisfaisant tous les critères."""
     exclude_ids = exclude_ids or set()
@@ -96,6 +106,10 @@ def select_exercises(
         if not _matches_program(ex, program_id, allow_universal):
             continue
         if categories and ex.get("category") not in categories:
+            continue
+        # Restreint la catégorie `arms` à un seul groupe (jours push / pull).
+        if arm_group_only and ex.get("category") == "arms" \
+                and arm_group(ex) != arm_group_only:
             continue
         if exercise_types and ex.get("exercise_type") not in exercise_types:
             continue
@@ -117,22 +131,133 @@ def select_exercises(
     return pool
 
 
-def pick(
+def order_by_freshness(
     pool: list[dict],
-    count: int,
     rng: random.Random,
     recent_ids: set[str] | None = None,
 ) -> list[dict]:
     """
-    Tire `count` exercices en privilégiant ceux qui n'ont pas servi récemment.
-    On ne les interdit pas : sur un pool étroit il faut bien réutiliser.
+    Ordonne un pool : ceux qui n'ont pas servi récemment d'abord, mélangés
+    à l'intérieur de chaque strate. On n'interdit jamais un exercice — sur un
+    pool étroit il faut bien réutiliser.
     """
     recent_ids = recent_ids or set()
     fresh = [e for e in pool if e["id"] not in recent_ids]
     stale = [e for e in pool if e["id"] in recent_ids]
     rng.shuffle(fresh)
     rng.shuffle(stale)
-    return (fresh + stale)[:count]
+    return fresh + stale
+
+
+def pick(
+    pool: list[dict],
+    count: int,
+    rng: random.Random,
+    recent_ids: set[str] | None = None,
+) -> list[dict]:
+    """Tirage simple, quand le pool n'a pas de sous-groupes à équilibrer."""
+    if not pool or count <= 0:
+        return []
+    return order_by_freshness(pool, rng, recent_ids)[:count]
+
+
+def group_by(pool: list[dict], key) -> list[list[dict]]:
+    """Répartit un pool en sous-groupes ; les exercices sans clé sont écartés."""
+    groups: dict[str, list[dict]] = {}
+    for ex in pool:
+        k = key(ex)
+        if not k:
+            continue
+        groups.setdefault(k, []).append(ex)
+    return list(groups.values())
+
+
+def pick_balanced(
+    groups: list[list[dict]],
+    count: int,
+    rng: random.Random,
+    recent_ids: set[str] | None = None,
+) -> list[dict]:
+    """
+    Tire `count` exercices en gardant chaque sous-groupe représenté.
+
+    C'est la règle qui manquait : un tirage à plat sur un focus `upper` mélange
+    push, pull et arms dans le même sac et peut rendre quatre compounds de push
+    et zéro pull — aléatoire, mais faux. On sert donc les sous-groupes en
+    tourniquet, chacun dans son propre ordre fraîcheur-d'abord.
+    """
+    if count <= 0:
+        return []
+    # L'ordre de passage des groupes est lui-même tiré : sinon le premier
+    # sous-groupe serait toujours servi en premier.
+    queues = [g for g in groups if g]
+    rng.shuffle(queues)
+    queues = [order_by_freshness(g, rng, recent_ids) for g in queues]
+
+    out: list[dict] = []
+    taken: set[str] = set()
+    while len(out) < count and any(queues):
+        for queue in queues:
+            if len(out) >= count:
+                break
+            if not queue:
+                continue
+            nxt = queue.pop(0)
+            if nxt["id"] not in taken:
+                taken.add(nxt["id"])
+                out.append(nxt)
+    return out
+
+
+# ─── Élargissement du plafond de niveau ───
+
+# En dessous de ce rapport pool/tirage, la rotation ne peut plus varier.
+POOL_VARIETY_FACTOR = 2
+
+LEVEL_LADDER = ["debutant", "intermediaire", "avance"]
+
+
+def select_varied(program_id: str, count: int, **opts) -> list[dict]:
+    """
+    Sélectionne en élargissant le plafond de niveau si le pool est trop étroit.
+
+    Le plafond vient du persona, et il est parfois plus serré que la
+    bibliothèque ne le permet : un Corporate Rusher plafonné à `intermediaire`
+    n'avait que 7 complexes éligibles pour 5 tirés par séance — le même jeu
+    revenait forcément. Mieux vaut lui proposer un mouvement avancé de temps en
+    temps que la même séance chaque fois. On ne descend jamais en dessous du
+    plafond demandé : on ne fait que l'élargir quand il étouffe le tirage.
+    """
+    level_max = opts.pop("level_max", "avance")
+    pool = select_exercises(program_id, level_max=level_max, **opts)
+    try:
+        start = LEVEL_LADDER.index(level_max)
+    except ValueError:
+        return pool
+    for wider_level in LEVEL_LADDER[start + 1:]:
+        if len(pool) >= count * POOL_VARIETY_FACTOR:
+            break
+        wider = select_exercises(program_id, level_max=wider_level, **opts)
+        if len(wider) > len(pool):
+            pool = wider
+    return pool
+
+
+def fit_to_pool(pool_size: int, wanted: int, sets: int) -> tuple[int, int]:
+    """
+    Ajuste le nombre d'exercices à ce que le pool peut réellement faire varier,
+    et reporte le volume perdu sur les séries.
+
+    Tirer 7 exercices dans une réserve de 8 ne produit pas une séance variée :
+    elle contient presque tout le pool, donc la suivante aussi. Mieux vaut moins
+    de mouvements et plus de tours — la charge de travail est conservée, et deux
+    séances consécutives cessent d'être la même liste réordonnée.
+    """
+    capacity = pool_size // POOL_VARIETY_FACTOR
+    if capacity < 1 or capacity >= wanted:
+        return wanted, sets
+    # Le report est plafonné : au-delà, la séance devient interminable.
+    return capacity, min(-(-sets * wanted // capacity), sets + 3)
 
 
 # ─── Énergie → charge et volume ───

@@ -203,6 +203,11 @@ CREATE TABLE exercises (
                                     CHECK (exercise_type IN ('compound','isolation','core','cardio')),
     -- Vide = universel (warmups et finishers servent tous les programmes)
     target_programs             TEXT[]          DEFAULT '{}',
+    -- Patron de mouvement (core uniquement) : diversifie le bloc tiré
+    movement_pattern            VARCHAR(30)
+                                    CHECK (movement_pattern IS NULL OR movement_pattern IN
+                                        ('anti_extension','flexion','extension','rotation',
+                                         'anti_lateral_flexion','hip_flexion')),
     -- Vocabulaire fermé dérivé de material_required à l'import
     equipment_tags              TEXT[]          DEFAULT '{}',
     -- Lieux où l'exercice est praticable

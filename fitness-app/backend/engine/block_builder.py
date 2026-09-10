@@ -17,8 +17,12 @@ from engine.exercise_selector import (
     CIRCUIT_CATEGORIES,
     FOCUS_CATEGORY_MAP,
     FOCUS_WARMUP_TARGET_MAP,
+    group_by,
     pick,
+    pick_balanced,
     select_exercises,
+    fit_to_pool,
+    select_varied,
     volume_for_energy,
 )
 from models.workout import ExerciseBlock
@@ -67,16 +71,41 @@ def build_warmup_block(ctx: BuildContext) -> list[ExerciseBlock]:
             allow_universal=True,
         )
 
+    # Règle d'échauffement : on mobilise avant d'activer. Le tirage est libre
+    # À L'INTÉRIEUR de chaque temps, l'ordre des deux temps ne l'est pas.
+    def is_pure_mobility(ex: dict) -> bool:
+        intent = set(ex.get("intent") or [])
+        return "mobilite" in intent and not (intent & {"stabilite", "endurance"})
+
+    def by_target(ex: dict) -> str:
+        return (ex.get("warmup_target") or ["all"])[0] or "all"
+
+    mobility = pick_balanced(
+        group_by([e for e in pool if is_pure_mobility(e)], by_target),
+        count // 2, ctx.rng, ctx.recent_ids,
+    )
+    taken = {e["id"] for e in mobility}
+    activation = pick_balanced(
+        group_by(
+            [e for e in pool if not is_pure_mobility(e) and e["id"] not in taken],
+            by_target,
+        ),
+        count - len(mobility), ctx.rng, ctx.recent_ids,
+    )
+
+    # L'étiquette suit le TEMPS où l'exercice est placé, la prescription suit sa
+    # NATURE : un mouvement tenu se compte en secondes même en phase d'activation.
     blocks = []
-    for ex in pick(pool, count, ctx.rng, ctx.recent_ids):
-        is_mobility = "mobilite" in (ex.get("intent") or [])
+    for ex, tier in [(e, "Mobilité") for e in mobility] + \
+                    [(e, "Activation musculaire") for e in activation]:
+        is_held = "mobilite" in (ex.get("intent") or [])
         blocks.append(ExerciseBlock(
             exercise_id=ex["id"],
             name=ex["name"],
-            sets=2 if is_mobility else 1,
-            reps=None if is_mobility else 10,
-            duration_sec=30 if is_mobility else None,
-            notes="Mobilité" if is_mobility else "Activation musculaire",
+            sets=2 if is_held else 1,
+            reps=None if is_held else 10,
+            duration_sec=30 if is_held else None,
+            notes=tier,
             log_results=False,
         ))
     return blocks
@@ -89,22 +118,27 @@ def _build_circuit_main(ctx: BuildContext) -> list[ExerciseBlock]:
     Ces programmes n'ont aucun exercice push/pull/legs : la séance est un
     enchaînement de complexes lestés, d'explosif et de conditionnement.
     """
-    pool = select_exercises(
+    count = ctx.policy["compounds"] + ctx.policy["isolations"]
+    pool = select_varied(
         ctx.program["id"],
+        count,
         categories=CIRCUIT_CATEGORIES,
         level_max=ctx.level_max,
         location=ctx.location,
     )
-    count = ctx.policy["compounds"] + ctx.policy["isolations"]
     reps = round(
         ((ctx.phase.get("rep_range_min") or 8) + (ctx.phase.get("rep_range_max") or 10)) / 2
     )
     rest = ctx.phase.get("rest_sec_min") or 60
     load = max(_resolve_load_pct(ctx.phase, ctx.program) + ctx.policy["load_delta"], 40)
-    sets = max(2, 3 + ctx.policy["sets_delta"])
+    count, sets = fit_to_pool(len(pool), count, max(2, 3 + ctx.policy["sets_delta"]))
 
     blocks = []
-    for i, ex in enumerate(pick(pool, count, ctx.rng, ctx.recent_ids)):
+    selection = pick_balanced(
+        group_by(pool, lambda e: e.get("category")),
+        count, ctx.rng, ctx.recent_ids,
+    )
+    for i, ex in enumerate(selection):
         is_cardio = ex.get("exercise_type") == "cardio"
         blocks.append(ExerciseBlock(
             exercise_id=ex["id"],
@@ -139,19 +173,36 @@ def build_main_block(ctx: BuildContext) -> list[ExerciseBlock]:
     )
 
     common = dict(level_max=ctx.level_max, location=ctx.location)
+    if ctx.focus in ("push", "pull"):
+        common["arm_group_only"] = "triceps" if ctx.focus == "push" else "biceps"
 
-    compounds = pick(
-        select_exercises(ctx.program["id"], categories=categories,
-                         exercise_types=["compound"], **common),
-        ctx.policy["compounds"], ctx.rng, ctx.recent_ids,
+    by_category = lambda e: e.get("category")
+
+    # Chaque catégorie du focus doit être représentée avant qu'une seule ne
+    # soit servie deux fois — d'où le tirage en tourniquet plutôt qu'à plat.
+    compound_pool = select_varied(ctx.program["id"], ctx.policy["compounds"],
+                                  categories=categories, exercise_types=["compound"], **common)
+    n_compounds, sets_compounds = fit_to_pool(
+        len(compound_pool), ctx.policy["compounds"], sets_compounds
     )
+    compounds = pick_balanced(
+        group_by(compound_pool, by_category),
+        n_compounds, ctx.rng, ctx.recent_ids,
+    )
+    ctx.rng.shuffle(compounds)
     used = {e["id"] for e in compounds}
 
-    isolations = pick(
-        select_exercises(ctx.program["id"], categories=categories,
-                         exercise_types=["isolation"], exclude_ids=used, **common),
-        ctx.policy["isolations"], ctx.rng, ctx.recent_ids,
+    isolation_pool = select_varied(ctx.program["id"], ctx.policy["isolations"],
+                                   categories=categories, exercise_types=["isolation"],
+                                   exclude_ids=used, **common)
+    n_isolations, sets_isolation = fit_to_pool(
+        len(isolation_pool), ctx.policy["isolations"], sets_isolation
     )
+    isolations = pick_balanced(
+        group_by(isolation_pool, by_category),
+        n_isolations, ctx.rng, ctx.recent_ids,
+    )
+    ctx.rng.shuffle(isolations)
 
     reps = round((rep_min + rep_max) / 2)
     iso_reps = min(reps + 2, rep_max + 2)
@@ -193,16 +244,26 @@ def build_core_block(ctx: BuildContext) -> list[ExerciseBlock]:
     if not ctx.program.get("has_core_block"):
         return []
 
-    pool = select_exercises(
+    pool = select_varied(
         ctx.program["id"],
+        ctx.policy["core"],
         exercise_types=["core"],
         level_max=ctx.level_max,
         location=ctx.location,
     )
-    sets = max(2, 3 + ctx.policy["sets_delta"])
+    n_core, sets = fit_to_pool(
+        len(pool), ctx.policy["core"], max(2, 3 + ctx.policy["sets_delta"])
+    )
+
+    # Deux exercices de core tirés à plat, c'est deux gainages d'affilée. On
+    # tire un patron de mouvement différent par exercice tant qu'il en reste.
+    selection = pick_balanced(
+        group_by(pool, lambda e: e.get("movement_pattern")),
+        n_core, ctx.rng, ctx.recent_ids,
+    )
 
     blocks = []
-    for ex in pick(pool, ctx.policy["core"], ctx.rng, ctx.recent_ids):
+    for ex in selection:
         is_endurance = ex.get("category") == "core_endurance"
         blocks.append(ExerciseBlock(
             exercise_id=ex["id"],
@@ -223,8 +284,9 @@ def build_finisher_block(ctx: BuildContext) -> list[ExerciseBlock]:
     if not ctx.policy["with_finisher"]:
         return []
 
-    pool = select_exercises(
+    pool = select_varied(
         ctx.program["id"],
+        2,
         categories=["finisher"],
         level_max=ctx.level_max,
         location=ctx.location,

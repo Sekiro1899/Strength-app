@@ -74,6 +74,7 @@ export default function OnboardingResultScreen() {
 
   return (
     <Screen
+      backdrop="onboarding"
       footer={
         <Button
           label="Démarrer mon programme"

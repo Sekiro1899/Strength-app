@@ -203,12 +203,21 @@ CREATE TABLE exercises (
                                     CHECK (exercise_type IN ('compound','isolation','core','cardio')),
     -- Vide = universel (warmups et finishers servent tous les programmes)
     target_programs             TEXT[]          DEFAULT '{}',
+    -- Patron de mouvement (core uniquement) : diversifie le bloc tiré
+    movement_pattern            VARCHAR(30)
+                                    CHECK (movement_pattern IS NULL OR movement_pattern IN
+                                        ('anti_extension','flexion','extension','rotation',
+                                         'anti_lateral_flexion','hip_flexion')),
     -- Vocabulaire fermé dérivé de material_required à l'import
     equipment_tags              TEXT[]          DEFAULT '{}',
     -- Lieux où l'exercice est praticable
     locations                   TEXT[]          DEFAULT '{gym}',
     video_url                   TEXT,
     image_url                   TEXT,
+    -- Format imposé par l'exercice (AMRAP, EMOM, circuit à tours fixes) :
+    -- prime sur la prescription du programme. Null = prescription standard.
+    prescribed_sets             SMALLINT,
+    prescribed_duration_sec     INTEGER,
     is_custom                   BOOLEAN         DEFAULT FALSE,
     created_by_user_id          UUID            REFERENCES users(id),
     created_at                  TIMESTAMPTZ     DEFAULT NOW()
@@ -370,6 +379,9 @@ CREATE TABLE sessions (
     -- Lieu déclaré en début de séance : filtre le matériel disponible
     location                    VARCHAR(20)     DEFAULT 'gym'
                                     CHECK (location IN ('gym','home','outdoor')),
+    -- Créneau annoncé : décide de la mise en superset des compounds.
+    time_budget                 VARCHAR(10)     DEFAULT 'standard'
+                                    CHECK (time_budget IN ('short','standard','long')),
     warmup_block                JSONB,
     main_block                  JSONB,
     core_block                  JSONB,

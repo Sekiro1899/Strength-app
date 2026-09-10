@@ -83,3 +83,11 @@ export function initialsFromEmail(email: string | null | undefined): string {
   }
   return name.slice(0, 2).toUpperCase();
 }
+
+/**
+ * Photo d'ambiance du fond d'écran. Laissée vide : aucun hébergeur d'images
+ * n'est joignable depuis l'environnement de build, et embarquer une photo
+ * dans le dépôt pose une question de licence. Renseigne une URL ici et le
+ * fond géométrique cède la place à la photo, assombrie et dégradée.
+ */
+export const GYM_PHOTO_URL: string | null = null;

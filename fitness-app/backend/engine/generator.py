@@ -46,9 +46,11 @@ async def generate_workout(request: WorkoutRequest) -> WorkoutResponse:
     # Résoudre le focus
     focus = request.focus or _resolve_focus(protocol, request.day_number)
 
-    # Résoudre le niveau max selon le persona
-    exp_level = persona.get("experience_level", "intermediate")
-    level_max = LEVEL_MAP.get(exp_level, "intermediaire")
+    # Le profil du pratiquant prime sur celui du persona : le persona dit une
+    # motivation, le questionnaire dit un niveau réel (q7) et un âge (q1).
+    # Miroir de mobile/lib/profile.ts.
+    profile = _fetch_profile(request.user_id, persona)
+    level_max = profile["level"]
 
     # Générer le label de séance
     session_label = _build_session_label(protocol, focus)
@@ -66,6 +68,9 @@ async def generate_workout(request: WorkoutRequest) -> WorkoutResponse:
         location=request.location,
         rng=session_rng(request.user_program_id, request.day_number),
         recent_ids=recent_ids,
+        allow_regressions=profile["allow_regressions"],
+        day_number=request.day_number,
+        time_budget=request.time_budget,
     )
 
     # ── Construire les 4 blocs ──
@@ -117,6 +122,42 @@ async def generate_workout(request: WorkoutRequest) -> WorkoutResponse:
 
 
 ROTATION_WINDOW = 2
+
+
+def _fetch_profile(user_id: str, persona: dict) -> dict:
+    """
+    Niveau et tolérance aux régressions, lus dans les réponses au
+    questionnaire. Miroir exact de mobile/lib/profile.ts — toute divergence
+    ferait générer deux séances différentes pour le même pratiquant.
+    """
+    result = (
+        supabase.table("users")
+        .select("questionnaire_answers")
+        .eq("id", user_id)
+        .maybe_single()
+        .execute()
+    )
+    answers = (result.data or {}).get("questionnaire_answers") or {}
+
+    def one(key: str):
+        value = answers.get(key)
+        if isinstance(value, list):
+            return value[0] if value else None
+        return value
+
+    level = LEVEL_MAP.get(one("q7") or "", None)
+    if level is None:
+        # Sans réponse exploitable, on retombe sur le persona.
+        level = LEVEL_MAP.get(persona.get("experience_level", ""), "intermediaire")
+    age_band = one("q1")
+
+    return {
+        "level": level,
+        "age_band": age_band,
+        # Un débutant apprend le mouvement ; après 60 ans, l'entrée en charge
+        # se fait plus progressivement. La régression a sa place.
+        "allow_regressions": level == "debutant" or age_band == "60_plus",
+    }
 
 
 def _recent_exercise_ids(user_program_id: str, day_number: int) -> set[str]:

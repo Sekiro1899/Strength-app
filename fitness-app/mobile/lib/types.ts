@@ -175,8 +175,27 @@ export type SessionStructure = "split" | "circuit";
 /** Lieu déclaré en début de séance — décide du matériel disponible. */
 export type TrainingLocation = "gym" | "home" | "outdoor";
 
+/**
+ * Temps annoncé en début de séance. Le superset n'est pas une norme : il sert
+ * à tenir la séance dans le créneau disponible, et n'apparaît donc que quand
+ * ce créneau est contraint.
+ */
+export type TimeBudget = "short" | "standard" | "long";
+
 /** Décide dans quel bloc l'exercice tombe — prime sur la catégorie. */
 export type ExerciseType = "compound" | "isolation" | "core" | "cardio";
+
+/**
+ * Patron de mouvement — renseigné sur les exercices de core uniquement.
+ * Sert à tirer un bloc varié plutôt que deux gainages d'affilée.
+ */
+export type MovementPattern =
+  | "anti_extension"
+  | "flexion"
+  | "extension"
+  | "rotation"
+  | "anti_lateral_flexion"
+  | "hip_flexion";
 
 export interface Exercise {
   id: string;
@@ -195,6 +214,26 @@ export interface Exercise {
   warmup_target: string[] | null;
   description: string | null;
   exercise_type: ExerciseType | null;
+  /** Non-null sur les exercices de core — pilote la diversité du bloc. */
+  movement_pattern: MovementPattern | null;
+  /**
+   * Famille de mouvement : deux exercices de la même famille sont équivalents
+   * (tractions et tractions négatives), on ne les enchaîne pas dans une séance.
+   */
+  movement_family: string | null;
+  /**
+   * Variante allégée d'un mouvement. Sa place est dans le bloc principal d'un
+   * débutant ou d'un pratiquant âgé ; pour les autres elle ne charge pas assez.
+   */
+  is_regression: boolean;
+  /** Démonstration YouTube. Null = repli sur une recherche par nom. */
+  video_url: string | null;
+  /**
+   * Format imposé par l'exercice lui-même — un AMRAP 20 min ou un EMOM 30 ne
+   * se découpe pas en séries standard. Null = prescription du programme.
+   */
+  prescribed_sets: number | null;
+  prescribed_duration_sec: number | null;
   /** Vide = universel (warmups et finishers servent tous les programmes). */
   target_programs: string[];
   image_url: string | null;
@@ -288,6 +327,7 @@ export interface WorkoutSession {
   status: SessionStatus;
   energy_level: number | null;
   location: TrainingLocation | null;
+  time_budget: TimeBudget | null;
   warmup_block: ExerciseBlock[] | null;
   main_block: ExerciseBlock[] | null;
   core_block: ExerciseBlock[] | null;
@@ -312,6 +352,8 @@ export interface ExerciseBlock {
   name: string;
   sets: number;
   reps?: number;
+  /** Borne haute quand la prescription est une plage (10-12 plutôt que 11). */
+  reps_max?: number;
   /** Exclusif avec `reps` — gainage, EMOM, conditionnement. */
   duration_sec?: number;
   load_pct_1rm?: number;
@@ -338,6 +380,8 @@ export interface WorkoutRequest {
   available_equipment?: string[];
   /** Lieu d'entraînement du jour. */
   location?: TrainingLocation;
+  /** Créneau annoncé — décide de la mise en superset. */
+  time_budget?: TimeBudget;
 }
 
 /** Miroir de models.workout.WorkoutResponse. */

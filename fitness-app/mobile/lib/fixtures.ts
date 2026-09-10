@@ -1449,1008 +1449,6 @@ export const QUESTIONNAIRE_OPTIONS: QuestionnaireOption[] = [
 
 export const EXERCISES: Exercise[] = [
   {
-    "id": "PUS-001",
-    "category": "push",
-    "name": "Barbell Bench Press",
-    "muscles_primary": [
-      "Pectoraux",
-      "Deltoïde ant."
-    ],
-    "muscles_secondary": [
-      "Triceps"
-    ],
-    "intent": [
-      "force",
-      "hypertrophie"
-    ],
-    "level": "intermediaire",
-    "bodyweight_compatible": false,
-    "material_required": [
-      "Barre olympique",
-      "banc plat",
-      "rack"
-    ],
-    "equipment_tags": [
-      "barbell",
-      "bench",
-      "rack"
-    ],
-    "locations": [
-      "gym"
-    ],
-    "warmup_target": [],
-    "description": "Allongé sur le banc, barre saisie en prise large. Descente contrôlée jusqu'au sternum, coudes à 45-75°. Poussée explosive en expirant.",
-    "exercise_type": "compound",
-    "target_programs": [
-      "program_muscle_building",
-      "program_strength"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "PUS-002",
-    "category": "push",
-    "name": "Dumbbell Bench Press",
-    "muscles_primary": [
-      "Pectoraux",
-      "Deltoïde ant."
-    ],
-    "muscles_secondary": [
-      "Triceps"
-    ],
-    "intent": [
-      "hypertrophie"
-    ],
-    "level": "debutant",
-    "bodyweight_compatible": false,
-    "material_required": [
-      "Haltères",
-      "banc plat"
-    ],
-    "equipment_tags": [
-      "dumbbell",
-      "bench"
-    ],
-    "locations": [
-      "gym",
-      "home"
-    ],
-    "warmup_target": [],
-    "description": "Même schéma que la barre mais amplitude plus grande. Permet une rotation naturelle des poignets. Instabilité utile pour activation stabilisatrice.",
-    "exercise_type": "compound",
-    "target_programs": [
-      "program_muscle_building"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "PUS-003",
-    "category": "push",
-    "name": "Ring Dips",
-    "muscles_primary": [
-      "Pectoraux inf.",
-      "Triceps"
-    ],
-    "muscles_secondary": [
-      "Core",
-      "Épaules"
-    ],
-    "intent": [
-      "force",
-      "hypertrophie"
-    ],
-    "level": "avance",
-    "bodyweight_compatible": true,
-    "material_required": [
-      "Anneaux de gymnastique"
-    ],
-    "equipment_tags": [
-      "rings"
-    ],
-    "locations": [
-      "gym",
-      "home",
-      "outdoor"
-    ],
-    "warmup_target": [],
-    "description": "Dips sur anneaux — instabilité maximale. Corps légèrement incliné vers l'avant pour cibler pectoraux. Anneaux tournés vers l'extérieur en haut.",
-    "exercise_type": "compound",
-    "target_programs": [
-      "program_bodyweight",
-      "program_strength"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "PUS-004",
-    "category": "push",
-    "name": "Dips",
-    "muscles_primary": [
-      "Pectoraux inf.",
-      "Triceps"
-    ],
-    "muscles_secondary": [
-      "Épaules"
-    ],
-    "intent": [
-      "force",
-      "hypertrophie"
-    ],
-    "level": "intermediaire",
-    "bodyweight_compatible": true,
-    "material_required": [
-      "Barres parallèles"
-    ],
-    "equipment_tags": [
-      "pullup_bar"
-    ],
-    "locations": [
-      "gym",
-      "home",
-      "outdoor"
-    ],
-    "warmup_target": [],
-    "description": "Barres parallèles. Descente jusqu'à 90° de coude minimum. Variation triceps : corps vertical. Variation pec : légère inclinaison avant.",
-    "exercise_type": "compound",
-    "target_programs": [
-      "program_bodyweight",
-      "program_muscle_building",
-      "program_strength"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "PUS-005",
-    "category": "push",
-    "name": "Straight Bar Dips",
-    "muscles_primary": [
-      "Pectoraux inf.",
-      "Triceps"
-    ],
-    "muscles_secondary": [
-      "Épaules",
-      "Core"
-    ],
-    "intent": [
-      "force",
-      "hypertrophie"
-    ],
-    "level": "avance",
-    "bodyweight_compatible": true,
-    "material_required": [
-      "Barre fixe ou barres parallèles"
-    ],
-    "equipment_tags": [
-      "pullup_bar"
-    ],
-    "locations": [
-      "gym",
-      "home",
-      "outdoor"
-    ],
-    "warmup_target": [],
-    "description": "Barre fixe basse ou parallèles. Mouvement de bascule vers l'avant, pression sur la barre en prise pronation. Transition vers muscle-up possible.",
-    "exercise_type": "compound",
-    "target_programs": [
-      "program_bodyweight",
-      "program_strength"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "PUS-006",
-    "category": "push",
-    "name": "Overhead Press (Barbell)",
-    "muscles_primary": [
-      "Deltoïdes",
-      "Triceps"
-    ],
-    "muscles_secondary": [
-      "Trapèze",
-      "Core"
-    ],
-    "intent": [
-      "force"
-    ],
-    "level": "intermediaire",
-    "bodyweight_compatible": false,
-    "material_required": [
-      "Barre olympique",
-      "rack"
-    ],
-    "equipment_tags": [
-      "barbell",
-      "rack"
-    ],
-    "locations": [
-      "gym"
-    ],
-    "warmup_target": [],
-    "description": "Barre au niveau de la clavicule, prise légèrement plus large que les épaules. Pousser verticalement, tête en arrière au passage, verrouillage en haut.",
-    "exercise_type": "compound",
-    "target_programs": [
-      "program_muscle_building",
-      "program_strength"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "PUS-007",
-    "category": "push",
-    "name": "Push-ups (Endurance Reps)",
-    "muscles_primary": [
-      "Pectoraux",
-      "Deltoïdes ant."
-    ],
-    "muscles_secondary": [
-      "Triceps",
-      "Core"
-    ],
-    "intent": [
-      "endurance"
-    ],
-    "level": "debutant",
-    "bodyweight_compatible": true,
-    "material_required": [],
-    "equipment_tags": [],
-    "locations": [
-      "gym",
-      "home",
-      "outdoor"
-    ],
-    "warmup_target": [],
-    "description": "Appuis au sol, mains à largeur d'épaules. Séries longues (20-50 reps), rythme constant. Gainage actif tout au long. Objectif : densité de reps.",
-    "exercise_type": "compound",
-    "target_programs": [
-      "program_bodyweight",
-      "program_lactate",
-      "program_muscle_building"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "PUS-008",
-    "category": "push",
-    "name": "Close Grip Bench Press",
-    "muscles_primary": [
-      "Triceps"
-    ],
-    "muscles_secondary": [
-      "Pectoraux",
-      "Deltoïde ant."
-    ],
-    "intent": [
-      "force",
-      "hypertrophie"
-    ],
-    "level": "intermediaire",
-    "bodyweight_compatible": false,
-    "material_required": [
-      "Barre olympique",
-      "banc plat",
-      "rack"
-    ],
-    "equipment_tags": [
-      "barbell",
-      "bench",
-      "rack"
-    ],
-    "locations": [
-      "gym"
-    ],
-    "warmup_target": [],
-    "description": "Prise serrée (~30 cm), coudes près du corps. Focus sur extension triceps. Moins de mobilisation pectorale que bench classique.",
-    "exercise_type": "compound",
-    "target_programs": [
-      "program_muscle_building",
-      "program_strength"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "PUS-009",
-    "category": "push",
-    "name": "Close Grip Push-ups",
-    "muscles_primary": [
-      "Triceps"
-    ],
-    "muscles_secondary": [
-      "Pectoraux"
-    ],
-    "intent": [
-      "hypertrophie",
-      "endurance"
-    ],
-    "level": "debutant",
-    "bodyweight_compatible": true,
-    "material_required": [],
-    "equipment_tags": [],
-    "locations": [
-      "gym",
-      "home",
-      "outdoor"
-    ],
-    "warmup_target": [],
-    "description": "Mains sous les épaules, coudes plaqués au corps. Variante accessible du close grip bench. Bon finisher ou exercice de remplissage.",
-    "exercise_type": "compound",
-    "target_programs": [
-      "program_bodyweight",
-      "program_lactate",
-      "program_muscle_building"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "PUS-010",
-    "category": "push",
-    "name": "Ring Negative Muscle-ups (Band)",
-    "muscles_primary": [
-      "Dorsaux",
-      "Pectoraux",
-      "Triceps"
-    ],
-    "muscles_secondary": [
-      "Biceps",
-      "Core"
-    ],
-    "intent": [
-      "force"
-    ],
-    "level": "avance",
-    "bodyweight_compatible": true,
-    "material_required": [
-      "Anneaux de gymnastique",
-      "bande élastique"
-    ],
-    "equipment_tags": [
-      "rings",
-      "band"
-    ],
-    "locations": [
-      "gym",
-      "home",
-      "outdoor"
-    ],
-    "warmup_target": [],
-    "description": "Descente lente depuis la position de support sur anneaux vers le bas du pull. Bande élastique sous les pieds pour assistance. Temps de descente : 4-6s.",
-    "exercise_type": "compound",
-    "target_programs": [
-      "program_bodyweight",
-      "program_strength"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "PUS-011",
-    "category": "push",
-    "name": "Negative Muscle-ups",
-    "muscles_primary": [
-      "Dorsaux",
-      "Pectoraux",
-      "Triceps"
-    ],
-    "muscles_secondary": [
-      "Biceps",
-      "Core"
-    ],
-    "intent": [
-      "force"
-    ],
-    "level": "avance",
-    "bodyweight_compatible": true,
-    "material_required": [
-      "Barre fixe ou anneaux"
-    ],
-    "equipment_tags": [
-      "pullup_bar"
-    ],
-    "locations": [
-      "gym",
-      "home",
-      "outdoor"
-    ],
-    "warmup_target": [],
-    "description": "Même mouvement sans assistance. Point de départ : support au-dessus de la barre. Descente excentrique maximale. Renforce le schéma moteur complet.",
-    "exercise_type": "compound",
-    "target_programs": [
-      "program_bodyweight",
-      "program_strength"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "PUS-012",
-    "category": "push",
-    "name": "Ring Support Hold",
-    "muscles_primary": [
-      "Épaules",
-      "Triceps"
-    ],
-    "muscles_secondary": [
-      "Core",
-      "Avant-bras"
-    ],
-    "intent": [
-      "stabilite"
-    ],
-    "level": "avance",
-    "bodyweight_compatible": true,
-    "material_required": [
-      "Anneaux de gymnastique"
-    ],
-    "equipment_tags": [
-      "rings"
-    ],
-    "locations": [
-      "gym",
-      "home",
-      "outdoor"
-    ],
-    "warmup_target": [],
-    "description": "Position de support statique sur anneaux, bras tendus, anneaux tournés vers l'extérieur. Gainage total. Base des progressions aux anneaux (dips, muscle-up).",
-    "exercise_type": "compound",
-    "target_programs": [
-      "program_bodyweight"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "PUS-013",
-    "category": "push",
-    "name": "Knee Push-ups",
-    "muscles_primary": [
-      "Pectoraux",
-      "Deltoïde ant."
-    ],
-    "muscles_secondary": [
-      "Triceps"
-    ],
-    "intent": [
-      "endurance"
-    ],
-    "level": "debutant",
-    "bodyweight_compatible": true,
-    "material_required": [],
-    "equipment_tags": [],
-    "locations": [
-      "gym",
-      "home",
-      "outdoor"
-    ],
-    "warmup_target": [],
-    "description": "Version allégée du push-up. Genou au sol, corps en ligne droite de genou à tête. Idéal débutant ou récupération active.",
-    "exercise_type": "compound",
-    "target_programs": [
-      "program_bodyweight",
-      "program_lactate",
-      "program_muscle_building"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "PUS-014",
-    "category": "push",
-    "name": "Lateral Raises (Incline Posture)",
-    "muscles_primary": [
-      "Deltoïde latéral"
-    ],
-    "muscles_secondary": [
-      "Deltoïde post.",
-      "Trapèze"
-    ],
-    "intent": [
-      "hypertrophie",
-      "endurance"
-    ],
-    "level": "debutant",
-    "bodyweight_compatible": false,
-    "material_required": [
-      "Haltères",
-      "banc incliné"
-    ],
-    "equipment_tags": [
-      "dumbbell",
-      "bench"
-    ],
-    "locations": [
-      "gym",
-      "home"
-    ],
-    "warmup_target": [],
-    "description": "Buste incliné à ~30° vers l'avant sur banc incliné pour pré-étirer le faisceau latéral. Élévations strictes, sans élan. Isole mieux que la version debout droite.",
-    "exercise_type": "isolation",
-    "target_programs": [
-      "program_lactate",
-      "program_muscle_building"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "PUL-015",
-    "category": "pull",
-    "name": "Pull-over (DB)",
-    "muscles_primary": [
-      "Grand dorsal"
-    ],
-    "muscles_secondary": [
-      "Grand pectoral",
-      "Serratus"
-    ],
-    "intent": [
-      "hypertrophie"
-    ],
-    "level": "intermediaire",
-    "bodyweight_compatible": false,
-    "material_required": [
-      "Haltère",
-      "banc"
-    ],
-    "equipment_tags": [
-      "dumbbell",
-      "bench"
-    ],
-    "locations": [
-      "gym",
-      "home"
-    ],
-    "warmup_target": [],
-    "description": "Allongé perpendiculaire au banc, haltère tenu à deux mains. Arc de cercle de la poitrine vers l'arrière de la tête. Étirement max du dorsal. Coudes légèrement fléchis.",
-    "exercise_type": "compound",
-    "target_programs": [
-      "program_muscle_building"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "PUL-016",
-    "category": "pull",
-    "name": "Pull-ups (Pronation)",
-    "muscles_primary": [
-      "Grand dorsal",
-      "Biceps"
-    ],
-    "muscles_secondary": [
-      "Rhomboïdes",
-      "Trapèze"
-    ],
-    "intent": [
-      "force",
-      "hypertrophie"
-    ],
-    "level": "intermediaire",
-    "bodyweight_compatible": true,
-    "material_required": [
-      "Barre de traction"
-    ],
-    "equipment_tags": [
-      "pullup_bar"
-    ],
-    "locations": [
-      "gym",
-      "home",
-      "outdoor"
-    ],
-    "warmup_target": [],
-    "description": "Prise pronation (paumes en avant), mains ~1.5× largeur épaules. Tirer coudes vers les hanches. Chin au-dessus de la barre. Descente contrôlée.",
-    "exercise_type": "compound",
-    "target_programs": [
-      "program_bodyweight",
-      "program_muscle_building",
-      "program_strength"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "PUL-017",
-    "category": "pull",
-    "name": "Chin-ups (Supination)",
-    "muscles_primary": [
-      "Grand dorsal",
-      "Biceps"
-    ],
-    "muscles_secondary": [
-      "Rhomboïdes"
-    ],
-    "intent": [
-      "hypertrophie"
-    ],
-    "level": "debutant",
-    "bodyweight_compatible": true,
-    "material_required": [
-      "Barre de traction"
-    ],
-    "equipment_tags": [
-      "pullup_bar"
-    ],
-    "locations": [
-      "gym",
-      "home",
-      "outdoor"
-    ],
-    "warmup_target": [],
-    "description": "Prise supination (paumes vers soi). Plus de recrutement biceps. Facilite la connexion esprit-muscle sur le dorsal pour débutants.",
-    "exercise_type": "compound",
-    "target_programs": [
-      "program_bodyweight",
-      "program_muscle_building"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "PUL-018",
-    "category": "pull",
-    "name": "Negative Pull-ups",
-    "muscles_primary": [
-      "Grand dorsal",
-      "Biceps"
-    ],
-    "muscles_secondary": [
-      "Rhomboïdes",
-      "Trapèze"
-    ],
-    "intent": [
-      "force"
-    ],
-    "level": "debutant",
-    "bodyweight_compatible": true,
-    "material_required": [
-      "Barre de traction"
-    ],
-    "equipment_tags": [
-      "pullup_bar"
-    ],
-    "locations": [
-      "gym",
-      "home",
-      "outdoor"
-    ],
-    "warmup_target": [],
-    "description": "Monter en sautant ou sur une box, puis descente excentrique lente (4-6s). Construit la force nécessaire avant les tractions complètes.",
-    "exercise_type": "compound",
-    "target_programs": [
-      "program_bodyweight",
-      "program_muscle_building"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "PUL-019",
-    "category": "pull",
-    "name": "Scapular Pull-ups",
-    "muscles_primary": [
-      "Rhomboïdes",
-      "Trapèze inf."
-    ],
-    "muscles_secondary": [
-      "Grand dorsal"
-    ],
-    "intent": [
-      "stabilite",
-      "endurance"
-    ],
-    "level": "debutant",
-    "bodyweight_compatible": true,
-    "material_required": [
-      "Barre de traction"
-    ],
-    "equipment_tags": [
-      "pullup_bar"
-    ],
-    "locations": [
-      "gym",
-      "home",
-      "outdoor"
-    ],
-    "warmup_target": [],
-    "description": "En dead hang, rétraction scapulaire pure sans fléchir les coudes. Activation des fixateurs de l'omoplate. Base de santé épaule / posture.",
-    "exercise_type": "compound",
-    "target_programs": [
-      "program_bodyweight",
-      "program_lactate",
-      "program_muscle_building"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "PUL-020",
-    "category": "pull",
-    "name": "Barbell Rows",
-    "muscles_primary": [
-      "Grand dorsal",
-      "Rhomboïdes"
-    ],
-    "muscles_secondary": [
-      "Trapèze",
-      "Biceps"
-    ],
-    "intent": [
-      "force"
-    ],
-    "level": "intermediaire",
-    "bodyweight_compatible": false,
-    "material_required": [
-      "Barre olympique",
-      "disques"
-    ],
-    "equipment_tags": [
-      "barbell",
-      "plate"
-    ],
-    "locations": [
-      "gym"
-    ],
-    "warmup_target": [],
-    "description": "Pendlay ou Yates row. Buste ~45°, barre tirée vers le bas du sternum. Rétraction scapulaire en fin de mouvement. Base du programme de force.",
-    "exercise_type": "compound",
-    "target_programs": [
-      "program_muscle_building",
-      "program_strength"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "PUL-021",
-    "category": "pull",
-    "name": "T-Bar / Landmine Rows",
-    "muscles_primary": [
-      "Grand dorsal",
-      "Rhomboïdes"
-    ],
-    "muscles_secondary": [
-      "Trapèze",
-      "Biceps"
-    ],
-    "intent": [
-      "force",
-      "hypertrophie"
-    ],
-    "level": "intermediaire",
-    "bodyweight_compatible": false,
-    "material_required": [
-      "Barre",
-      "support landmine ou angle de mur",
-      "poignée V-bar optionnelle"
-    ],
-    "equipment_tags": [
-      "barbell"
-    ],
-    "locations": [
-      "gym"
-    ],
-    "warmup_target": [],
-    "description": "Barre insérée dans un angle ou support landmine. Position légèrement plus upright que le barbell row. Prise neutre si poignée V-bar.",
-    "exercise_type": "compound",
-    "target_programs": [
-      "program_muscle_building",
-      "program_strength"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "PUL-022",
-    "category": "pull",
-    "name": "Australian Pull-ups / TRX Rows",
-    "muscles_primary": [
-      "Grand dorsal",
-      "Rhomboïdes"
-    ],
-    "muscles_secondary": [
-      "Biceps",
-      "Trapèze"
-    ],
-    "intent": [
-      "endurance",
-      "hypertrophie"
-    ],
-    "level": "debutant",
-    "bodyweight_compatible": true,
-    "material_required": [
-      "Barre basse ou TRX / sangles de suspension"
-    ],
-    "equipment_tags": [
-      "pullup_bar"
-    ],
-    "locations": [
-      "gym",
-      "home",
-      "outdoor"
-    ],
-    "warmup_target": [],
-    "description": "Corps quasi horizontal sous barre fixe ou TRX. Tire la poitrine vers la barre. Régression utile avant pull-ups. Volume élevé possible.",
-    "exercise_type": "compound",
-    "target_programs": [
-      "program_bodyweight",
-      "program_lactate",
-      "program_muscle_building"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "PUL-023",
-    "category": "pull",
-    "name": "Single Arm Dumbbell Row",
-    "muscles_primary": [
-      "Grand dorsal",
-      "Rhomboïdes"
-    ],
-    "muscles_secondary": [
-      "Biceps",
-      "Érecteurs"
-    ],
-    "intent": [
-      "hypertrophie"
-    ],
-    "level": "debutant",
-    "bodyweight_compatible": false,
-    "material_required": [
-      "Haltère",
-      "banc"
-    ],
-    "equipment_tags": [
-      "dumbbell",
-      "bench"
-    ],
-    "locations": [
-      "gym",
-      "home"
-    ],
-    "warmup_target": [],
-    "description": "Appui sur un banc, bras libre tire l'haltère vers la hanche. Focus sur rétraction finale et légère rotation du torse. Amplitude maximale.",
-    "exercise_type": "compound",
-    "target_programs": [
-      "program_muscle_building"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "PUL-024",
-    "category": "pull",
-    "name": "Face Pulls",
-    "muscles_primary": [
-      "Deltoïde post.",
-      "Trapèze"
-    ],
-    "muscles_secondary": [
-      "Rotateurs ext.",
-      "Rhomboïdes"
-    ],
-    "intent": [
-      "endurance",
-      "hypertrophie"
-    ],
-    "level": "debutant",
-    "bodyweight_compatible": false,
-    "material_required": [
-      "Câble avec corde",
-      "ou bande élastique"
-    ],
-    "equipment_tags": [
-      "cable",
-      "band"
-    ],
-    "locations": [
-      "gym"
-    ],
-    "warmup_target": [],
-    "description": "Câble à hauteur des yeux ou plus. Tirer vers le visage en ouvrant les coudes. Rotation externe en fin de mouvement. Santé épaule prioritaire.",
-    "exercise_type": "isolation",
-    "target_programs": [
-      "program_lactate",
-      "program_muscle_building"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "PUL-025",
-    "category": "pull",
-    "name": "Y Raises & W Raises (Plates)",
-    "muscles_primary": [
-      "Trapèze inf.",
-      "Deltoïde post."
-    ],
-    "muscles_secondary": [
-      "Rhomboïdes",
-      "Rotateurs"
-    ],
-    "intent": [
-      "endurance",
-      "stabilite"
-    ],
-    "level": "debutant",
-    "bodyweight_compatible": false,
-    "material_required": [
-      "Disques légers 2.5-5 kg",
-      "banc incliné"
-    ],
-    "equipment_tags": [
-      "plate",
-      "bench"
-    ],
-    "locations": [
-      "gym"
-    ],
-    "warmup_target": [],
-    "description": "Allongé face contre banc incliné. Y : bras en V vers le haut. W : coudes fléchis, rotation externe. Disques très légers. Référence physiothérapie épaule.",
-    "exercise_type": "isolation",
-    "target_programs": [
-      "program_lactate",
-      "program_muscle_building"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "PUL-026",
-    "category": "pull",
-    "name": "Prone Paddle Simulator",
-    "muscles_primary": [
-      "Érecteurs",
-      "Deltoïde post."
-    ],
-    "muscles_secondary": [
-      "Trapèze",
-      "Grand dorsal"
-    ],
-    "intent": [
-      "endurance",
-      "stabilite"
-    ],
-    "level": "intermediaire",
-    "bodyweight_compatible": true,
-    "material_required": [
-      "Tapis de sol (Swiss ball optionnel)"
-    ],
-    "equipment_tags": [
-      "ball"
-    ],
-    "locations": [
-      "gym",
-      "home",
-      "outdoor"
-    ],
-    "warmup_target": [],
-    "description": "Sur tapis, position prone. Simulation du mouvement de paddle surf : bras alternés en arc horizontal, torse légèrement soulevé. Pour surfeurs.",
-    "exercise_type": "compound",
-    "target_programs": [
-      "program_bodyweight",
-      "program_lactate",
-      "program_muscle_building"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "PUL-027",
-    "category": "pull",
-    "name": "Straight Arm Lat Pulldown",
-    "muscles_primary": [
-      "Grand dorsal",
-      "Serratus"
-    ],
-    "muscles_secondary": [
-      "Teres major"
-    ],
-    "intent": [
-      "hypertrophie"
-    ],
-    "level": "debutant",
-    "bodyweight_compatible": false,
-    "material_required": [
-      "Câble haut ou bande élastique"
-    ],
-    "equipment_tags": [
-      "cable"
-    ],
-    "locations": [
-      "gym"
-    ],
-    "warmup_target": [],
-    "description": "Câble ou élastique haut, bras tendus (légère flexion coude). Descendre les bras vers les hanches en gardant les coudes fixes. Isole le dorsal sans biceps.",
-    "exercise_type": "compound",
-    "target_programs": [
-      "program_muscle_building"
-    ],
-    "image_url": null
-  },
-  {
     "id": "ARM-028",
     "category": "arms",
     "name": "Biceps Curls (Barbell)",
@@ -2480,10 +1478,16 @@ export const EXERCISES: Exercise[] = [
     "warmup_target": [],
     "description": "Barre droite ou EZ, prise supination. Flexion pure, sans balancement. Poignets neutres. Coudes fixes contre le torse.",
     "exercise_type": "isolation",
+    "movement_pattern": null,
+    "movement_family": "elbow_flexion",
+    "is_regression": false,
     "target_programs": [
       "program_muscle_building"
     ],
-    "image_url": null
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
   },
   {
     "id": "ARM-029",
@@ -2513,10 +1517,16 @@ export const EXERCISES: Exercise[] = [
     "warmup_target": [],
     "description": "Haltères en alternance, supination en cours de mouvement. Active le chef long du biceps sur la torsion.",
     "exercise_type": "isolation",
+    "movement_pattern": null,
+    "movement_family": "elbow_flexion",
+    "is_regression": false,
     "target_programs": [
       "program_muscle_building"
     ],
-    "image_url": null
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
   },
   {
     "id": "ARM-030",
@@ -2548,10 +1558,16 @@ export const EXERCISES: Exercise[] = [
     "warmup_target": [],
     "description": "Chaque set alterne entre prise serrée et large sur la barre EZ. Prise serrée : chef long. Prise large : chef court.",
     "exercise_type": "isolation",
+    "movement_pattern": null,
+    "movement_family": "elbow_flexion",
+    "is_regression": false,
     "target_programs": [
       "program_muscle_building"
     ],
-    "image_url": null
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
   },
   {
     "id": "ARM-031",
@@ -2582,10 +1598,16 @@ export const EXERCISES: Exercise[] = [
     "warmup_target": [],
     "description": "Prise neutre (paumes face à face). Cible le brachialis et avant-bras. Peut se faire alterné ou simultané.",
     "exercise_type": "isolation",
+    "movement_pattern": null,
+    "movement_family": "elbow_flexion",
+    "is_regression": false,
     "target_programs": [
       "program_muscle_building"
     ],
-    "image_url": null
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
   },
   {
     "id": "ARM-032",
@@ -2616,10 +1638,16 @@ export const EXERCISES: Exercise[] = [
     "warmup_target": [],
     "description": "Montée en supination puis rotation du poignet en pronation avant la descente. Double stimulation : concentrique biceps, excentrique avant-bras.",
     "exercise_type": "isolation",
+    "movement_pattern": null,
+    "movement_family": "elbow_flexion",
+    "is_regression": false,
     "target_programs": [
       "program_muscle_building"
     ],
-    "image_url": null
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
   },
   {
     "id": "ARM-033",
@@ -2649,11 +1677,17 @@ export const EXERCISES: Exercise[] = [
     "warmup_target": [],
     "description": "Câble haut, barre droite ou corde. Coudes fixes, extension complète. Prise pronation standard. Fort volume possible.",
     "exercise_type": "isolation",
+    "movement_pattern": null,
+    "movement_family": "elbow_extension",
+    "is_regression": false,
     "target_programs": [
       "program_lactate",
       "program_muscle_building"
     ],
-    "image_url": null
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
   },
   {
     "id": "ARM-034",
@@ -2682,10 +1716,16 @@ export const EXERCISES: Exercise[] = [
     "warmup_target": [],
     "description": "Câble derrière la tête, prise supination ou corde. Étirement complet du chef long en position haute. Coudes proches des oreilles.",
     "exercise_type": "isolation",
+    "movement_pattern": null,
+    "movement_family": "elbow_extension",
+    "is_regression": false,
     "target_programs": [
       "program_muscle_building"
     ],
-    "image_url": null
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
   },
   {
     "id": "ARM-035",
@@ -2715,10 +1755,16 @@ export const EXERCISES: Exercise[] = [
     "warmup_target": [],
     "description": "Même que pushdown mais prise inversée ou barre angled. Variation pour changer l'angle de force.",
     "exercise_type": "isolation",
+    "movement_pattern": null,
+    "movement_family": "elbow_extension",
+    "is_regression": false,
     "target_programs": [
       "program_muscle_building"
     ],
-    "image_url": null
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
   },
   {
     "id": "ARM-036",
@@ -2750,11 +1796,17 @@ export const EXERCISES: Exercise[] = [
     "warmup_target": [],
     "description": "Allongé sur banc, barre EZ. Descente vers le front ou au-dessus du crâne, coudes fixes. Extension complète. Charge modérée, contrôle strict.",
     "exercise_type": "isolation",
+    "movement_pattern": null,
+    "movement_family": "elbow_extension",
+    "is_regression": false,
     "target_programs": [
       "program_muscle_building",
       "program_strength"
     ],
-    "image_url": null
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
   },
   {
     "id": "ARM-037",
@@ -2787,1333 +1839,19 @@ export const EXERCISES: Exercise[] = [
     "warmup_target": [],
     "description": "Mains sur un banc derrière soi, pieds au sol ou surélevés. Descente en fléchissant les coudes. Attention contrainte épaule en rotation interne.",
     "exercise_type": "isolation",
+    "movement_pattern": null,
+    "movement_family": "elbow_extension",
+    "is_regression": true,
     "target_programs": [
       "program_bodyweight",
-      "program_lactate",
-      "program_muscle_building"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "LEG-038",
-    "category": "legs",
-    "name": "Goblet Squat",
-    "muscles_primary": [
-      "Quadriceps",
-      "Fessiers"
-    ],
-    "muscles_secondary": [
-      "Core",
-      "Mollets"
-    ],
-    "intent": [
-      "hypertrophie",
-      "endurance"
-    ],
-    "level": "debutant",
-    "bodyweight_compatible": false,
-    "material_required": [
-      "Kettlebell ou haltère"
-    ],
-    "equipment_tags": [
-      "dumbbell"
-    ],
-    "locations": [
-      "gym",
-      "home"
-    ],
-    "warmup_target": [],
-    "description": "Haltère ou KB tenu en coupe devant la poitrine. Descente profonde, coudes entre les genoux. Excellent pour la mobilité de hanche et la technique squat.",
-    "exercise_type": "compound",
-    "target_programs": [
-      "program_lactate",
-      "program_muscle_building"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "LEG-039",
-    "category": "legs",
-    "name": "Barbell Squat",
-    "muscles_primary": [
-      "Quadriceps",
-      "Fessiers"
-    ],
-    "muscles_secondary": [
-      "Ischio",
-      "Érecteurs",
-      "Core"
-    ],
-    "intent": [
-      "force"
-    ],
-    "level": "intermediaire",
-    "bodyweight_compatible": false,
-    "material_required": [
-      "Barre olympique",
-      "rack",
-      "disques"
-    ],
-    "equipment_tags": [
-      "barbell",
-      "rack",
-      "plate"
-    ],
-    "locations": [
-      "gym"
-    ],
-    "warmup_target": [],
-    "description": "Barre en high bar ou low bar. Descente sous parallèle, genoux dans l'axe des orteils. Montée explosive. Fondateur Starting Strength.",
-    "exercise_type": "compound",
-    "target_programs": [
-      "program_muscle_building",
-      "program_strength"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "LEG-040",
-    "category": "legs",
-    "name": "Single Leg Romanian Deadlift",
-    "muscles_primary": [
-      "Ischio-jambiers",
-      "Fessiers"
-    ],
-    "muscles_secondary": [
-      "Stabilisateurs",
-      "Core"
-    ],
-    "intent": [
-      "hypertrophie",
-      "stabilite"
-    ],
-    "level": "intermediaire",
-    "bodyweight_compatible": false,
-    "material_required": [
-      "Haltères ou kettlebells"
-    ],
-    "equipment_tags": [
-      "dumbbell"
-    ],
-    "locations": [
-      "gym",
-      "home"
-    ],
-    "warmup_target": [],
-    "description": "Sur une jambe, haltères dans les mains. Charnière de hanche, dos plat. Torse parallèle au sol en bas. Charge excentrique ischio. Référence KOT.",
-    "exercise_type": "compound",
-    "target_programs": [
-      "program_muscle_building",
-      "program_strength"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "LEG-041",
-    "category": "legs",
-    "name": "Goblet Sumo Squat",
-    "muscles_primary": [
-      "Adducteurs",
-      "Fessiers"
-    ],
-    "muscles_secondary": [
-      "Quadriceps"
-    ],
-    "intent": [
-      "hypertrophie"
-    ],
-    "level": "debutant",
-    "bodyweight_compatible": false,
-    "material_required": [
-      "Kettlebell ou haltère"
-    ],
-    "equipment_tags": [
-      "dumbbell"
-    ],
-    "locations": [
-      "gym",
-      "home"
-    ],
-    "warmup_target": [],
-    "description": "Pieds larges en sumo, orteils à 45°. Haltère en coupe. Descente profonde. Cible adducteurs et fessiers plus que le goblet classique.",
-    "exercise_type": "compound",
-    "target_programs": [
-      "program_muscle_building"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "LEG-042",
-    "category": "legs",
-    "name": "Barbell Sumo Squat",
-    "muscles_primary": [
-      "Adducteurs",
-      "Fessiers",
-      "Quadriceps"
-    ],
-    "muscles_secondary": [
-      "Ischio",
-      "Érecteurs"
-    ],
-    "intent": [
-      "force",
-      "hypertrophie"
-    ],
-    "level": "intermediaire",
-    "bodyweight_compatible": false,
-    "material_required": [
-      "Barre olympique",
-      "rack",
-      "disques"
-    ],
-    "equipment_tags": [
-      "barbell",
-      "rack",
-      "plate"
-    ],
-    "locations": [
-      "gym"
-    ],
-    "warmup_target": [],
-    "description": "Écartement large, barre en position haute. Bon pour la mobilité de hanche et les adducteurs sous charge lourde.",
-    "exercise_type": "compound",
-    "target_programs": [
-      "program_muscle_building",
-      "program_strength"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "LEG-043",
-    "category": "legs",
-    "name": "Hip Thrust (Barbell)",
-    "muscles_primary": [
-      "Fessiers"
-    ],
-    "muscles_secondary": [
-      "Ischio-jambiers",
-      "Core"
-    ],
-    "intent": [
-      "hypertrophie"
-    ],
-    "level": "debutant",
-    "bodyweight_compatible": false,
-    "material_required": [
-      "Barre olympique",
-      "banc",
-      "disques",
-      "pad de protection"
-    ],
-    "equipment_tags": [
-      "barbell",
-      "bench",
-      "plate",
-      "mat"
-    ],
-    "locations": [
-      "gym"
-    ],
-    "warmup_target": [],
-    "description": "Dos appuyé sur banc, barre sur les hanches. Extension complète de hanche en haut, contraction isométrique finale. Référence Bret Contreras.",
-    "exercise_type": "compound",
-    "target_programs": [
-      "program_muscle_building"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "LEG-044",
-    "category": "legs",
-    "name": "Deadlift (Conventional)",
-    "muscles_primary": [
-      "Ischio-jambiers",
-      "Fessiers",
-      "Érecteurs"
-    ],
-    "muscles_secondary": [
-      "Grand dorsal",
-      "Trapèze"
-    ],
-    "intent": [
-      "force"
-    ],
-    "level": "intermediaire",
-    "bodyweight_compatible": false,
-    "material_required": [
-      "Barre olympique",
-      "disques",
-      "plateforme"
-    ],
-    "equipment_tags": [
-      "barbell",
-      "plate",
-      "box"
-    ],
-    "locations": [
-      "gym"
-    ],
-    "warmup_target": [],
-    "description": "Pieds dans la largeur des hanches, barre au-dessus des mid-foot. Prise mixte ou crochet. Dos neutre. Starting Strength fondamental.",
-    "exercise_type": "compound",
-    "target_programs": [
-      "program_muscle_building",
-      "program_strength"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "LEG-045",
-    "category": "legs",
-    "name": "Sumo Deadlift",
-    "muscles_primary": [
-      "Adducteurs",
-      "Fessiers",
-      "Ischio"
-    ],
-    "muscles_secondary": [
-      "Érecteurs",
-      "Grand dorsal"
-    ],
-    "intent": [
-      "force"
-    ],
-    "level": "intermediaire",
-    "bodyweight_compatible": false,
-    "material_required": [
-      "Barre olympique",
-      "disques",
-      "plateforme"
-    ],
-    "equipment_tags": [
-      "barbell",
-      "plate",
-      "box"
-    ],
-    "locations": [
-      "gym"
-    ],
-    "warmup_target": [],
-    "description": "Écartement très large, barre entre les jambes, prise pronation. Torse plus vertical. Bonne alternative pour morphologies courtes de buste.",
-    "exercise_type": "compound",
-    "target_programs": [
-      "program_muscle_building",
-      "program_strength"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "LEG-046",
-    "category": "legs",
-    "name": "Suitcase Deadlift",
-    "muscles_primary": [
-      "Carré des lombes",
-      "Obliques"
-    ],
-    "muscles_secondary": [
-      "Fessiers",
-      "Ischio",
-      "Core"
-    ],
-    "intent": [
-      "force",
-      "stabilite"
-    ],
-    "level": "intermediaire",
-    "bodyweight_compatible": false,
-    "material_required": [
-      "Haltère ou kettlebell"
-    ],
-    "equipment_tags": [
-      "dumbbell"
-    ],
-    "locations": [
-      "gym",
-      "home"
-    ],
-    "warmup_target": [],
-    "description": "Haltère sur le côté (comme une valise). Anti-flexion latérale du core. Asymétrie utile pour corriger déséquilibres gauche/droite.",
-    "exercise_type": "compound",
-    "target_programs": [
-      "program_muscle_building",
-      "program_strength"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "LEG-047",
-    "category": "legs",
-    "name": "Zercher Squat",
-    "muscles_primary": [
-      "Quadriceps",
-      "Fessiers",
-      "Core"
-    ],
-    "muscles_secondary": [
-      "Biceps",
-      "Érecteurs"
-    ],
-    "intent": [
-      "force"
-    ],
-    "level": "avance",
-    "bodyweight_compatible": false,
-    "material_required": [
-      "Barre olympique",
-      "rack",
-      "pad de coude optionnel"
-    ],
-    "equipment_tags": [
-      "barbell",
-      "rack",
-      "mat"
-    ],
-    "locations": [
-      "gym"
-    ],
-    "warmup_target": [],
-    "description": "Barre dans le creux des coudes, bras fléchis. Position très verticale du torse. Fort engagement du core. Référence Westside / Ed Coan.",
-    "exercise_type": "compound",
-    "target_programs": [
-      "program_strength"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "LEG-048",
-    "category": "legs",
-    "name": "Landmine Deadlift",
-    "muscles_primary": [
-      "Fessiers",
-      "Ischio",
-      "Érecteurs"
-    ],
-    "muscles_secondary": [
-      "Grand dorsal",
-      "Core"
-    ],
-    "intent": [
-      "force",
-      "hypertrophie"
-    ],
-    "level": "intermediaire",
-    "bodyweight_compatible": false,
-    "material_required": [
-      "Barre",
-      "support landmine ou angle de mur"
-    ],
-    "equipment_tags": [
-      "barbell"
-    ],
-    "locations": [
-      "gym"
-    ],
-    "warmup_target": [],
-    "description": "Barre insérée dans angle landmine. Mouvement en arc vers le haut. Axe de traction différent du DL classique, moins de stress lombaire.",
-    "exercise_type": "compound",
-    "target_programs": [
-      "program_muscle_building",
-      "program_strength"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "LEG-049",
-    "category": "legs",
-    "name": "Bulgarian Split Squat",
-    "muscles_primary": [
-      "Quadriceps",
-      "Fessiers"
-    ],
-    "muscles_secondary": [
-      "Core",
-      "Stabilisateurs"
-    ],
-    "intent": [
-      "hypertrophie",
-      "endurance"
-    ],
-    "level": "intermediaire",
-    "bodyweight_compatible": false,
-    "material_required": [
-      "Haltères",
-      "banc"
-    ],
-    "equipment_tags": [
-      "dumbbell",
-      "bench"
-    ],
-    "locations": [
-      "gym",
-      "home"
-    ],
-    "warmup_target": [],
-    "description": "Pied arrière surélevé sur banc, pied avant avancé. Descente verticale. Fort volume possible. Référence Jeremy Ethier unilatéral.",
-    "exercise_type": "compound",
-    "target_programs": [
       "program_lactate",
       "program_muscle_building",
       "program_strength"
     ],
-    "image_url": null
-  },
-  {
-    "id": "LEG-050",
-    "category": "legs",
-    "name": "Seated Calf Raises",
-    "muscles_primary": [
-      "Soléaire"
-    ],
-    "muscles_secondary": [
-      "Gastrocnémiens"
-    ],
-    "intent": [
-      "hypertrophie",
-      "endurance"
-    ],
-    "level": "debutant",
-    "bodyweight_compatible": false,
-    "material_required": [
-      "Machine seated calf ou haltères + banc + step"
-    ],
-    "equipment_tags": [
-      "machine"
-    ],
-    "locations": [
-      "gym"
-    ],
-    "warmup_target": [],
-    "description": "Genou à 90°. Le soléaire est plus actif en position fléchie. Amplitude complète : descente profonde, contraction max en haut.",
-    "exercise_type": "isolation",
-    "target_programs": [
-      "program_lactate",
-      "program_muscle_building"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "LEG-051",
-    "category": "legs",
-    "name": "Calf Raises (Standing)",
-    "muscles_primary": [
-      "Gastrocnémiens"
-    ],
-    "muscles_secondary": [
-      "Soléaire"
-    ],
-    "intent": [
-      "hypertrophie",
-      "endurance"
-    ],
-    "level": "debutant",
-    "bodyweight_compatible": false,
-    "material_required": [
-      "Machine standing ou haltères + step / marche"
-    ],
-    "equipment_tags": [
-      "machine"
-    ],
-    "locations": [
-      "gym"
-    ],
-    "warmup_target": [],
-    "description": "Debout sur une marche. Descente lente (3-4s), montée explosive. Amplitude totale. Possible avec sac à dos lesté si pas de machine.",
-    "exercise_type": "isolation",
-    "target_programs": [
-      "program_lactate",
-      "program_muscle_building"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "LEG-052",
-    "category": "legs",
-    "name": "Single Leg Bridges",
-    "muscles_primary": [
-      "Fessiers"
-    ],
-    "muscles_secondary": [
-      "Ischio",
-      "Core"
-    ],
-    "intent": [
-      "endurance",
-      "hypertrophie"
-    ],
-    "level": "debutant",
-    "bodyweight_compatible": true,
-    "material_required": [],
-    "equipment_tags": [],
-    "locations": [
-      "gym",
-      "home",
-      "outdoor"
-    ],
-    "warmup_target": [],
-    "description": "Au sol, une jambe tendue, l'autre fléchie. Extension de hanche unilatérale. Régression du hip thrust. Bon pour activation pré-workout.",
-    "exercise_type": "compound",
-    "target_programs": [
-      "program_bodyweight",
-      "program_lactate",
-      "program_muscle_building"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "LEG-053",
-    "category": "legs",
-    "name": "Frog Hip Thrust",
-    "muscles_primary": [
-      "Fessiers (fibres profondes)"
-    ],
-    "muscles_secondary": [
-      "Adducteurs",
-      "Ischio"
-    ],
-    "intent": [
-      "hypertrophie"
-    ],
-    "level": "debutant",
-    "bodyweight_compatible": true,
-    "material_required": [],
-    "equipment_tags": [],
-    "locations": [
-      "gym",
-      "home",
-      "outdoor"
-    ],
-    "warmup_target": [],
-    "description": "Pieds joints plante contre plante (position grenouille). Flexion externe de hanche maximale. Cible différemment les fessiers. Référence Ben Patrick / KOT.",
-    "exercise_type": "compound",
-    "target_programs": [
-      "program_bodyweight",
-      "program_muscle_building"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "LEG-054",
-    "category": "legs",
-    "name": "Side Leg Raises",
-    "muscles_primary": [
-      "Abducteurs",
-      "TFL"
-    ],
-    "muscles_secondary": [
-      "Fessiers médians"
-    ],
-    "intent": [
-      "endurance",
-      "stabilite"
-    ],
-    "level": "debutant",
-    "bodyweight_compatible": true,
-    "material_required": [],
-    "equipment_tags": [],
-    "locations": [
-      "gym",
-      "home",
-      "outdoor"
-    ],
-    "warmup_target": [],
-    "description": "Allongé sur le côté ou debout. Élévation latérale contrôlée. Stabilisation bassin. Compatible rééducation genou.",
-    "exercise_type": "isolation",
-    "target_programs": [
-      "program_bodyweight",
-      "program_lactate",
-      "program_muscle_building"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "COR-055",
-    "category": "core_strength",
-    "name": "Leg Raises (Roman Chair)",
-    "muscles_primary": [
-      "Abdominaux",
-      "Fléchisseurs hanches"
-    ],
-    "muscles_secondary": [
-      "Iliopsoas"
-    ],
-    "intent": [
-      "force"
-    ],
-    "level": "intermediaire",
-    "bodyweight_compatible": false,
-    "material_required": [
-      "Roman chair / Captain's chair"
-    ],
-    "equipment_tags": [
-      "machine"
-    ],
-    "locations": [
-      "gym"
-    ],
-    "warmup_target": [],
-    "description": "Bras appuyés sur les supports. Jambes tendues ou fléchies montées jusqu'à l'horizontale ou plus. Contrôle du balancement. Focus bas du ventre.",
-    "exercise_type": "core",
-    "target_programs": [
-      "program_strength"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "COR-056",
-    "category": "core_strength",
-    "name": "Leg Raises (Bar)",
-    "muscles_primary": [
-      "Abdominaux",
-      "Fléchisseurs hanches"
-    ],
-    "muscles_secondary": [
-      "Grand dorsal (stabilisation)"
-    ],
-    "intent": [
-      "force"
-    ],
-    "level": "avance",
-    "bodyweight_compatible": true,
-    "material_required": [
-      "Barre de traction"
-    ],
-    "equipment_tags": [
-      "pullup_bar"
-    ],
-    "locations": [
-      "gym",
-      "home",
-      "outdoor"
-    ],
-    "warmup_target": [],
-    "description": "En suspension à la barre. Jambes tendues montées à 90° ou plus. Forte composante stabilisation épaule. Version avancée : L-sit hang.",
-    "exercise_type": "core",
-    "target_programs": [
-      "program_bodyweight",
-      "program_strength"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "COR-057",
-    "category": "core_strength",
-    "name": "Ab Wheel Rollout",
-    "muscles_primary": [
-      "Rectus abdominis",
-      "Serratus"
-    ],
-    "muscles_secondary": [
-      "Épaules",
-      "Lombaires"
-    ],
-    "intent": [
-      "force",
-      "endurance"
-    ],
-    "level": "intermediaire",
-    "bodyweight_compatible": false,
-    "material_required": [
-      "Ab wheel"
-    ],
-    "equipment_tags": [
-      "wheel"
-    ],
-    "locations": [
-      "gym",
-      "home"
-    ],
-    "warmup_target": [],
-    "description": "Sur genoux ou debout (avancé). Roulement vers l'avant, extension maximale sans toucher le sol. Retour contrôlé. Fort activation core en allongement.",
-    "exercise_type": "core",
-    "target_programs": [
-      "program_lactate",
-      "program_strength"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "COR-058",
-    "category": "core_strength",
-    "name": "Landmine Twists",
-    "muscles_primary": [
-      "Obliques"
-    ],
-    "muscles_secondary": [
-      "Core anti-rotation",
-      "Épaules"
-    ],
-    "intent": [
-      "force",
-      "explosivite"
-    ],
-    "level": "intermediaire",
-    "bodyweight_compatible": false,
-    "material_required": [
-      "Barre",
-      "support landmine ou angle de mur"
-    ],
-    "equipment_tags": [
-      "barbell"
-    ],
-    "locations": [
-      "gym"
-    ],
-    "warmup_target": [],
-    "description": "Barre tenue à bout de bras. Rotation du torse d'un côté à l'autre. Charge progressive possible. Utile pour sports de rotation (surf, raquette).",
-    "exercise_type": "core",
-    "target_programs": [
-      "program_strength"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "COR-059",
-    "category": "core_strength",
-    "name": "Kneeling Cable Crunch",
-    "muscles_primary": [
-      "Rectus abdominis"
-    ],
-    "muscles_secondary": [
-      "Obliques"
-    ],
-    "intent": [
-      "hypertrophie"
-    ],
-    "level": "debutant",
-    "bodyweight_compatible": false,
-    "material_required": [
-      "Câble haut",
-      "corde"
-    ],
-    "equipment_tags": [
-      "cable",
-      "rope"
-    ],
-    "locations": [
-      "gym"
-    ],
-    "warmup_target": [],
-    "description": "À genoux face au câble, corde derrière la nuque. Flexion du torse vers le bas, coudes vers les genoux. Résistance constante. Pas de balancement.",
-    "exercise_type": "core",
-    "target_programs": [
-      "program_muscle_building"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "COR-060",
-    "category": "core_strength",
-    "name": "Seated Good Morning",
-    "muscles_primary": [
-      "Érecteurs",
-      "Ischio-jambiers"
-    ],
-    "muscles_secondary": [
-      "Fessiers",
-      "Lombaires"
-    ],
-    "intent": [
-      "force",
-      "endurance"
-    ],
-    "level": "intermediaire",
-    "bodyweight_compatible": false,
-    "material_required": [
-      "Barre légère",
-      "banc"
-    ],
-    "equipment_tags": [
-      "barbell",
-      "bench"
-    ],
-    "locations": [
-      "gym"
-    ],
-    "warmup_target": [],
-    "description": "Assis sur un banc, barre légère sur les épaules. Flexion de hanche vers l'avant, dos plat. Renforcement lombaire et mobilité.",
-    "exercise_type": "core",
-    "target_programs": [
-      "program_lactate",
-      "program_strength"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "COR-061",
-    "category": "core_strength",
-    "name": "Hip Flexor KB Raises",
-    "muscles_primary": [
-      "Iliopsoas",
-      "Rectus femoris"
-    ],
-    "muscles_secondary": [
-      "Abdominaux",
-      "Carré lombaire"
-    ],
-    "intent": [
-      "force",
-      "endurance"
-    ],
-    "level": "intermediaire",
-    "bodyweight_compatible": false,
-    "material_required": [
-      "Kettlebell",
-      "banc ou chaise stable"
-    ],
-    "equipment_tags": [
-      "kettlebell",
-      "bench"
-    ],
-    "locations": [
-      "gym",
-      "home"
-    ],
-    "warmup_target": [],
-    "description": "Assis ou en suspension, KB fixé sur le pied ou cheville. Élévation du genou contre résistance. Référence KOT / Ben Patrick.",
-    "exercise_type": "core",
-    "target_programs": [
-      "program_lactate",
-      "program_strength"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "COR-062",
-    "category": "core_endurance",
-    "name": "Starfish Crunch",
-    "muscles_primary": [
-      "Rectus abdominis",
-      "Obliques"
-    ],
-    "muscles_secondary": [],
-    "intent": [
-      "endurance"
-    ],
-    "level": "debutant",
-    "bodyweight_compatible": true,
-    "material_required": [],
-    "equipment_tags": [],
-    "locations": [
-      "gym",
-      "home",
-      "outdoor"
-    ],
-    "warmup_target": [],
-    "description": "Allongé, bras et jambes en étoile. Crunch en ramenant coude opposé au genou opposé. Enchaînement bilatéral en rythme HIIT. Référence Jeff Cavalière / AthleanX.",
-    "exercise_type": "core",
-    "target_programs": [
-      "program_bodyweight",
-      "program_lactate",
-      "program_athletic"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "COR-063",
-    "category": "core_endurance",
-    "name": "Russian Twist (HIIT)",
-    "muscles_primary": [
-      "Obliques"
-    ],
-    "muscles_secondary": [
-      "Rectus abdominis"
-    ],
-    "intent": [
-      "endurance"
-    ],
-    "level": "debutant",
-    "bodyweight_compatible": true,
-    "material_required": [
-      "Médecine ball ou haltère léger (optionnel)"
-    ],
-    "equipment_tags": [
-      "dumbbell"
-    ],
-    "locations": [
-      "gym",
-      "home",
-      "outdoor"
-    ],
-    "warmup_target": [],
-    "description": "Assis à 45°, pieds levés. Rotation du torse alternée gauche-droite en rythme rapide. Mode HIIT : 30-45s non-stop.",
-    "exercise_type": "core",
-    "target_programs": [
-      "program_bodyweight",
-      "program_lactate",
-      "program_athletic"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "COR-064",
-    "category": "core_endurance",
-    "name": "Mountain Climbers",
-    "muscles_primary": [
-      "Core",
-      "Fléchisseurs hanches"
-    ],
-    "muscles_secondary": [
-      "Épaules",
-      "Quadriceps"
-    ],
-    "intent": [
-      "endurance",
-      "cardio"
-    ],
-    "level": "debutant",
-    "bodyweight_compatible": true,
-    "material_required": [],
-    "equipment_tags": [],
-    "locations": [
-      "gym",
-      "home",
-      "outdoor"
-    ],
-    "warmup_target": [],
-    "description": "Position de push-up, genoux amenés alternativement vers la poitrine en rythme rapide. Transition parfaite core → cardio.",
-    "exercise_type": "core",
-    "target_programs": [
-      "program_bodyweight",
-      "program_lactate",
-      "program_athletic"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "COR-065",
-    "category": "core_endurance",
-    "name": "Plank to Downward Dog",
-    "muscles_primary": [
-      "Core",
-      "Épaules"
-    ],
-    "muscles_secondary": [
-      "Ischio",
-      "Grand dorsal"
-    ],
-    "intent": [
-      "endurance",
-      "mobilite"
-    ],
-    "level": "debutant",
-    "bodyweight_compatible": true,
-    "material_required": [],
-    "equipment_tags": [],
-    "locations": [
-      "gym",
-      "home",
-      "outdoor"
-    ],
-    "warmup_target": [],
-    "description": "Alterné entre position planche et V inversé. Mobilité thoracique + gainage. Rythme lent pour contrôle ou rapide pour cardio.",
-    "exercise_type": "core",
-    "target_programs": [
-      "program_bodyweight",
-      "program_lactate",
-      "program_athletic"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "COR-066",
-    "category": "core_endurance",
-    "name": "Bicycle Crunches",
-    "muscles_primary": [
-      "Obliques",
-      "Rectus abdominis"
-    ],
-    "muscles_secondary": [
-      "Fléchisseurs hanches"
-    ],
-    "intent": [
-      "endurance"
-    ],
-    "level": "debutant",
-    "bodyweight_compatible": true,
-    "material_required": [],
-    "equipment_tags": [],
-    "locations": [
-      "gym",
-      "home",
-      "outdoor"
-    ],
-    "warmup_target": [],
-    "description": "Allongé, pédalage alterné avec rotation coude-genou opposé. Rythme contrôlé cible mieux les obliques que rythme rapide.",
-    "exercise_type": "core",
-    "target_programs": [
-      "program_bodyweight",
-      "program_lactate",
-      "program_athletic"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "COR-067",
-    "category": "core_endurance",
-    "name": "Bear Crawl",
-    "muscles_primary": [
-      "Core global",
-      "Épaules"
-    ],
-    "muscles_secondary": [
-      "Quadriceps",
-      "Fessiers"
-    ],
-    "intent": [
-      "endurance",
-      "stabilite"
-    ],
-    "level": "debutant",
-    "bodyweight_compatible": true,
-    "material_required": [],
-    "equipment_tags": [],
-    "locations": [
-      "gym",
-      "home",
-      "outdoor"
-    ],
-    "warmup_target": [],
-    "description": "À quatre pattes, genoux à 5 cm du sol. Avancée alternée bras/jambe opposé sur 10-20 m. Gainage complet en mouvement.",
-    "exercise_type": "core",
-    "target_programs": [
-      "program_bodyweight",
-      "program_lactate",
-      "program_athletic"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "EXP-068",
-    "category": "explosive",
-    "name": "EMOM KB Swings",
-    "muscles_primary": [
-      "Fessiers",
-      "Ischio",
-      "Core"
-    ],
-    "muscles_secondary": [
-      "Épaules",
-      "Grand dorsal"
-    ],
-    "intent": [
-      "explosivite",
-      "endurance"
-    ],
-    "level": "intermediaire",
-    "bodyweight_compatible": false,
-    "material_required": [
-      "Kettlebell 16-24 kg"
-    ],
-    "equipment_tags": [
-      "kettlebell"
-    ],
-    "locations": [
-      "gym",
-      "home",
-      "outdoor"
-    ],
-    "warmup_target": [],
-    "description": "Protocole EMOM. Swing bilatéral, hanches = moteur. Charge légère, vitesse > charge. 15-20 reps/minute. Référence kettlebell sport.",
-    "exercise_type": "compound",
-    "target_programs": [
-      "program_lactate",
-      "program_athletic"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "EXP-069",
-    "category": "explosive",
-    "name": "Box Squat into Jump (Barbell)",
-    "muscles_primary": [
-      "Quadriceps",
-      "Fessiers"
-    ],
-    "muscles_secondary": [
-      "Core",
-      "Ischio"
-    ],
-    "intent": [
-      "explosivite"
-    ],
-    "level": "avance",
-    "bodyweight_compatible": false,
-    "material_required": [
-      "Barre légère (~30% 1RM)",
-      "rack",
-      "box basse"
-    ],
-    "equipment_tags": [
-      "barbell",
-      "rack",
-      "box"
-    ],
-    "locations": [
-      "gym"
-    ],
-    "warmup_target": [],
-    "description": "Squat avec barre, pause sur box basse, extension explosive en saut. Charge très légère ou technique confirmée obligatoire.",
-    "exercise_type": "compound",
-    "target_programs": [
-      "program_athletic"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "EXP-070",
-    "category": "explosive",
-    "name": "Hex Bar Jump Deadlift",
-    "muscles_primary": [
-      "Fessiers",
-      "Quadriceps",
-      "Ischio"
-    ],
-    "muscles_secondary": [
-      "Érecteurs",
-      "Trapèze"
-    ],
-    "intent": [
-      "explosivite",
-      "force"
-    ],
-    "level": "avance",
-    "bodyweight_compatible": false,
-    "material_required": [
-      "Trap bar / Hex bar",
-      "disques"
-    ],
-    "equipment_tags": [
-      "barbell",
-      "plate"
-    ],
-    "locations": [
-      "gym"
-    ],
-    "warmup_target": [],
-    "description": "Charge 30-40% du DL max. Triple extension explosive jusqu'au saut. Atterrissage absorbé. Référence force athlétique.",
-    "exercise_type": "compound",
-    "target_programs": [
-      "program_athletic",
-      "program_strength"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "EXP-071",
-    "category": "explosive",
-    "name": "Alternating Rotational Swings",
-    "muscles_primary": [
-      "Obliques",
-      "Fessiers",
-      "Épaules"
-    ],
-    "muscles_secondary": [
-      "Core",
-      "Grand dorsal"
-    ],
-    "intent": [
-      "explosivite",
-      "endurance"
-    ],
-    "level": "intermediaire",
-    "bodyweight_compatible": false,
-    "material_required": [
-      "Kettlebell ou médecine ball"
-    ],
-    "equipment_tags": [
-      "kettlebell"
-    ],
-    "locations": [
-      "gym",
-      "home",
-      "outdoor"
-    ],
-    "warmup_target": [],
-    "description": "Axe rotationnel (≠ swing sagittal). Rotation du torse + swing de côté à côté. Utile pour sports de raquette et surf.",
-    "exercise_type": "compound",
-    "target_programs": [
-      "program_lactate",
-      "program_athletic"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "EXP-072",
-    "category": "explosive",
-    "name": "EMOM KB Snatch",
-    "muscles_primary": [
-      "Deltoïdes",
-      "Fessiers",
-      "Ischio"
-    ],
-    "muscles_secondary": [
-      "Core",
-      "Trapèze",
-      "Avant-bras"
-    ],
-    "intent": [
-      "explosivite",
-      "endurance"
-    ],
-    "level": "avance",
-    "bodyweight_compatible": false,
-    "material_required": [
-      "Kettlebell (charge légère)"
-    ],
-    "equipment_tags": [
-      "kettlebell"
-    ],
-    "locations": [
-      "gym",
-      "home",
-      "outdoor"
-    ],
-    "warmup_target": [],
-    "description": "Arraché KB unilatéral. Protocole EMOM. 8-10 reps/bras/minute. Cardiorespiratoire intense. Aucune charge si technique non maîtrisée.",
-    "exercise_type": "compound",
-    "target_programs": [
-      "program_lactate",
-      "program_athletic"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "EXP-073",
-    "category": "explosive",
-    "name": "Jump Rope",
-    "muscles_primary": [
-      "Mollets",
-      "Fléchisseurs hanches"
-    ],
-    "muscles_secondary": [
-      "Épaules",
-      "Coordination"
-    ],
-    "intent": [
-      "endurance",
-      "cardio"
-    ],
-    "level": "debutant",
-    "bodyweight_compatible": true,
-    "material_required": [
-      "Corde à sauter (simulable sans corde pour débutant)"
-    ],
-    "equipment_tags": [
-      "rope"
-    ],
-    "locations": [
-      "gym",
-      "home",
-      "outdoor"
-    ],
-    "warmup_target": [],
-    "description": "Si maîtrisé : double-unders, alternance pieds. Si débutant : saut sur place rythmé. Objectif : vitesse, pas la charge. Excellent warmup ou finisher.",
-    "exercise_type": "compound",
-    "target_programs": [
-      "program_lactate",
-      "program_athletic"
-    ],
-    "image_url": null
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
   },
   {
     "id": "COM-074",
@@ -4147,12 +1885,18 @@ export const EXERCISES: Exercise[] = [
     "warmup_target": [],
     "description": "DB en position de rack. Squat profond, remontée explosive servant de relance pour le press overhead. Mouvement continu. Charge modérée.",
     "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_lactate",
       "program_athletic",
       "program_strength"
     ],
-    "image_url": null
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
   },
   {
     "id": "COM-075",
@@ -4186,13 +1930,19 @@ export const EXERCISES: Exercise[] = [
     "warmup_target": [],
     "description": "RDL jusqu'en bas, puis à la remontée enchaîner un curl alterné par bras. Double stimulus postérieur + fléchisseurs. Charge limitée par le curl.",
     "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_lactate",
       "program_muscle_building",
       "program_athletic",
       "program_strength"
     ],
-    "image_url": null
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
   },
   {
     "id": "COM-076",
@@ -4228,12 +1978,18 @@ export const EXERCISES: Exercise[] = [
     "warmup_target": [],
     "description": "Triple mouvement : clean depuis position suspendue → squat avant → push press. Chaîne cinétique complète. Référence CrossFit / athlètes.",
     "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_lactate",
       "program_athletic",
       "program_strength"
     ],
-    "image_url": null
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
   },
   {
     "id": "COM-077",
@@ -4267,12 +2023,18 @@ export const EXERCISES: Exercise[] = [
     "warmup_target": [],
     "description": "Push-up → row bras droit → row bras gauche. Anti-rotation core maximal. Haltères hexagonaux pour stabilité au sol.",
     "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_lactate",
       "program_athletic",
       "program_strength"
     ],
-    "image_url": null
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
   },
   {
     "id": "COM-078",
@@ -4308,12 +2070,18 @@ export const EXERCISES: Exercise[] = [
     "warmup_target": [],
     "description": "KB tenu à bout de bras tout au long. Passage de allongé → assis → genou → debout → retour. Complexité motrice maximale.",
     "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_lactate",
       "program_athletic",
       "program_strength"
     ],
-    "image_url": null
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
   },
   {
     "id": "COM-079",
@@ -4348,13 +2116,19 @@ export const EXERCISES: Exercise[] = [
     "warmup_target": [],
     "description": "Fente arrière, puis à la remontée enchaîner un curl alterné. Coordination haut/bas du corps. Charge limitée par le curl.",
     "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_lactate",
       "program_muscle_building",
       "program_athletic",
       "program_strength"
     ],
-    "image_url": null
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
   },
   {
     "id": "COM-080",
@@ -4390,12 +2164,18 @@ export const EXERCISES: Exercise[] = [
     "warmup_target": [],
     "description": "Swing bilatéral → attraper la KB en position goblet → squat profond contrôlé. Transition ballistique → contrôlé. Enseigne l'absorption de force.",
     "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_lactate",
       "program_athletic",
       "program_strength"
     ],
-    "image_url": null
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
   },
   {
     "id": "CON-081",
@@ -4432,11 +2212,17 @@ export const EXERCISES: Exercise[] = [
     "warmup_target": [],
     "description": "10 jump squats → 10 fentes sautées → 15 KB swings. Repos 60-90s. ×3-4 rounds. Charge légère. Objectif VO2max + puissance.",
     "exercise_type": "cardio",
+    "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_lactate",
       "program_athletic"
     ],
-    "image_url": null
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
   },
   {
     "id": "CON-082",
@@ -4472,12 +2258,18 @@ export const EXERCISES: Exercise[] = [
     "warmup_target": [],
     "description": "RDL → Hang clean → Front squat → Push press → Back squat. Sans poser la barre. ×5 cycles = 1 round. AMRAP ou EMOM possible.",
     "exercise_type": "cardio",
+    "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_lactate",
       "program_athletic",
       "program_strength"
     ],
-    "image_url": null
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
   },
   {
     "id": "CON-083",
@@ -4514,12 +2306,18 @@ export const EXERCISES: Exercise[] = [
     "warmup_target": [],
     "description": "10 thrusters → 8 renegade rows → 20 m farmer carry. Circuit métabolique complet.",
     "exercise_type": "cardio",
+    "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_lactate",
       "program_athletic",
       "program_strength"
     ],
-    "image_url": null
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
   },
   {
     "id": "CON-084",
@@ -4553,11 +2351,4119 @@ export const EXERCISES: Exercise[] = [
     "warmup_target": [],
     "description": "AMRAP 8 min : 5 burpee pull-ups → 8 jump squats → 6 push-ups explosifs. Score = nombre de rounds.",
     "exercise_type": "cardio",
+    "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_lactate",
       "program_athletic"
     ],
-    "image_url": null
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": 1,
+    "prescribed_duration_sec": 600
+  },
+  {
+    "id": "CON-131",
+    "category": "conditioning",
+    "name": "Cindy (AMRAP 20 min)",
+    "muscles_primary": [
+      "Full body"
+    ],
+    "muscles_secondary": [
+      "Dorsaux",
+      "Pectoraux",
+      "Quadriceps"
+    ],
+    "intent": [
+      "endurance",
+      "cardio"
+    ],
+    "level": "intermediaire",
+    "bodyweight_compatible": true,
+    "material_required": [],
+    "equipment_tags": [
+      "pullup_bar"
+    ],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "Benchmark CrossFit. 20 minutes, autant de tours que possible : 5 tractions, 10 pompes, 15 air squats. Rythme régulier plutôt que départ rapide. Scaler avec des tractions australiennes et des pompes sur genoux.",
+    "exercise_type": "cardio",
+    "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
+    "target_programs": [
+      "program_lactate",
+      "program_athletic",
+      "program_bodyweight"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": 1,
+    "prescribed_duration_sec": 1200
+  },
+  {
+    "id": "CON-132",
+    "category": "conditioning",
+    "name": "Circuit Jump Squat → Pompes → Fentes alternées (3 tours)",
+    "muscles_primary": [
+      "Quadriceps",
+      "Fessiers",
+      "Pectoraux"
+    ],
+    "muscles_secondary": [
+      "Core",
+      "Mollets"
+    ],
+    "intent": [
+      "explosivite",
+      "endurance"
+    ],
+    "level": "debutant",
+    "bodyweight_compatible": true,
+    "material_required": [],
+    "equipment_tags": [],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "3 tours : 15 jump squats, 12 pompes, 20 fentes alternées. 60 s de repos entre les tours, aucun repos à l'intérieur d'un tour. Aucun matériel.",
+    "exercise_type": "cardio",
+    "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
+    "target_programs": [
+      "program_lactate",
+      "program_athletic",
+      "program_bodyweight"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": 3,
+    "prescribed_duration_sec": 180
+  },
+  {
+    "id": "CON-133",
+    "category": "conditioning",
+    "name": "Chelsea (EMOM 30 min)",
+    "muscles_primary": [
+      "Full body"
+    ],
+    "muscles_secondary": [
+      "Dorsaux",
+      "Pectoraux",
+      "Quadriceps"
+    ],
+    "intent": [
+      "endurance",
+      "cardio"
+    ],
+    "level": "avance",
+    "bodyweight_compatible": true,
+    "material_required": [],
+    "equipment_tags": [
+      "pullup_bar"
+    ],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "Benchmark CrossFit. Au début de chaque minute, pendant 30 minutes : 5 tractions, 10 pompes, 15 air squats. Le repos est ce qu'il reste de la minute. On s'arrête dès qu'une minute n'est plus tenue.",
+    "exercise_type": "cardio",
+    "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
+    "target_programs": [
+      "program_lactate",
+      "program_athletic",
+      "program_bodyweight"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": 1,
+    "prescribed_duration_sec": 1800
+  },
+  {
+    "id": "CON-134",
+    "category": "conditioning",
+    "name": "Circuit Spiderman → Burpees → Tractions australiennes (4 tours)",
+    "muscles_primary": [
+      "Full body"
+    ],
+    "muscles_secondary": [
+      "Core",
+      "Pectoraux",
+      "Dorsaux"
+    ],
+    "intent": [
+      "endurance",
+      "explosivite"
+    ],
+    "level": "intermediaire",
+    "bodyweight_compatible": true,
+    "material_required": [],
+    "equipment_tags": [],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "4 tours : 10 pompes spiderman (genou vers le coude à la descente), 12 burpees, 10 tractions australiennes sous une barre basse. 90 s de repos entre les tours.",
+    "exercise_type": "cardio",
+    "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
+    "target_programs": [
+      "program_lactate",
+      "program_athletic",
+      "program_bodyweight"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": 4,
+    "prescribed_duration_sec": 200
+  },
+  {
+    "id": "COR-055",
+    "category": "core_strength",
+    "name": "Leg Raises (Roman Chair)",
+    "muscles_primary": [
+      "Abdominaux",
+      "Fléchisseurs hanches"
+    ],
+    "muscles_secondary": [
+      "Iliopsoas"
+    ],
+    "intent": [
+      "force"
+    ],
+    "level": "intermediaire",
+    "bodyweight_compatible": false,
+    "material_required": [
+      "Roman chair / Captain's chair"
+    ],
+    "equipment_tags": [
+      "machine"
+    ],
+    "locations": [
+      "gym"
+    ],
+    "warmup_target": [],
+    "description": "Bras appuyés sur les supports. Jambes tendues ou fléchies montées jusqu'à l'horizontale ou plus. Contrôle du balancement. Focus bas du ventre.",
+    "exercise_type": "core",
+    "movement_pattern": "hip_flexion",
+    "movement_family": null,
+    "is_regression": false,
+    "target_programs": [
+      "program_strength"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "COR-056",
+    "category": "core_strength",
+    "name": "Leg Raises (Bar)",
+    "muscles_primary": [
+      "Abdominaux",
+      "Fléchisseurs hanches"
+    ],
+    "muscles_secondary": [
+      "Grand dorsal (stabilisation)"
+    ],
+    "intent": [
+      "force"
+    ],
+    "level": "avance",
+    "bodyweight_compatible": true,
+    "material_required": [
+      "Barre de traction"
+    ],
+    "equipment_tags": [
+      "pullup_bar"
+    ],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "En suspension à la barre. Jambes tendues montées à 90° ou plus. Forte composante stabilisation épaule. Version avancée : L-sit hang.",
+    "exercise_type": "core",
+    "movement_pattern": "hip_flexion",
+    "movement_family": null,
+    "is_regression": false,
+    "target_programs": [
+      "program_bodyweight",
+      "program_strength",
+      "program_muscle_building"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "COR-057",
+    "category": "core_strength",
+    "name": "Ab Wheel Rollout",
+    "muscles_primary": [
+      "Rectus abdominis",
+      "Serratus"
+    ],
+    "muscles_secondary": [
+      "Épaules",
+      "Lombaires"
+    ],
+    "intent": [
+      "force",
+      "endurance"
+    ],
+    "level": "intermediaire",
+    "bodyweight_compatible": false,
+    "material_required": [
+      "Ab wheel"
+    ],
+    "equipment_tags": [
+      "wheel"
+    ],
+    "locations": [
+      "gym",
+      "home"
+    ],
+    "warmup_target": [],
+    "description": "Sur genoux ou debout (avancé). Roulement vers l'avant, extension maximale sans toucher le sol. Retour contrôlé. Fort activation core en allongement.",
+    "exercise_type": "core",
+    "movement_pattern": "anti_extension",
+    "movement_family": null,
+    "is_regression": false,
+    "target_programs": [
+      "program_lactate",
+      "program_strength"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "COR-058",
+    "category": "core_strength",
+    "name": "Landmine Twists",
+    "muscles_primary": [
+      "Obliques"
+    ],
+    "muscles_secondary": [
+      "Core anti-rotation",
+      "Épaules"
+    ],
+    "intent": [
+      "force",
+      "explosivite"
+    ],
+    "level": "intermediaire",
+    "bodyweight_compatible": false,
+    "material_required": [
+      "Barre",
+      "support landmine ou angle de mur"
+    ],
+    "equipment_tags": [
+      "barbell"
+    ],
+    "locations": [
+      "gym"
+    ],
+    "warmup_target": [],
+    "description": "Barre tenue à bout de bras. Rotation du torse d'un côté à l'autre. Charge progressive possible. Utile pour sports de rotation (surf, raquette).",
+    "exercise_type": "core",
+    "movement_pattern": "rotation",
+    "movement_family": null,
+    "is_regression": false,
+    "target_programs": [
+      "program_strength"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "COR-059",
+    "category": "core_strength",
+    "name": "Kneeling Cable Crunch",
+    "muscles_primary": [
+      "Rectus abdominis"
+    ],
+    "muscles_secondary": [
+      "Obliques"
+    ],
+    "intent": [
+      "hypertrophie"
+    ],
+    "level": "debutant",
+    "bodyweight_compatible": false,
+    "material_required": [
+      "Câble haut",
+      "corde"
+    ],
+    "equipment_tags": [
+      "cable",
+      "rope"
+    ],
+    "locations": [
+      "gym"
+    ],
+    "warmup_target": [],
+    "description": "À genoux face au câble, corde derrière la nuque. Flexion du torse vers le bas, coudes vers les genoux. Résistance constante. Pas de balancement.",
+    "exercise_type": "core",
+    "movement_pattern": "flexion",
+    "movement_family": null,
+    "is_regression": false,
+    "target_programs": [
+      "program_muscle_building"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "COR-060",
+    "category": "core_strength",
+    "name": "Seated Good Morning",
+    "muscles_primary": [
+      "Érecteurs",
+      "Ischio-jambiers"
+    ],
+    "muscles_secondary": [
+      "Fessiers",
+      "Lombaires"
+    ],
+    "intent": [
+      "force",
+      "endurance"
+    ],
+    "level": "intermediaire",
+    "bodyweight_compatible": false,
+    "material_required": [
+      "Barre légère",
+      "banc"
+    ],
+    "equipment_tags": [
+      "barbell",
+      "bench"
+    ],
+    "locations": [
+      "gym"
+    ],
+    "warmup_target": [],
+    "description": "Assis sur un banc, barre légère sur les épaules. Flexion de hanche vers l'avant, dos plat. Renforcement lombaire et mobilité.",
+    "exercise_type": "core",
+    "movement_pattern": "extension",
+    "movement_family": null,
+    "is_regression": false,
+    "target_programs": [
+      "program_lactate",
+      "program_strength"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "COR-061",
+    "category": "core_strength",
+    "name": "Hip Flexor KB Raises",
+    "muscles_primary": [
+      "Iliopsoas",
+      "Rectus femoris"
+    ],
+    "muscles_secondary": [
+      "Abdominaux",
+      "Carré lombaire"
+    ],
+    "intent": [
+      "force",
+      "endurance"
+    ],
+    "level": "intermediaire",
+    "bodyweight_compatible": false,
+    "material_required": [
+      "Kettlebell",
+      "banc ou chaise stable"
+    ],
+    "equipment_tags": [
+      "kettlebell",
+      "bench"
+    ],
+    "locations": [
+      "gym",
+      "home"
+    ],
+    "warmup_target": [],
+    "description": "Assis ou en suspension, KB fixé sur le pied ou cheville. Élévation du genou contre résistance. Référence KOT / Ben Patrick.",
+    "exercise_type": "core",
+    "movement_pattern": "hip_flexion",
+    "movement_family": null,
+    "is_regression": false,
+    "target_programs": [
+      "program_lactate",
+      "program_strength"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "COR-062",
+    "category": "core_endurance",
+    "name": "Starfish Crunch",
+    "muscles_primary": [
+      "Rectus abdominis",
+      "Obliques"
+    ],
+    "muscles_secondary": [],
+    "intent": [
+      "endurance"
+    ],
+    "level": "debutant",
+    "bodyweight_compatible": true,
+    "material_required": [],
+    "equipment_tags": [],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "Allongé, bras et jambes en étoile. Crunch en ramenant coude opposé au genou opposé. Enchaînement bilatéral en rythme HIIT. Référence Jeff Cavalière / AthleanX.",
+    "exercise_type": "core",
+    "movement_pattern": "flexion",
+    "movement_family": null,
+    "is_regression": false,
+    "target_programs": [
+      "program_bodyweight",
+      "program_lactate",
+      "program_athletic"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "COR-063",
+    "category": "core_endurance",
+    "name": "Russian Twist (HIIT)",
+    "muscles_primary": [
+      "Obliques"
+    ],
+    "muscles_secondary": [
+      "Rectus abdominis"
+    ],
+    "intent": [
+      "endurance"
+    ],
+    "level": "debutant",
+    "bodyweight_compatible": true,
+    "material_required": [
+      "Médecine ball ou haltère léger (optionnel)"
+    ],
+    "equipment_tags": [
+      "dumbbell"
+    ],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "Assis à 45°, pieds levés. Rotation du torse alternée gauche-droite en rythme rapide. Mode HIIT : 30-45s non-stop.",
+    "exercise_type": "core",
+    "movement_pattern": "rotation",
+    "movement_family": null,
+    "is_regression": false,
+    "target_programs": [
+      "program_bodyweight",
+      "program_lactate",
+      "program_athletic"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "COR-064",
+    "category": "core_endurance",
+    "name": "Mountain Climbers",
+    "muscles_primary": [
+      "Core",
+      "Fléchisseurs hanches"
+    ],
+    "muscles_secondary": [
+      "Épaules",
+      "Quadriceps"
+    ],
+    "intent": [
+      "endurance",
+      "cardio"
+    ],
+    "level": "debutant",
+    "bodyweight_compatible": true,
+    "material_required": [],
+    "equipment_tags": [],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "Position de push-up, genoux amenés alternativement vers la poitrine en rythme rapide. Transition parfaite core → cardio.",
+    "exercise_type": "core",
+    "movement_pattern": "hip_flexion",
+    "movement_family": null,
+    "is_regression": false,
+    "target_programs": [
+      "program_bodyweight",
+      "program_lactate",
+      "program_athletic"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "COR-065",
+    "category": "core_endurance",
+    "name": "Plank to Downward Dog",
+    "muscles_primary": [
+      "Core",
+      "Épaules"
+    ],
+    "muscles_secondary": [
+      "Ischio",
+      "Grand dorsal"
+    ],
+    "intent": [
+      "endurance",
+      "mobilite"
+    ],
+    "level": "debutant",
+    "bodyweight_compatible": true,
+    "material_required": [],
+    "equipment_tags": [],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "Alterné entre position planche et V inversé. Mobilité thoracique + gainage. Rythme lent pour contrôle ou rapide pour cardio.",
+    "exercise_type": "core",
+    "movement_pattern": "anti_extension",
+    "movement_family": null,
+    "is_regression": false,
+    "target_programs": [
+      "program_bodyweight",
+      "program_lactate",
+      "program_athletic"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "COR-066",
+    "category": "core_endurance",
+    "name": "Bicycle Crunches",
+    "muscles_primary": [
+      "Obliques",
+      "Rectus abdominis"
+    ],
+    "muscles_secondary": [
+      "Fléchisseurs hanches"
+    ],
+    "intent": [
+      "endurance"
+    ],
+    "level": "debutant",
+    "bodyweight_compatible": true,
+    "material_required": [],
+    "equipment_tags": [],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "Allongé, pédalage alterné avec rotation coude-genou opposé. Rythme contrôlé cible mieux les obliques que rythme rapide.",
+    "exercise_type": "core",
+    "movement_pattern": "flexion",
+    "movement_family": null,
+    "is_regression": false,
+    "target_programs": [
+      "program_bodyweight",
+      "program_lactate",
+      "program_athletic"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "COR-067",
+    "category": "core_endurance",
+    "name": "Bear Crawl",
+    "muscles_primary": [
+      "Core global",
+      "Épaules"
+    ],
+    "muscles_secondary": [
+      "Quadriceps",
+      "Fessiers"
+    ],
+    "intent": [
+      "endurance",
+      "stabilite"
+    ],
+    "level": "debutant",
+    "bodyweight_compatible": true,
+    "material_required": [],
+    "equipment_tags": [],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "À quatre pattes, genoux à 5 cm du sol. Avancée alternée bras/jambe opposé sur 10-20 m. Gainage complet en mouvement.",
+    "exercise_type": "core",
+    "movement_pattern": "anti_extension",
+    "movement_family": null,
+    "is_regression": false,
+    "target_programs": [
+      "program_bodyweight",
+      "program_lactate",
+      "program_athletic"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "COR-110",
+    "category": "core_endurance",
+    "name": "Weighted Plank",
+    "muscles_primary": [
+      "Transverse",
+      "Grand droit"
+    ],
+    "muscles_secondary": [
+      "Obliques",
+      "Épaules"
+    ],
+    "intent": [
+      "force",
+      "stabilite"
+    ],
+    "level": "debutant",
+    "bodyweight_compatible": true,
+    "material_required": [
+      "Disque",
+      "Tapis de sol"
+    ],
+    "equipment_tags": [
+      "plate",
+      "mat"
+    ],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "Planche sur avant-bras, disque posé entre les omoplates. Bassin en rétroversion, ligne épaules-hanches-chevilles maintenue. La charge se progresse disque après disque.",
+    "exercise_type": "core",
+    "movement_pattern": "anti_extension",
+    "movement_family": null,
+    "is_regression": false,
+    "target_programs": [
+      "program_muscle_building",
+      "program_strength",
+      "program_bodyweight"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "COR-111",
+    "category": "core_strength",
+    "name": "Weighted Dead Bug",
+    "muscles_primary": [
+      "Transverse",
+      "Grand droit"
+    ],
+    "muscles_secondary": [
+      "Fléchisseurs de hanche"
+    ],
+    "intent": [
+      "force",
+      "stabilite"
+    ],
+    "level": "debutant",
+    "bodyweight_compatible": true,
+    "material_required": [
+      "Haltère",
+      "Tapis de sol"
+    ],
+    "equipment_tags": [
+      "dumbbell",
+      "mat"
+    ],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "Dos plaqué au sol, haltère tenu bras tendus. Descendre jambe et bras opposés sans décoller les lombaires. Le lest augmente la demande anti-extension.",
+    "exercise_type": "core",
+    "movement_pattern": "anti_extension",
+    "movement_family": null,
+    "is_regression": false,
+    "target_programs": [
+      "program_muscle_building",
+      "program_bodyweight"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "COR-112",
+    "category": "core_strength",
+    "name": "Kneeling Cable Fallout",
+    "muscles_primary": [
+      "Grand droit",
+      "Transverse"
+    ],
+    "muscles_secondary": [
+      "Dorsaux",
+      "Triceps"
+    ],
+    "intent": [
+      "force",
+      "hypertrophie"
+    ],
+    "level": "intermediaire",
+    "bodyweight_compatible": false,
+    "material_required": [
+      "Câble haut",
+      "Corde"
+    ],
+    "equipment_tags": [
+      "cable",
+      "rope"
+    ],
+    "locations": [
+      "gym"
+    ],
+    "warmup_target": [],
+    "description": "À genoux face à la poulie haute, corde tenue au-dessus de la tête. Étendre les bras vers l'avant en résistant à la cambrure, puis revenir. Charge réglable au kilo près.",
+    "exercise_type": "core",
+    "movement_pattern": "anti_extension",
+    "movement_family": null,
+    "is_regression": false,
+    "target_programs": [
+      "program_muscle_building",
+      "program_strength"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "COR-113",
+    "category": "core_strength",
+    "name": "Weighted Crunch",
+    "muscles_primary": [
+      "Grand droit"
+    ],
+    "muscles_secondary": [
+      "Obliques"
+    ],
+    "intent": [
+      "hypertrophie"
+    ],
+    "level": "debutant",
+    "bodyweight_compatible": true,
+    "material_required": [
+      "Disque",
+      "Tapis de sol"
+    ],
+    "equipment_tags": [
+      "plate",
+      "mat"
+    ],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "Allongé genoux fléchis, disque tenu contre la poitrine. Enrouler le buste vertèbre par vertèbre sur 30-40° d'amplitude. Expirer en haut, contrôler la descente.",
+    "exercise_type": "core",
+    "movement_pattern": "flexion",
+    "movement_family": null,
+    "is_regression": false,
+    "target_programs": [
+      "program_muscle_building",
+      "program_bodyweight"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "COR-114",
+    "category": "core_strength",
+    "name": "Weighted Decline Crunch",
+    "muscles_primary": [
+      "Grand droit"
+    ],
+    "muscles_secondary": [
+      "Fléchisseurs de hanche",
+      "Obliques"
+    ],
+    "intent": [
+      "hypertrophie",
+      "force"
+    ],
+    "level": "intermediaire",
+    "bodyweight_compatible": false,
+    "material_required": [
+      "Banc décliné",
+      "Disque"
+    ],
+    "equipment_tags": [
+      "bench",
+      "plate"
+    ],
+    "locations": [
+      "gym"
+    ],
+    "warmup_target": [],
+    "description": "Sur banc décliné, pieds bloqués, disque contre la poitrine. Enrouler le buste sans tirer sur la nuque. L'inclinaison allonge le bras de levier.",
+    "exercise_type": "core",
+    "movement_pattern": "flexion",
+    "movement_family": null,
+    "is_regression": false,
+    "target_programs": [
+      "program_muscle_building",
+      "program_strength"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "COR-115",
+    "category": "core_strength",
+    "name": "Cable Reverse Crunch",
+    "muscles_primary": [
+      "Grand droit inférieur"
+    ],
+    "muscles_secondary": [
+      "Transverse"
+    ],
+    "intent": [
+      "hypertrophie"
+    ],
+    "level": "intermediaire",
+    "bodyweight_compatible": false,
+    "material_required": [
+      "Câble bas",
+      "Sangles de cheville",
+      "Banc plat"
+    ],
+    "equipment_tags": [
+      "cable",
+      "rings",
+      "bench"
+    ],
+    "locations": [
+      "gym"
+    ],
+    "warmup_target": [],
+    "description": "Allongé, chevilles sanglées à la poulie basse. Enrouler le bassin vers la cage en décollant le sacrum, sans élan. Cible la portion basse du grand droit.",
+    "exercise_type": "core",
+    "movement_pattern": "flexion",
+    "movement_family": null,
+    "is_regression": false,
+    "target_programs": [
+      "program_muscle_building"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "COR-116",
+    "category": "core_strength",
+    "name": "Half-Kneeling Pallof Press",
+    "muscles_primary": [
+      "Obliques",
+      "Transverse"
+    ],
+    "muscles_secondary": [
+      "Fessiers",
+      "Épaules"
+    ],
+    "intent": [
+      "force",
+      "stabilite"
+    ],
+    "level": "debutant",
+    "bodyweight_compatible": false,
+    "material_required": [
+      "Câble",
+      "Poignée simple"
+    ],
+    "equipment_tags": [
+      "cable"
+    ],
+    "locations": [
+      "gym"
+    ],
+    "warmup_target": [],
+    "description": "En fente à genoux, perpendiculaire à la poulie. Presser la poignée devant le sternum en résistant à la rotation. Le tronc ne bouge pas, c'est là tout le travail.",
+    "exercise_type": "core",
+    "movement_pattern": "rotation",
+    "movement_family": null,
+    "is_regression": false,
+    "target_programs": [
+      "program_muscle_building",
+      "program_strength"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "COR-117",
+    "category": "core_strength",
+    "name": "Cable Woodchopper (High to Low)",
+    "muscles_primary": [
+      "Obliques"
+    ],
+    "muscles_secondary": [
+      "Grand droit",
+      "Fessiers"
+    ],
+    "intent": [
+      "force",
+      "hypertrophie"
+    ],
+    "level": "intermediaire",
+    "bodyweight_compatible": false,
+    "material_required": [
+      "Câble haut",
+      "Corde"
+    ],
+    "equipment_tags": [
+      "cable",
+      "rope"
+    ],
+    "locations": [
+      "gym"
+    ],
+    "warmup_target": [],
+    "description": "Poulie haute, corde saisie à deux mains. Tirer en diagonale vers la hanche opposée, rotation menée par le tronc et non par les bras. Contrôler le retour.",
+    "exercise_type": "core",
+    "movement_pattern": "rotation",
+    "movement_family": null,
+    "is_regression": false,
+    "target_programs": [
+      "program_muscle_building",
+      "program_strength"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "COR-118",
+    "category": "core_strength",
+    "name": "Suitcase Carry",
+    "muscles_primary": [
+      "Obliques",
+      "Transverse"
+    ],
+    "muscles_secondary": [
+      "Trapèzes",
+      "Avant-bras"
+    ],
+    "intent": [
+      "force",
+      "stabilite"
+    ],
+    "level": "debutant",
+    "bodyweight_compatible": false,
+    "material_required": [
+      "Kettlebell"
+    ],
+    "equipment_tags": [
+      "kettlebell"
+    ],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "Marcher sur 20-30 m avec une charge lourde d'un seul côté, épaules de niveau. Le tronc lutte contre l'inclinaison latérale. Alterner les côtés à chaque série.",
+    "exercise_type": "core",
+    "movement_pattern": "anti_lateral_flexion",
+    "movement_family": null,
+    "is_regression": false,
+    "target_programs": [
+      "program_muscle_building",
+      "program_strength",
+      "program_bodyweight"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "COR-119",
+    "category": "core_endurance",
+    "name": "Weighted Side Plank",
+    "muscles_primary": [
+      "Obliques",
+      "Carré des lombes"
+    ],
+    "muscles_secondary": [
+      "Moyen fessier",
+      "Épaules"
+    ],
+    "intent": [
+      "force",
+      "stabilite"
+    ],
+    "level": "intermediaire",
+    "bodyweight_compatible": true,
+    "material_required": [
+      "Disque",
+      "Tapis de sol"
+    ],
+    "equipment_tags": [
+      "plate",
+      "mat"
+    ],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "Planche latérale sur avant-bras, disque posé sur la hanche haute. Bassin haut, corps aligné de la cheville à l'épaule. Ajouter du poids plutôt que du temps.",
+    "exercise_type": "core",
+    "movement_pattern": "anti_lateral_flexion",
+    "movement_family": null,
+    "is_regression": false,
+    "target_programs": [
+      "program_muscle_building",
+      "program_bodyweight"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "COR-120",
+    "category": "core_strength",
+    "name": "Weighted Hanging Leg Raise",
+    "muscles_primary": [
+      "Grand droit inférieur",
+      "Fléchisseurs de hanche"
+    ],
+    "muscles_secondary": [
+      "Obliques",
+      "Avant-bras"
+    ],
+    "intent": [
+      "force",
+      "hypertrophie"
+    ],
+    "level": "avance",
+    "bodyweight_compatible": true,
+    "material_required": [
+      "Barre de traction",
+      "Haltère"
+    ],
+    "equipment_tags": [
+      "pullup_bar",
+      "dumbbell"
+    ],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "Suspendu, haltère serré entre les chevilles. Monter jambes tendues jusqu'à l'horizontale en enroulant le bassin. Aucun balancement — descente contrôlée.",
+    "exercise_type": "core",
+    "movement_pattern": "hip_flexion",
+    "movement_family": null,
+    "is_regression": false,
+    "target_programs": [
+      "program_muscle_building",
+      "program_strength",
+      "program_bodyweight"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "COR-121",
+    "category": "core_endurance",
+    "name": "Weighted Hollow Body Hold",
+    "muscles_primary": [
+      "Grand droit",
+      "Transverse"
+    ],
+    "muscles_secondary": [
+      "Fléchisseurs de hanche"
+    ],
+    "intent": [
+      "force",
+      "stabilite"
+    ],
+    "level": "intermediaire",
+    "bodyweight_compatible": true,
+    "material_required": [
+      "Disque",
+      "Tapis de sol"
+    ],
+    "equipment_tags": [
+      "plate",
+      "mat"
+    ],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "Lombaires plaquées au sol, bras et jambes tendus décollés, disque tenu bras tendus. Position en banane maintenue sans creuser le bas du dos.",
+    "exercise_type": "core",
+    "movement_pattern": "anti_extension",
+    "movement_family": null,
+    "is_regression": false,
+    "target_programs": [
+      "program_muscle_building",
+      "program_bodyweight"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "EXP-068",
+    "category": "explosive",
+    "name": "EMOM KB Swings",
+    "muscles_primary": [
+      "Fessiers",
+      "Ischio",
+      "Core"
+    ],
+    "muscles_secondary": [
+      "Épaules",
+      "Grand dorsal"
+    ],
+    "intent": [
+      "explosivite",
+      "endurance"
+    ],
+    "level": "intermediaire",
+    "bodyweight_compatible": false,
+    "material_required": [
+      "Kettlebell 16-24 kg"
+    ],
+    "equipment_tags": [
+      "kettlebell"
+    ],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "Protocole EMOM. Swing bilatéral, hanches = moteur. Charge légère, vitesse > charge. 15-20 reps/minute. Référence kettlebell sport.",
+    "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
+    "target_programs": [
+      "program_lactate",
+      "program_athletic"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "EXP-069",
+    "category": "explosive",
+    "name": "Box Squat into Jump (Barbell)",
+    "muscles_primary": [
+      "Quadriceps",
+      "Fessiers"
+    ],
+    "muscles_secondary": [
+      "Core",
+      "Ischio"
+    ],
+    "intent": [
+      "explosivite"
+    ],
+    "level": "avance",
+    "bodyweight_compatible": false,
+    "material_required": [
+      "Barre légère (~30% 1RM)",
+      "rack",
+      "box basse"
+    ],
+    "equipment_tags": [
+      "barbell",
+      "rack",
+      "box"
+    ],
+    "locations": [
+      "gym"
+    ],
+    "warmup_target": [],
+    "description": "Squat avec barre, pause sur box basse, extension explosive en saut. Charge très légère ou technique confirmée obligatoire.",
+    "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
+    "target_programs": [
+      "program_athletic"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "EXP-070",
+    "category": "explosive",
+    "name": "Hex Bar Jump Deadlift",
+    "muscles_primary": [
+      "Fessiers",
+      "Quadriceps",
+      "Ischio"
+    ],
+    "muscles_secondary": [
+      "Érecteurs",
+      "Trapèze"
+    ],
+    "intent": [
+      "explosivite",
+      "force"
+    ],
+    "level": "avance",
+    "bodyweight_compatible": false,
+    "material_required": [
+      "Trap bar / Hex bar",
+      "disques"
+    ],
+    "equipment_tags": [
+      "barbell",
+      "plate"
+    ],
+    "locations": [
+      "gym"
+    ],
+    "warmup_target": [],
+    "description": "Charge 30-40% du DL max. Triple extension explosive jusqu'au saut. Atterrissage absorbé. Référence force athlétique.",
+    "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
+    "target_programs": [
+      "program_athletic",
+      "program_strength"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "EXP-071",
+    "category": "explosive",
+    "name": "Alternating Rotational Swings",
+    "muscles_primary": [
+      "Obliques",
+      "Fessiers",
+      "Épaules"
+    ],
+    "muscles_secondary": [
+      "Core",
+      "Grand dorsal"
+    ],
+    "intent": [
+      "explosivite",
+      "endurance"
+    ],
+    "level": "intermediaire",
+    "bodyweight_compatible": false,
+    "material_required": [
+      "Kettlebell ou médecine ball"
+    ],
+    "equipment_tags": [
+      "kettlebell"
+    ],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "Axe rotationnel (≠ swing sagittal). Rotation du torse + swing de côté à côté. Utile pour sports de raquette et surf.",
+    "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
+    "target_programs": [
+      "program_lactate",
+      "program_athletic"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "EXP-072",
+    "category": "explosive",
+    "name": "EMOM KB Snatch",
+    "muscles_primary": [
+      "Deltoïdes",
+      "Fessiers",
+      "Ischio"
+    ],
+    "muscles_secondary": [
+      "Core",
+      "Trapèze",
+      "Avant-bras"
+    ],
+    "intent": [
+      "explosivite",
+      "endurance"
+    ],
+    "level": "avance",
+    "bodyweight_compatible": false,
+    "material_required": [
+      "Kettlebell (charge légère)"
+    ],
+    "equipment_tags": [
+      "kettlebell"
+    ],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "Arraché KB unilatéral. Protocole EMOM. 8-10 reps/bras/minute. Cardiorespiratoire intense. Aucune charge si technique non maîtrisée.",
+    "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
+    "target_programs": [
+      "program_lactate",
+      "program_athletic"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "EXP-073",
+    "category": "explosive",
+    "name": "Jump Rope",
+    "muscles_primary": [
+      "Mollets",
+      "Fléchisseurs hanches"
+    ],
+    "muscles_secondary": [
+      "Épaules",
+      "Coordination"
+    ],
+    "intent": [
+      "endurance",
+      "cardio"
+    ],
+    "level": "debutant",
+    "bodyweight_compatible": true,
+    "material_required": [
+      "Corde à sauter (simulable sans corde pour débutant)"
+    ],
+    "equipment_tags": [
+      "rope"
+    ],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "Si maîtrisé : double-unders, alternance pieds. Si débutant : saut sur place rythmé. Objectif : vitesse, pas la charge. Excellent warmup ou finisher.",
+    "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
+    "target_programs": [
+      "program_lactate",
+      "program_athletic"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "FIN-102",
+    "category": "finisher",
+    "name": "Burpees",
+    "muscles_primary": [
+      "Full body"
+    ],
+    "muscles_secondary": [
+      "Core",
+      "Coordination"
+    ],
+    "intent": [
+      "endurance",
+      "cardio"
+    ],
+    "level": "debutant",
+    "bodyweight_compatible": true,
+    "material_required": [],
+    "equipment_tags": [],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "4×10 ou AMRAP 3 min. Drop en push-up + saut en haut. Rythme élevé. Variante : burpee pull-up pour plus de défi.",
+    "exercise_type": null,
+    "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
+    "target_programs": [],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "FIN-103",
+    "category": "finisher",
+    "name": "Jump Squats",
+    "muscles_primary": [
+      "Quadriceps",
+      "Fessiers"
+    ],
+    "muscles_secondary": [
+      "Mollets"
+    ],
+    "intent": [
+      "explosivite",
+      "endurance"
+    ],
+    "level": "debutant",
+    "bodyweight_compatible": true,
+    "material_required": [],
+    "equipment_tags": [],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "4×12, poids du corps. Descente squat → saut explosif. Atterrissage amorti sur avant-pied. Pas de charge ajoutée.",
+    "exercise_type": null,
+    "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
+    "target_programs": [],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "FIN-104",
+    "category": "finisher",
+    "name": "Fentes Sautées",
+    "muscles_primary": [
+      "Quadriceps",
+      "Fessiers"
+    ],
+    "muscles_secondary": [
+      "Mollets",
+      "Core"
+    ],
+    "intent": [
+      "explosivite",
+      "endurance"
+    ],
+    "level": "debutant",
+    "bodyweight_compatible": true,
+    "material_required": [],
+    "equipment_tags": [],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "3×10/jambe. Ciseau en l'air. Atterrissage absorbé en fente. Excellent cardio bas corps.",
+    "exercise_type": null,
+    "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
+    "target_programs": [],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "FIN-105",
+    "category": "finisher",
+    "name": "Jump Rope",
+    "muscles_primary": [
+      "Mollets",
+      "Coordination",
+      "Cardio"
+    ],
+    "muscles_secondary": [
+      "Épaules"
+    ],
+    "intent": [
+      "endurance",
+      "cardio"
+    ],
+    "level": "debutant",
+    "bodyweight_compatible": true,
+    "material_required": [
+      "Corde à sauter"
+    ],
+    "equipment_tags": [
+      "rope"
+    ],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "3×1 min ou 5×30s. Si débutant : saut sur place rythmé sans corde. Fréquence cardiaque élevée rapidement.",
+    "exercise_type": null,
+    "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
+    "target_programs": [],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "FIN-106",
+    "category": "finisher",
+    "name": "KB Swings (Finisher)",
+    "muscles_primary": [
+      "Fessiers",
+      "Ischio",
+      "Core"
+    ],
+    "muscles_secondary": [
+      "Grand dorsal",
+      "Épaules"
+    ],
+    "intent": [
+      "explosivite",
+      "endurance"
+    ],
+    "level": "intermediaire",
+    "bodyweight_compatible": false,
+    "material_required": [
+      "Kettlebell"
+    ],
+    "equipment_tags": [
+      "kettlebell"
+    ],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "4×15 reps. Charge modérée. Focus vitesse et extension hanches. Dernier push énergétique en fin de séance.",
+    "exercise_type": null,
+    "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
+    "target_programs": [],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "FIN-107",
+    "category": "finisher",
+    "name": "KB Snatch (Finisher)",
+    "muscles_primary": [
+      "Full body"
+    ],
+    "muscles_secondary": [
+      "Core",
+      "Épaules"
+    ],
+    "intent": [
+      "explosivite",
+      "endurance"
+    ],
+    "level": "avance",
+    "bodyweight_compatible": false,
+    "material_required": [
+      "Kettlebell (charge légère)"
+    ],
+    "equipment_tags": [
+      "kettlebell"
+    ],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "3×8/bras. Arraché complet KB. Complexité technique élevée. Charge légère prioritaire sur la technique.",
+    "exercise_type": null,
+    "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
+    "target_programs": [],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "FIN-108",
+    "category": "finisher",
+    "name": "Battle Rope (Alternating)",
+    "muscles_primary": [
+      "Épaules",
+      "Core"
+    ],
+    "muscles_secondary": [
+      "Avant-bras"
+    ],
+    "intent": [
+      "endurance",
+      "cardio"
+    ],
+    "level": "intermediaire",
+    "bodyweight_compatible": false,
+    "material_required": [
+      "Battle rope (~10-15 m)"
+    ],
+    "equipment_tags": [
+      "rope"
+    ],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "3×30s max intensity. Ondes alternées. Cardio bras en fin de séance.",
+    "exercise_type": null,
+    "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
+    "target_programs": [],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "FIN-109",
+    "category": "finisher",
+    "name": "Farmer Carry",
+    "muscles_primary": [
+      "Avant-bras",
+      "Trapèze",
+      "Core"
+    ],
+    "muscles_secondary": [
+      "Full body"
+    ],
+    "intent": [
+      "force",
+      "endurance"
+    ],
+    "level": "debutant",
+    "bodyweight_compatible": false,
+    "material_required": [
+      "Haltères lourds ou kettlebells"
+    ],
+    "equipment_tags": [
+      "dumbbell"
+    ],
+    "locations": [
+      "gym",
+      "home"
+    ],
+    "warmup_target": [],
+    "description": "3×40 m avec haltères lourds. Gainage debout, pas stable. Finisher silencieux mais brutal.",
+    "exercise_type": null,
+    "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
+    "target_programs": [],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "LEG-038",
+    "category": "legs",
+    "name": "Goblet Squat",
+    "muscles_primary": [
+      "Quadriceps",
+      "Fessiers"
+    ],
+    "muscles_secondary": [
+      "Core",
+      "Mollets"
+    ],
+    "intent": [
+      "hypertrophie",
+      "endurance"
+    ],
+    "level": "debutant",
+    "bodyweight_compatible": false,
+    "material_required": [
+      "Kettlebell ou haltère"
+    ],
+    "equipment_tags": [
+      "dumbbell"
+    ],
+    "locations": [
+      "gym",
+      "home"
+    ],
+    "warmup_target": [],
+    "description": "Haltère ou KB tenu en coupe devant la poitrine. Descente profonde, coudes entre les genoux. Excellent pour la mobilité de hanche et la technique squat.",
+    "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": "squat",
+    "is_regression": false,
+    "target_programs": [
+      "program_lactate",
+      "program_muscle_building"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "LEG-039",
+    "category": "legs",
+    "name": "Barbell Squat",
+    "muscles_primary": [
+      "Quadriceps",
+      "Fessiers"
+    ],
+    "muscles_secondary": [
+      "Ischio",
+      "Érecteurs",
+      "Core"
+    ],
+    "intent": [
+      "force"
+    ],
+    "level": "intermediaire",
+    "bodyweight_compatible": false,
+    "material_required": [
+      "Barre olympique",
+      "rack",
+      "disques"
+    ],
+    "equipment_tags": [
+      "barbell",
+      "rack",
+      "plate"
+    ],
+    "locations": [
+      "gym"
+    ],
+    "warmup_target": [],
+    "description": "Barre en high bar ou low bar. Descente sous parallèle, genoux dans l'axe des orteils. Montée explosive. Fondateur Starting Strength.",
+    "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": "squat",
+    "is_regression": false,
+    "target_programs": [
+      "program_muscle_building",
+      "program_strength"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "LEG-040",
+    "category": "legs",
+    "name": "Single Leg Romanian Deadlift",
+    "muscles_primary": [
+      "Ischio-jambiers",
+      "Fessiers"
+    ],
+    "muscles_secondary": [
+      "Stabilisateurs",
+      "Core"
+    ],
+    "intent": [
+      "hypertrophie",
+      "stabilite"
+    ],
+    "level": "intermediaire",
+    "bodyweight_compatible": false,
+    "material_required": [
+      "Haltères ou kettlebells"
+    ],
+    "equipment_tags": [
+      "dumbbell"
+    ],
+    "locations": [
+      "gym",
+      "home"
+    ],
+    "warmup_target": [],
+    "description": "Sur une jambe, haltères dans les mains. Charnière de hanche, dos plat. Torse parallèle au sol en bas. Charge excentrique ischio. Référence KOT.",
+    "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": "hinge",
+    "is_regression": false,
+    "target_programs": [
+      "program_muscle_building",
+      "program_strength"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "LEG-041",
+    "category": "legs",
+    "name": "Goblet Sumo Squat",
+    "muscles_primary": [
+      "Adducteurs",
+      "Fessiers"
+    ],
+    "muscles_secondary": [
+      "Quadriceps"
+    ],
+    "intent": [
+      "hypertrophie"
+    ],
+    "level": "debutant",
+    "bodyweight_compatible": false,
+    "material_required": [
+      "Kettlebell ou haltère"
+    ],
+    "equipment_tags": [
+      "dumbbell"
+    ],
+    "locations": [
+      "gym",
+      "home"
+    ],
+    "warmup_target": [],
+    "description": "Pieds larges en sumo, orteils à 45°. Haltère en coupe. Descente profonde. Cible adducteurs et fessiers plus que le goblet classique.",
+    "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": "squat",
+    "is_regression": false,
+    "target_programs": [
+      "program_muscle_building"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "LEG-042",
+    "category": "legs",
+    "name": "Barbell Sumo Squat",
+    "muscles_primary": [
+      "Adducteurs",
+      "Fessiers",
+      "Quadriceps"
+    ],
+    "muscles_secondary": [
+      "Ischio",
+      "Érecteurs"
+    ],
+    "intent": [
+      "force",
+      "hypertrophie"
+    ],
+    "level": "intermediaire",
+    "bodyweight_compatible": false,
+    "material_required": [
+      "Barre olympique",
+      "rack",
+      "disques"
+    ],
+    "equipment_tags": [
+      "barbell",
+      "rack",
+      "plate"
+    ],
+    "locations": [
+      "gym"
+    ],
+    "warmup_target": [],
+    "description": "Écartement large, barre en position haute. Bon pour la mobilité de hanche et les adducteurs sous charge lourde.",
+    "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": "squat",
+    "is_regression": false,
+    "target_programs": [
+      "program_muscle_building",
+      "program_strength"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "LEG-043",
+    "category": "legs",
+    "name": "Hip Thrust (Barbell)",
+    "muscles_primary": [
+      "Fessiers"
+    ],
+    "muscles_secondary": [
+      "Ischio-jambiers",
+      "Core"
+    ],
+    "intent": [
+      "hypertrophie"
+    ],
+    "level": "debutant",
+    "bodyweight_compatible": false,
+    "material_required": [
+      "Barre olympique",
+      "banc",
+      "disques",
+      "pad de protection"
+    ],
+    "equipment_tags": [
+      "barbell",
+      "bench",
+      "plate",
+      "mat"
+    ],
+    "locations": [
+      "gym"
+    ],
+    "warmup_target": [],
+    "description": "Dos appuyé sur banc, barre sur les hanches. Extension complète de hanche en haut, contraction isométrique finale. Référence Bret Contreras.",
+    "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": "hip_extension",
+    "is_regression": false,
+    "target_programs": [
+      "program_muscle_building"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "LEG-044",
+    "category": "legs",
+    "name": "Deadlift (Conventional)",
+    "muscles_primary": [
+      "Ischio-jambiers",
+      "Fessiers",
+      "Érecteurs"
+    ],
+    "muscles_secondary": [
+      "Grand dorsal",
+      "Trapèze"
+    ],
+    "intent": [
+      "force"
+    ],
+    "level": "intermediaire",
+    "bodyweight_compatible": false,
+    "material_required": [
+      "Barre olympique",
+      "disques",
+      "plateforme"
+    ],
+    "equipment_tags": [
+      "barbell",
+      "plate",
+      "box"
+    ],
+    "locations": [
+      "gym"
+    ],
+    "warmup_target": [],
+    "description": "Pieds dans la largeur des hanches, barre au-dessus des mid-foot. Prise mixte ou crochet. Dos neutre. Starting Strength fondamental.",
+    "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": "hinge",
+    "is_regression": false,
+    "target_programs": [
+      "program_muscle_building",
+      "program_strength"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "LEG-045",
+    "category": "legs",
+    "name": "Sumo Deadlift",
+    "muscles_primary": [
+      "Adducteurs",
+      "Fessiers",
+      "Ischio"
+    ],
+    "muscles_secondary": [
+      "Érecteurs",
+      "Grand dorsal"
+    ],
+    "intent": [
+      "force"
+    ],
+    "level": "intermediaire",
+    "bodyweight_compatible": false,
+    "material_required": [
+      "Barre olympique",
+      "disques",
+      "plateforme"
+    ],
+    "equipment_tags": [
+      "barbell",
+      "plate",
+      "box"
+    ],
+    "locations": [
+      "gym"
+    ],
+    "warmup_target": [],
+    "description": "Écartement très large, barre entre les jambes, prise pronation. Torse plus vertical. Bonne alternative pour morphologies courtes de buste.",
+    "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": "hinge",
+    "is_regression": false,
+    "target_programs": [
+      "program_muscle_building",
+      "program_strength"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "LEG-046",
+    "category": "legs",
+    "name": "Suitcase Deadlift",
+    "muscles_primary": [
+      "Carré des lombes",
+      "Obliques"
+    ],
+    "muscles_secondary": [
+      "Fessiers",
+      "Ischio",
+      "Core"
+    ],
+    "intent": [
+      "force",
+      "stabilite"
+    ],
+    "level": "intermediaire",
+    "bodyweight_compatible": false,
+    "material_required": [
+      "Haltère ou kettlebell"
+    ],
+    "equipment_tags": [
+      "dumbbell"
+    ],
+    "locations": [
+      "gym",
+      "home"
+    ],
+    "warmup_target": [],
+    "description": "Haltère sur le côté (comme une valise). Anti-flexion latérale du core. Asymétrie utile pour corriger déséquilibres gauche/droite.",
+    "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": "hinge",
+    "is_regression": false,
+    "target_programs": [
+      "program_muscle_building",
+      "program_strength"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "LEG-047",
+    "category": "legs",
+    "name": "Zercher Squat",
+    "muscles_primary": [
+      "Quadriceps",
+      "Fessiers",
+      "Core"
+    ],
+    "muscles_secondary": [
+      "Biceps",
+      "Érecteurs"
+    ],
+    "intent": [
+      "force"
+    ],
+    "level": "avance",
+    "bodyweight_compatible": false,
+    "material_required": [
+      "Barre olympique",
+      "rack",
+      "pad de coude optionnel"
+    ],
+    "equipment_tags": [
+      "barbell",
+      "rack",
+      "mat"
+    ],
+    "locations": [
+      "gym"
+    ],
+    "warmup_target": [],
+    "description": "Barre dans le creux des coudes, bras fléchis. Position très verticale du torse. Fort engagement du core. Référence Westside / Ed Coan.",
+    "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": "squat",
+    "is_regression": false,
+    "target_programs": [
+      "program_strength"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "LEG-048",
+    "category": "legs",
+    "name": "Landmine Deadlift",
+    "muscles_primary": [
+      "Fessiers",
+      "Ischio",
+      "Érecteurs"
+    ],
+    "muscles_secondary": [
+      "Grand dorsal",
+      "Core"
+    ],
+    "intent": [
+      "force",
+      "hypertrophie"
+    ],
+    "level": "intermediaire",
+    "bodyweight_compatible": false,
+    "material_required": [
+      "Barre",
+      "support landmine ou angle de mur"
+    ],
+    "equipment_tags": [
+      "barbell"
+    ],
+    "locations": [
+      "gym"
+    ],
+    "warmup_target": [],
+    "description": "Barre insérée dans angle landmine. Mouvement en arc vers le haut. Axe de traction différent du DL classique, moins de stress lombaire.",
+    "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": "hinge",
+    "is_regression": false,
+    "target_programs": [
+      "program_muscle_building",
+      "program_strength"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "LEG-049",
+    "category": "legs",
+    "name": "Bulgarian Split Squat",
+    "muscles_primary": [
+      "Quadriceps",
+      "Fessiers"
+    ],
+    "muscles_secondary": [
+      "Core",
+      "Stabilisateurs"
+    ],
+    "intent": [
+      "hypertrophie",
+      "endurance"
+    ],
+    "level": "intermediaire",
+    "bodyweight_compatible": false,
+    "material_required": [
+      "Haltères",
+      "banc"
+    ],
+    "equipment_tags": [
+      "dumbbell",
+      "bench"
+    ],
+    "locations": [
+      "gym",
+      "home"
+    ],
+    "warmup_target": [],
+    "description": "Pied arrière surélevé sur banc, pied avant avancé. Descente verticale. Fort volume possible. Référence Jeremy Ethier unilatéral.",
+    "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": "lunge",
+    "is_regression": false,
+    "target_programs": [
+      "program_lactate",
+      "program_muscle_building",
+      "program_strength"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "LEG-050",
+    "category": "legs",
+    "name": "Seated Calf Raises",
+    "muscles_primary": [
+      "Soléaire"
+    ],
+    "muscles_secondary": [
+      "Gastrocnémiens"
+    ],
+    "intent": [
+      "hypertrophie",
+      "endurance"
+    ],
+    "level": "debutant",
+    "bodyweight_compatible": false,
+    "material_required": [
+      "Machine seated calf ou haltères + banc + step"
+    ],
+    "equipment_tags": [
+      "machine"
+    ],
+    "locations": [
+      "gym"
+    ],
+    "warmup_target": [],
+    "description": "Genou à 90°. Le soléaire est plus actif en position fléchie. Amplitude complète : descente profonde, contraction max en haut.",
+    "exercise_type": "isolation",
+    "movement_pattern": null,
+    "movement_family": "calf",
+    "is_regression": false,
+    "target_programs": [
+      "program_lactate",
+      "program_muscle_building"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "LEG-051",
+    "category": "legs",
+    "name": "Calf Raises (Standing)",
+    "muscles_primary": [
+      "Gastrocnémiens"
+    ],
+    "muscles_secondary": [
+      "Soléaire"
+    ],
+    "intent": [
+      "hypertrophie",
+      "endurance"
+    ],
+    "level": "debutant",
+    "bodyweight_compatible": false,
+    "material_required": [
+      "Machine standing ou haltères + step / marche"
+    ],
+    "equipment_tags": [
+      "machine"
+    ],
+    "locations": [
+      "gym"
+    ],
+    "warmup_target": [],
+    "description": "Debout sur une marche. Descente lente (3-4s), montée explosive. Amplitude totale. Possible avec sac à dos lesté si pas de machine.",
+    "exercise_type": "isolation",
+    "movement_pattern": null,
+    "movement_family": "calf",
+    "is_regression": false,
+    "target_programs": [
+      "program_lactate",
+      "program_muscle_building"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "LEG-052",
+    "category": "legs",
+    "name": "Single Leg Bridges",
+    "muscles_primary": [
+      "Fessiers"
+    ],
+    "muscles_secondary": [
+      "Ischio",
+      "Core"
+    ],
+    "intent": [
+      "endurance",
+      "hypertrophie"
+    ],
+    "level": "debutant",
+    "bodyweight_compatible": true,
+    "material_required": [],
+    "equipment_tags": [],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "Au sol, une jambe tendue, l'autre fléchie. Extension de hanche unilatérale. Régression du hip thrust. Bon pour activation pré-workout.",
+    "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": "hip_extension",
+    "is_regression": false,
+    "target_programs": [
+      "program_bodyweight",
+      "program_lactate",
+      "program_muscle_building",
+      "program_strength"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "LEG-053",
+    "category": "legs",
+    "name": "Frog Hip Thrust",
+    "muscles_primary": [
+      "Fessiers (fibres profondes)"
+    ],
+    "muscles_secondary": [
+      "Adducteurs",
+      "Ischio"
+    ],
+    "intent": [
+      "hypertrophie"
+    ],
+    "level": "debutant",
+    "bodyweight_compatible": true,
+    "material_required": [],
+    "equipment_tags": [],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "Pieds joints plante contre plante (position grenouille). Flexion externe de hanche maximale. Cible différemment les fessiers. Référence Ben Patrick / KOT.",
+    "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": "hip_extension",
+    "is_regression": false,
+    "target_programs": [
+      "program_bodyweight",
+      "program_muscle_building"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "LEG-054",
+    "category": "legs",
+    "name": "Side Leg Raises",
+    "muscles_primary": [
+      "Abducteurs",
+      "TFL"
+    ],
+    "muscles_secondary": [
+      "Fessiers médians"
+    ],
+    "intent": [
+      "endurance",
+      "stabilite"
+    ],
+    "level": "debutant",
+    "bodyweight_compatible": true,
+    "material_required": [],
+    "equipment_tags": [],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "Allongé sur le côté ou debout. Élévation latérale contrôlée. Stabilisation bassin. Compatible rééducation genou.",
+    "exercise_type": "isolation",
+    "movement_pattern": null,
+    "movement_family": "abduction",
+    "is_regression": false,
+    "target_programs": [
+      "program_bodyweight",
+      "program_lactate",
+      "program_muscle_building",
+      "program_strength"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "LEG-126",
+    "category": "legs",
+    "name": "Air Squat",
+    "muscles_primary": [
+      "Quadriceps",
+      "Fessiers"
+    ],
+    "muscles_secondary": [
+      "Ischio-jambiers",
+      "Core"
+    ],
+    "intent": [
+      "endurance",
+      "force"
+    ],
+    "level": "debutant",
+    "bodyweight_compatible": true,
+    "material_required": [],
+    "equipment_tags": [],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [
+      "squat",
+      "leg"
+    ],
+    "description": "Squat au poids de corps, cuisses sous la parallèle, talons au sol, genoux dans l'axe des pieds. Base de tout travail de jambes sans matériel.",
+    "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": "squat",
+    "is_regression": true,
+    "target_programs": [
+      "program_bodyweight",
+      "program_muscle_building",
+      "program_strength",
+      "program_lactate"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "LEG-127",
+    "category": "legs",
+    "name": "Walking Lunges (Poids de corps)",
+    "muscles_primary": [
+      "Quadriceps",
+      "Fessiers"
+    ],
+    "muscles_secondary": [
+      "Ischio-jambiers",
+      "Core"
+    ],
+    "intent": [
+      "endurance",
+      "force"
+    ],
+    "level": "debutant",
+    "bodyweight_compatible": true,
+    "material_required": [],
+    "equipment_tags": [],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "Fentes avant enchaînées en avançant. Genou arrière effleure le sol, buste droit. Compter les répétitions par jambe.",
+    "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": "lunge",
+    "is_regression": false,
+    "target_programs": [
+      "program_bodyweight",
+      "program_muscle_building",
+      "program_strength"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "LEG-128",
+    "category": "legs",
+    "name": "Step-ups (Banc)",
+    "muscles_primary": [
+      "Quadriceps",
+      "Fessiers"
+    ],
+    "muscles_secondary": [
+      "Ischio-jambiers",
+      "Mollets"
+    ],
+    "intent": [
+      "force",
+      "endurance"
+    ],
+    "level": "debutant",
+    "bodyweight_compatible": true,
+    "material_required": [],
+    "equipment_tags": [],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "Montée sur un banc ou une marche, jambe d'appui seule, sans pousser sur la jambe libre. Descente contrôlée. Un banc de parc convient.",
+    "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": "lunge",
+    "is_regression": false,
+    "target_programs": [
+      "program_bodyweight",
+      "program_muscle_building",
+      "program_strength"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "LEG-129",
+    "category": "legs",
+    "name": "Pistol Squat (Assisté)",
+    "muscles_primary": [
+      "Quadriceps",
+      "Fessiers"
+    ],
+    "muscles_secondary": [
+      "Ischio-jambiers",
+      "Core"
+    ],
+    "intent": [
+      "force",
+      "stabilite"
+    ],
+    "level": "avance",
+    "bodyweight_compatible": true,
+    "material_required": [],
+    "equipment_tags": [],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "Squat sur une jambe, l'autre tendue devant. S'aider d'un poteau ou d'une sangle au début. Demande mobilité de cheville et gainage.",
+    "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": "lunge",
+    "is_regression": false,
+    "target_programs": [
+      "program_bodyweight",
+      "program_muscle_building",
+      "program_strength"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "LEG-130",
+    "category": "legs",
+    "name": "Nordic Hamstring Curl",
+    "muscles_primary": [
+      "Ischio-jambiers"
+    ],
+    "muscles_secondary": [
+      "Fessiers",
+      "Core"
+    ],
+    "intent": [
+      "force"
+    ],
+    "level": "avance",
+    "bodyweight_compatible": true,
+    "material_required": [],
+    "equipment_tags": [],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "Genoux au sol, chevilles bloquées (banc, partenaire, barre basse). Descendre le buste le plus lentement possible, remonter en poussant des mains. Excentrique très exigeant : peu de répétitions.",
+    "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": "hinge",
+    "is_regression": false,
+    "target_programs": [
+      "program_bodyweight",
+      "program_muscle_building",
+      "program_strength"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "PUL-015",
+    "category": "pull",
+    "name": "Pull-over (DB)",
+    "muscles_primary": [
+      "Grand dorsal"
+    ],
+    "muscles_secondary": [
+      "Grand pectoral",
+      "Serratus"
+    ],
+    "intent": [
+      "hypertrophie"
+    ],
+    "level": "intermediaire",
+    "bodyweight_compatible": false,
+    "material_required": [
+      "Haltère",
+      "banc"
+    ],
+    "equipment_tags": [
+      "dumbbell",
+      "bench"
+    ],
+    "locations": [
+      "gym",
+      "home"
+    ],
+    "warmup_target": [],
+    "description": "Allongé perpendiculaire au banc, haltère tenu à deux mains. Arc de cercle de la poitrine vers l'arrière de la tête. Étirement max du dorsal. Coudes légèrement fléchis.",
+    "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": "pullover",
+    "is_regression": false,
+    "target_programs": [
+      "program_muscle_building"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "PUL-016",
+    "category": "pull",
+    "name": "Pull-ups (Pronation)",
+    "muscles_primary": [
+      "Grand dorsal",
+      "Biceps"
+    ],
+    "muscles_secondary": [
+      "Rhomboïdes",
+      "Trapèze"
+    ],
+    "intent": [
+      "force",
+      "hypertrophie"
+    ],
+    "level": "intermediaire",
+    "bodyweight_compatible": true,
+    "material_required": [
+      "Barre de traction"
+    ],
+    "equipment_tags": [
+      "pullup_bar"
+    ],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "Prise pronation (paumes en avant), mains ~1.5× largeur épaules. Tirer coudes vers les hanches. Chin au-dessus de la barre. Descente contrôlée.",
+    "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": "vertical_pull",
+    "is_regression": false,
+    "target_programs": [
+      "program_bodyweight",
+      "program_muscle_building",
+      "program_strength"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "PUL-017",
+    "category": "pull",
+    "name": "Chin-ups (Supination)",
+    "muscles_primary": [
+      "Grand dorsal",
+      "Biceps"
+    ],
+    "muscles_secondary": [
+      "Rhomboïdes"
+    ],
+    "intent": [
+      "hypertrophie"
+    ],
+    "level": "debutant",
+    "bodyweight_compatible": true,
+    "material_required": [
+      "Barre de traction"
+    ],
+    "equipment_tags": [
+      "pullup_bar"
+    ],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "Prise supination (paumes vers soi). Plus de recrutement biceps. Facilite la connexion esprit-muscle sur le dorsal pour débutants.",
+    "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": "vertical_pull",
+    "is_regression": false,
+    "target_programs": [
+      "program_bodyweight",
+      "program_muscle_building",
+      "program_strength"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "PUL-018",
+    "category": "pull",
+    "name": "Negative Pull-ups",
+    "muscles_primary": [
+      "Grand dorsal",
+      "Biceps"
+    ],
+    "muscles_secondary": [
+      "Rhomboïdes",
+      "Trapèze"
+    ],
+    "intent": [
+      "force"
+    ],
+    "level": "debutant",
+    "bodyweight_compatible": true,
+    "material_required": [
+      "Barre de traction"
+    ],
+    "equipment_tags": [
+      "pullup_bar"
+    ],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "Monter en sautant ou sur une box, puis descente excentrique lente (4-6s). Construit la force nécessaire avant les tractions complètes.",
+    "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": "vertical_pull",
+    "is_regression": true,
+    "target_programs": [
+      "program_bodyweight",
+      "program_muscle_building",
+      "program_strength"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "PUL-019",
+    "category": "pull",
+    "name": "Scapular Pull-ups",
+    "muscles_primary": [
+      "Rhomboïdes",
+      "Trapèze inf."
+    ],
+    "muscles_secondary": [
+      "Grand dorsal"
+    ],
+    "intent": [
+      "stabilite",
+      "endurance"
+    ],
+    "level": "debutant",
+    "bodyweight_compatible": true,
+    "material_required": [
+      "Barre de traction"
+    ],
+    "equipment_tags": [
+      "pullup_bar"
+    ],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "En dead hang, rétraction scapulaire pure sans fléchir les coudes. Activation des fixateurs de l'omoplate. Base de santé épaule / posture.",
+    "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": "vertical_pull",
+    "is_regression": true,
+    "target_programs": [
+      "program_bodyweight",
+      "program_lactate",
+      "program_muscle_building",
+      "program_strength"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "PUL-020",
+    "category": "pull",
+    "name": "Barbell Rows",
+    "muscles_primary": [
+      "Grand dorsal",
+      "Rhomboïdes"
+    ],
+    "muscles_secondary": [
+      "Trapèze",
+      "Biceps"
+    ],
+    "intent": [
+      "force"
+    ],
+    "level": "intermediaire",
+    "bodyweight_compatible": false,
+    "material_required": [
+      "Barre olympique",
+      "disques"
+    ],
+    "equipment_tags": [
+      "barbell",
+      "plate"
+    ],
+    "locations": [
+      "gym"
+    ],
+    "warmup_target": [],
+    "description": "Pendlay ou Yates row. Buste ~45°, barre tirée vers le bas du sternum. Rétraction scapulaire en fin de mouvement. Base du programme de force.",
+    "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": "horizontal_pull",
+    "is_regression": false,
+    "target_programs": [
+      "program_muscle_building",
+      "program_strength"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "PUL-021",
+    "category": "pull",
+    "name": "T-Bar / Landmine Rows",
+    "muscles_primary": [
+      "Grand dorsal",
+      "Rhomboïdes"
+    ],
+    "muscles_secondary": [
+      "Trapèze",
+      "Biceps"
+    ],
+    "intent": [
+      "force",
+      "hypertrophie"
+    ],
+    "level": "intermediaire",
+    "bodyweight_compatible": false,
+    "material_required": [
+      "Barre",
+      "support landmine ou angle de mur",
+      "poignée V-bar optionnelle"
+    ],
+    "equipment_tags": [
+      "barbell"
+    ],
+    "locations": [
+      "gym"
+    ],
+    "warmup_target": [],
+    "description": "Barre insérée dans un angle ou support landmine. Position légèrement plus upright que le barbell row. Prise neutre si poignée V-bar.",
+    "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": "horizontal_pull",
+    "is_regression": false,
+    "target_programs": [
+      "program_muscle_building",
+      "program_strength"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "PUL-022",
+    "category": "pull",
+    "name": "Australian Pull-ups / TRX Rows",
+    "muscles_primary": [
+      "Grand dorsal",
+      "Rhomboïdes"
+    ],
+    "muscles_secondary": [
+      "Biceps",
+      "Trapèze"
+    ],
+    "intent": [
+      "endurance",
+      "hypertrophie"
+    ],
+    "level": "debutant",
+    "bodyweight_compatible": true,
+    "material_required": [
+      "Barre basse ou TRX / sangles de suspension"
+    ],
+    "equipment_tags": [
+      "pullup_bar"
+    ],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "Corps quasi horizontal sous barre fixe ou TRX. Tire la poitrine vers la barre. Régression utile avant pull-ups. Volume élevé possible.",
+    "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": "horizontal_pull",
+    "is_regression": false,
+    "target_programs": [
+      "program_bodyweight",
+      "program_lactate",
+      "program_muscle_building",
+      "program_strength"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "PUL-023",
+    "category": "pull",
+    "name": "Single Arm Dumbbell Row",
+    "muscles_primary": [
+      "Grand dorsal",
+      "Rhomboïdes"
+    ],
+    "muscles_secondary": [
+      "Biceps",
+      "Érecteurs"
+    ],
+    "intent": [
+      "hypertrophie"
+    ],
+    "level": "debutant",
+    "bodyweight_compatible": false,
+    "material_required": [
+      "Haltère",
+      "banc"
+    ],
+    "equipment_tags": [
+      "dumbbell",
+      "bench"
+    ],
+    "locations": [
+      "gym",
+      "home"
+    ],
+    "warmup_target": [],
+    "description": "Appui sur un banc, bras libre tire l'haltère vers la hanche. Focus sur rétraction finale et légère rotation du torse. Amplitude maximale.",
+    "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": "horizontal_pull",
+    "is_regression": false,
+    "target_programs": [
+      "program_muscle_building"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "PUL-024",
+    "category": "pull",
+    "name": "Face Pulls",
+    "muscles_primary": [
+      "Deltoïde post.",
+      "Trapèze"
+    ],
+    "muscles_secondary": [
+      "Rotateurs ext.",
+      "Rhomboïdes"
+    ],
+    "intent": [
+      "endurance",
+      "hypertrophie"
+    ],
+    "level": "debutant",
+    "bodyweight_compatible": false,
+    "material_required": [
+      "Câble avec corde",
+      "ou bande élastique"
+    ],
+    "equipment_tags": [
+      "cable",
+      "band"
+    ],
+    "locations": [
+      "gym"
+    ],
+    "warmup_target": [],
+    "description": "Câble à hauteur des yeux ou plus. Tirer vers le visage en ouvrant les coudes. Rotation externe en fin de mouvement. Santé épaule prioritaire.",
+    "exercise_type": "isolation",
+    "movement_pattern": null,
+    "movement_family": "rear_delt",
+    "is_regression": false,
+    "target_programs": [
+      "program_lactate",
+      "program_muscle_building"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "PUL-025",
+    "category": "pull",
+    "name": "Y Raises & W Raises (Plates)",
+    "muscles_primary": [
+      "Trapèze inf.",
+      "Deltoïde post."
+    ],
+    "muscles_secondary": [
+      "Rhomboïdes",
+      "Rotateurs"
+    ],
+    "intent": [
+      "endurance",
+      "stabilite"
+    ],
+    "level": "debutant",
+    "bodyweight_compatible": false,
+    "material_required": [
+      "Disques légers 2.5-5 kg",
+      "banc incliné"
+    ],
+    "equipment_tags": [
+      "plate",
+      "bench"
+    ],
+    "locations": [
+      "gym"
+    ],
+    "warmup_target": [],
+    "description": "Allongé face contre banc incliné. Y : bras en V vers le haut. W : coudes fléchis, rotation externe. Disques très légers. Référence physiothérapie épaule.",
+    "exercise_type": "isolation",
+    "movement_pattern": null,
+    "movement_family": "rear_delt",
+    "is_regression": false,
+    "target_programs": [
+      "program_lactate",
+      "program_muscle_building"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "PUL-026",
+    "category": "pull",
+    "name": "Prone Paddle Simulator",
+    "muscles_primary": [
+      "Érecteurs",
+      "Deltoïde post."
+    ],
+    "muscles_secondary": [
+      "Trapèze",
+      "Grand dorsal"
+    ],
+    "intent": [
+      "endurance",
+      "stabilite"
+    ],
+    "level": "intermediaire",
+    "bodyweight_compatible": true,
+    "material_required": [
+      "Tapis de sol (Swiss ball optionnel)"
+    ],
+    "equipment_tags": [
+      "ball"
+    ],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "Sur tapis, position prone. Simulation du mouvement de paddle surf : bras alternés en arc horizontal, torse légèrement soulevé. Pour surfeurs.",
+    "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": "horizontal_pull",
+    "is_regression": false,
+    "target_programs": [
+      "program_bodyweight",
+      "program_lactate",
+      "program_muscle_building"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "PUL-027",
+    "category": "pull",
+    "name": "Straight Arm Lat Pulldown",
+    "muscles_primary": [
+      "Grand dorsal",
+      "Serratus"
+    ],
+    "muscles_secondary": [
+      "Teres major"
+    ],
+    "intent": [
+      "hypertrophie"
+    ],
+    "level": "debutant",
+    "bodyweight_compatible": false,
+    "material_required": [
+      "Câble haut ou bande élastique"
+    ],
+    "equipment_tags": [
+      "cable"
+    ],
+    "locations": [
+      "gym"
+    ],
+    "warmup_target": [],
+    "description": "Câble ou élastique haut, bras tendus (légère flexion coude). Descendre les bras vers les hanches en gardant les coudes fixes. Isole le dorsal sans biceps.",
+    "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": "pullover",
+    "is_regression": false,
+    "target_programs": [
+      "program_muscle_building"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "PUL-125",
+    "category": "pull",
+    "name": "Ring Rows",
+    "muscles_primary": [
+      "Dorsaux",
+      "Rhomboïdes"
+    ],
+    "muscles_secondary": [
+      "Biceps",
+      "Trapèzes moy."
+    ],
+    "intent": [
+      "hypertrophie",
+      "force"
+    ],
+    "level": "debutant",
+    "bodyweight_compatible": true,
+    "material_required": [],
+    "equipment_tags": [
+      "rings"
+    ],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "Tirage horizontal aux anneaux, corps gainé en planche. Plus les pieds avancent, plus c'est lourd. Serrer les omoplates en fin de tirage.",
+    "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": "horizontal_pull",
+    "is_regression": false,
+    "target_programs": [
+      "program_bodyweight",
+      "program_muscle_building",
+      "program_strength"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "PUS-001",
+    "category": "push",
+    "name": "Barbell Bench Press",
+    "muscles_primary": [
+      "Pectoraux",
+      "Deltoïde ant."
+    ],
+    "muscles_secondary": [
+      "Triceps"
+    ],
+    "intent": [
+      "force",
+      "hypertrophie"
+    ],
+    "level": "intermediaire",
+    "bodyweight_compatible": false,
+    "material_required": [
+      "Barre olympique",
+      "banc plat",
+      "rack"
+    ],
+    "equipment_tags": [
+      "barbell",
+      "bench",
+      "rack"
+    ],
+    "locations": [
+      "gym"
+    ],
+    "warmup_target": [],
+    "description": "Allongé sur le banc, barre saisie en prise large. Descente contrôlée jusqu'au sternum, coudes à 45-75°. Poussée explosive en expirant.",
+    "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": "horizontal_push",
+    "is_regression": false,
+    "target_programs": [
+      "program_muscle_building",
+      "program_strength"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "PUS-002",
+    "category": "push",
+    "name": "Dumbbell Bench Press",
+    "muscles_primary": [
+      "Pectoraux",
+      "Deltoïde ant."
+    ],
+    "muscles_secondary": [
+      "Triceps"
+    ],
+    "intent": [
+      "hypertrophie"
+    ],
+    "level": "debutant",
+    "bodyweight_compatible": false,
+    "material_required": [
+      "Haltères",
+      "banc plat"
+    ],
+    "equipment_tags": [
+      "dumbbell",
+      "bench"
+    ],
+    "locations": [
+      "gym",
+      "home"
+    ],
+    "warmup_target": [],
+    "description": "Même schéma que la barre mais amplitude plus grande. Permet une rotation naturelle des poignets. Instabilité utile pour activation stabilisatrice.",
+    "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": "horizontal_push",
+    "is_regression": false,
+    "target_programs": [
+      "program_muscle_building"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "PUS-003",
+    "category": "push",
+    "name": "Ring Dips",
+    "muscles_primary": [
+      "Pectoraux inf.",
+      "Triceps"
+    ],
+    "muscles_secondary": [
+      "Core",
+      "Épaules"
+    ],
+    "intent": [
+      "force",
+      "hypertrophie"
+    ],
+    "level": "avance",
+    "bodyweight_compatible": true,
+    "material_required": [
+      "Anneaux de gymnastique"
+    ],
+    "equipment_tags": [
+      "rings"
+    ],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "Dips sur anneaux — instabilité maximale. Corps légèrement incliné vers l'avant pour cibler pectoraux. Anneaux tournés vers l'extérieur en haut.",
+    "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": "dip",
+    "is_regression": false,
+    "target_programs": [
+      "program_bodyweight",
+      "program_strength",
+      "program_muscle_building"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "PUS-004",
+    "category": "push",
+    "name": "Dips",
+    "muscles_primary": [
+      "Pectoraux inf.",
+      "Triceps"
+    ],
+    "muscles_secondary": [
+      "Épaules"
+    ],
+    "intent": [
+      "force",
+      "hypertrophie"
+    ],
+    "level": "intermediaire",
+    "bodyweight_compatible": true,
+    "material_required": [
+      "Barres parallèles"
+    ],
+    "equipment_tags": [
+      "pullup_bar"
+    ],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "Barres parallèles. Descente jusqu'à 90° de coude minimum. Variation triceps : corps vertical. Variation pec : légère inclinaison avant.",
+    "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": "dip",
+    "is_regression": false,
+    "target_programs": [
+      "program_bodyweight",
+      "program_muscle_building",
+      "program_strength"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "PUS-005",
+    "category": "push",
+    "name": "Straight Bar Dips",
+    "muscles_primary": [
+      "Pectoraux inf.",
+      "Triceps"
+    ],
+    "muscles_secondary": [
+      "Épaules",
+      "Core"
+    ],
+    "intent": [
+      "force",
+      "hypertrophie"
+    ],
+    "level": "avance",
+    "bodyweight_compatible": true,
+    "material_required": [
+      "Barre fixe ou barres parallèles"
+    ],
+    "equipment_tags": [
+      "pullup_bar"
+    ],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "Barre fixe basse ou parallèles. Mouvement de bascule vers l'avant, pression sur la barre en prise pronation. Transition vers muscle-up possible.",
+    "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": "dip",
+    "is_regression": false,
+    "target_programs": [
+      "program_bodyweight",
+      "program_strength",
+      "program_muscle_building"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "PUS-006",
+    "category": "push",
+    "name": "Overhead Press (Barbell)",
+    "muscles_primary": [
+      "Deltoïdes",
+      "Triceps"
+    ],
+    "muscles_secondary": [
+      "Trapèze",
+      "Core"
+    ],
+    "intent": [
+      "force"
+    ],
+    "level": "intermediaire",
+    "bodyweight_compatible": false,
+    "material_required": [
+      "Barre olympique",
+      "rack"
+    ],
+    "equipment_tags": [
+      "barbell",
+      "rack"
+    ],
+    "locations": [
+      "gym"
+    ],
+    "warmup_target": [],
+    "description": "Barre au niveau de la clavicule, prise légèrement plus large que les épaules. Pousser verticalement, tête en arrière au passage, verrouillage en haut.",
+    "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": "vertical_push",
+    "is_regression": false,
+    "target_programs": [
+      "program_muscle_building",
+      "program_strength"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "PUS-007",
+    "category": "push",
+    "name": "Push-ups (Endurance Reps)",
+    "muscles_primary": [
+      "Pectoraux",
+      "Deltoïdes ant."
+    ],
+    "muscles_secondary": [
+      "Triceps",
+      "Core"
+    ],
+    "intent": [
+      "endurance"
+    ],
+    "level": "debutant",
+    "bodyweight_compatible": true,
+    "material_required": [],
+    "equipment_tags": [],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "Appuis au sol, mains à largeur d'épaules. Séries longues (20-50 reps), rythme constant. Gainage actif tout au long. Objectif : densité de reps.",
+    "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": "horizontal_push",
+    "is_regression": false,
+    "target_programs": [
+      "program_bodyweight",
+      "program_lactate",
+      "program_muscle_building",
+      "program_strength"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "PUS-008",
+    "category": "push",
+    "name": "Close Grip Bench Press",
+    "muscles_primary": [
+      "Triceps"
+    ],
+    "muscles_secondary": [
+      "Pectoraux",
+      "Deltoïde ant."
+    ],
+    "intent": [
+      "force",
+      "hypertrophie"
+    ],
+    "level": "intermediaire",
+    "bodyweight_compatible": false,
+    "material_required": [
+      "Barre olympique",
+      "banc plat",
+      "rack"
+    ],
+    "equipment_tags": [
+      "barbell",
+      "bench",
+      "rack"
+    ],
+    "locations": [
+      "gym"
+    ],
+    "warmup_target": [],
+    "description": "Prise serrée (~30 cm), coudes près du corps. Focus sur extension triceps. Moins de mobilisation pectorale que bench classique.",
+    "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": "horizontal_push",
+    "is_regression": false,
+    "target_programs": [
+      "program_muscle_building",
+      "program_strength"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "PUS-009",
+    "category": "push",
+    "name": "Close Grip Push-ups",
+    "muscles_primary": [
+      "Triceps"
+    ],
+    "muscles_secondary": [
+      "Pectoraux"
+    ],
+    "intent": [
+      "hypertrophie",
+      "endurance"
+    ],
+    "level": "debutant",
+    "bodyweight_compatible": true,
+    "material_required": [],
+    "equipment_tags": [],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "Mains sous les épaules, coudes plaqués au corps. Variante accessible du close grip bench. Bon finisher ou exercice de remplissage.",
+    "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": "horizontal_push",
+    "is_regression": false,
+    "target_programs": [
+      "program_bodyweight",
+      "program_lactate",
+      "program_muscle_building",
+      "program_strength"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "PUS-010",
+    "category": "push",
+    "name": "Ring Negative Muscle-ups (Band)",
+    "muscles_primary": [
+      "Dorsaux",
+      "Pectoraux",
+      "Triceps"
+    ],
+    "muscles_secondary": [
+      "Biceps",
+      "Core"
+    ],
+    "intent": [
+      "force"
+    ],
+    "level": "avance",
+    "bodyweight_compatible": true,
+    "material_required": [
+      "Anneaux de gymnastique",
+      "bande élastique"
+    ],
+    "equipment_tags": [
+      "rings",
+      "band"
+    ],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "Descente lente depuis la position de support sur anneaux vers le bas du pull. Bande élastique sous les pieds pour assistance. Temps de descente : 4-6s.",
+    "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": "muscle_up",
+    "is_regression": false,
+    "target_programs": [
+      "program_bodyweight",
+      "program_strength"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "PUS-011",
+    "category": "push",
+    "name": "Negative Muscle-ups",
+    "muscles_primary": [
+      "Dorsaux",
+      "Pectoraux",
+      "Triceps"
+    ],
+    "muscles_secondary": [
+      "Biceps",
+      "Core"
+    ],
+    "intent": [
+      "force"
+    ],
+    "level": "avance",
+    "bodyweight_compatible": true,
+    "material_required": [
+      "Barre fixe ou anneaux"
+    ],
+    "equipment_tags": [
+      "pullup_bar"
+    ],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "Même mouvement sans assistance. Point de départ : support au-dessus de la barre. Descente excentrique maximale. Renforce le schéma moteur complet.",
+    "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": "muscle_up",
+    "is_regression": false,
+    "target_programs": [
+      "program_bodyweight",
+      "program_strength"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "PUS-012",
+    "category": "push",
+    "name": "Ring Support Hold",
+    "muscles_primary": [
+      "Épaules",
+      "Triceps"
+    ],
+    "muscles_secondary": [
+      "Core",
+      "Avant-bras"
+    ],
+    "intent": [
+      "stabilite"
+    ],
+    "level": "avance",
+    "bodyweight_compatible": true,
+    "material_required": [
+      "Anneaux de gymnastique"
+    ],
+    "equipment_tags": [
+      "rings"
+    ],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "Position de support statique sur anneaux, bras tendus, anneaux tournés vers l'extérieur. Gainage total. Base des progressions aux anneaux (dips, muscle-up).",
+    "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": "dip",
+    "is_regression": false,
+    "target_programs": [
+      "program_bodyweight"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "PUS-013",
+    "category": "push",
+    "name": "Knee Push-ups",
+    "muscles_primary": [
+      "Pectoraux",
+      "Deltoïde ant."
+    ],
+    "muscles_secondary": [
+      "Triceps"
+    ],
+    "intent": [
+      "endurance"
+    ],
+    "level": "debutant",
+    "bodyweight_compatible": true,
+    "material_required": [],
+    "equipment_tags": [],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "Version allégée du push-up. Genou au sol, corps en ligne droite de genou à tête. Idéal débutant ou récupération active.",
+    "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": "horizontal_push",
+    "is_regression": true,
+    "target_programs": [
+      "program_bodyweight",
+      "program_lactate",
+      "program_muscle_building",
+      "program_strength"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "PUS-014",
+    "category": "push",
+    "name": "Lateral Raises (Incline Posture)",
+    "muscles_primary": [
+      "Deltoïde latéral"
+    ],
+    "muscles_secondary": [
+      "Deltoïde post.",
+      "Trapèze"
+    ],
+    "intent": [
+      "hypertrophie",
+      "endurance"
+    ],
+    "level": "debutant",
+    "bodyweight_compatible": false,
+    "material_required": [
+      "Haltères",
+      "banc incliné"
+    ],
+    "equipment_tags": [
+      "dumbbell",
+      "bench"
+    ],
+    "locations": [
+      "gym",
+      "home"
+    ],
+    "warmup_target": [],
+    "description": "Buste incliné à ~30° vers l'avant sur banc incliné pour pré-étirer le faisceau latéral. Élévations strictes, sans élan. Isole mieux que la version debout droite.",
+    "exercise_type": "isolation",
+    "movement_pattern": null,
+    "movement_family": "shoulder_isolation",
+    "is_regression": false,
+    "target_programs": [
+      "program_lactate",
+      "program_muscle_building"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "PUS-122",
+    "category": "push",
+    "name": "Pike Push-ups",
+    "muscles_primary": [
+      "Deltoïdes ant.",
+      "Triceps"
+    ],
+    "muscles_secondary": [
+      "Trapèzes sup.",
+      "Core"
+    ],
+    "intent": [
+      "hypertrophie",
+      "force"
+    ],
+    "level": "intermediaire",
+    "bodyweight_compatible": true,
+    "material_required": [],
+    "equipment_tags": [],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "Bassin haut, tronc proche de la verticale, tête entre les mains. Descendre le sommet du crâne vers le sol. Plus les pieds sont hauts, plus la charge passe sur les épaules. Progression vers le handstand.",
+    "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": "vertical_push",
+    "is_regression": false,
+    "target_programs": [
+      "program_bodyweight",
+      "program_muscle_building",
+      "program_strength"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "PUS-123",
+    "category": "push",
+    "name": "Ring Push-ups",
+    "muscles_primary": [
+      "Pectoraux",
+      "Deltoïdes ant."
+    ],
+    "muscles_secondary": [
+      "Triceps",
+      "Core"
+    ],
+    "intent": [
+      "hypertrophie",
+      "stabilite"
+    ],
+    "level": "intermediaire",
+    "bodyweight_compatible": true,
+    "material_required": [],
+    "equipment_tags": [
+      "rings"
+    ],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "Pompes aux anneaux, mains libres de tourner. L'instabilité recrute les stabilisateurs de l'épaule. Anneaux bas pour commencer, plus hauts pour alléger.",
+    "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": "horizontal_push",
+    "is_regression": false,
+    "target_programs": [
+      "program_bodyweight",
+      "program_muscle_building",
+      "program_strength"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
+  },
+  {
+    "id": "PUS-124",
+    "category": "push",
+    "name": "Archer Push-ups",
+    "muscles_primary": [
+      "Pectoraux",
+      "Triceps"
+    ],
+    "muscles_secondary": [
+      "Deltoïdes ant.",
+      "Core"
+    ],
+    "intent": [
+      "force",
+      "hypertrophie"
+    ],
+    "level": "avance",
+    "bodyweight_compatible": true,
+    "material_required": [],
+    "equipment_tags": [],
+    "locations": [
+      "gym",
+      "home",
+      "outdoor"
+    ],
+    "warmup_target": [],
+    "description": "Pompes bras très écartés : on descend sur un bras, l'autre reste tendu au sol. Charge unilatérale, étape vers la pompe à un bras.",
+    "exercise_type": "compound",
+    "movement_pattern": null,
+    "movement_family": "horizontal_push",
+    "is_regression": false,
+    "target_programs": [
+      "program_bodyweight",
+      "program_muscle_building",
+      "program_strength"
+    ],
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
   },
   {
     "id": "WAR-085",
@@ -4588,8 +6494,14 @@ export const EXERCISES: Exercise[] = [
     ],
     "description": "Pour Squat / Leg. Position 90/90 au sol, bascule d'un côté à l'autre. 60s chaque côté. Ouvre la capsule de hanche avant squat profond.",
     "exercise_type": null,
+    "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [],
-    "image_url": null
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
   },
   {
     "id": "WAR-086",
@@ -4620,8 +6532,14 @@ export const EXERCISES: Exercise[] = [
     ],
     "description": "Pour Squat / Leg. Pied près du mur, genou poussé vers l'avant. 10×/côté. Améliore la dorsiflexion = squat plus profond.",
     "exercise_type": null,
+    "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [],
-    "image_url": null
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
   },
   {
     "id": "WAR-087",
@@ -4655,8 +6573,14 @@ export const EXERCISES: Exercise[] = [
     ],
     "description": "Pour Squat / Single leg. En appui sur une jambe, rotation du bassin. 8/côté. Contrôle pelvien avant squat unipodal.",
     "exercise_type": null,
+    "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [],
-    "image_url": null
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
   },
   {
     "id": "WAR-088",
@@ -4692,8 +6616,14 @@ export const EXERCISES: Exercise[] = [
     ],
     "description": "Pour Squat. 3×3 descente lente 3s, pause 2s sur la box, remontée. Groove le pattern squat. Référence Squat University.",
     "exercise_type": null,
+    "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [],
-    "image_url": null
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
   },
   {
     "id": "WAR-089",
@@ -4723,8 +6653,14 @@ export const EXERCISES: Exercise[] = [
     ],
     "description": "Pour Deadlift. 10 reps lentes, cycle flexion-extension vertébrale. Mobilise les vertèbres thoraciques et lombaires.",
     "exercise_type": null,
+    "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [],
-    "image_url": null
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
   },
   {
     "id": "WAR-090",
@@ -4755,8 +6691,14 @@ export const EXERCISES: Exercise[] = [
     ],
     "description": "Pour Deadlift. Fesse contre le mur, 10 reps. Groove le schéma de charnière de hanche sans charge. Fondamental Starting Strength.",
     "exercise_type": null,
+    "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [],
-    "image_url": null
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
   },
   {
     "id": "WAR-091",
@@ -4791,8 +6733,14 @@ export const EXERCISES: Exercise[] = [
     ],
     "description": "Pour Deadlift. Bande sur les épaules, 10 reps légères. Activation de la chaîne postérieure avant DL.",
     "exercise_type": null,
+    "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [],
-    "image_url": null
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
   },
   {
     "id": "WAR-092",
@@ -4829,8 +6777,14 @@ export const EXERCISES: Exercise[] = [
     ],
     "description": "Pour Push / Bench. Bande à hauteur des yeux, tirer en écartant les bras. 3×15. Activation rétracteurs scapulaires avant press.",
     "exercise_type": null,
+    "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [],
-    "image_url": null
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
   },
   {
     "id": "WAR-093",
@@ -4861,8 +6815,14 @@ export const EXERCISES: Exercise[] = [
     ],
     "description": "Pour Push / Bench. Push-up normal puis protraction maximale de l'omoplate en haut. Active le serratus souvent inhibé.",
     "exercise_type": null,
+    "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [],
-    "image_url": null
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
   },
   {
     "id": "WAR-094",
@@ -4893,8 +6853,14 @@ export const EXERCISES: Exercise[] = [
     ],
     "description": "Pour Push / OHP. Rotations articulaires contrôlées en amplitude maximale. 5 reps chaque sens. Référence FRC / physiothérapie.",
     "exercise_type": null,
+    "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [],
-    "image_url": null
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
   },
   {
     "id": "WAR-095",
@@ -4929,8 +6895,14 @@ export const EXERCISES: Exercise[] = [
     ],
     "description": "Pour OHP. Row → rotation externe → press. 2×10. Warmup spécifique OHP qui active toute la coiffe des rotateurs.",
     "exercise_type": null,
+    "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [],
-    "image_url": null
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
   },
   {
     "id": "WAR-096",
@@ -4966,8 +6938,14 @@ export const EXERCISES: Exercise[] = [
     ],
     "description": "Pour Pull. 30s en suspension passive. Décompression vertébrale. Étirement grand dorsal et capsule inférieure.",
     "exercise_type": null,
+    "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [],
-    "image_url": null
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
   },
   {
     "id": "WAR-097",
@@ -5001,8 +6979,14 @@ export const EXERCISES: Exercise[] = [
     ],
     "description": "Pour Pull. En suspension, rétraction et dépression des omoplates sans fléchir les coudes. 2×10. Base santé épaule.",
     "exercise_type": null,
+    "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [],
-    "image_url": null
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
   },
   {
     "id": "WAR-098",
@@ -5038,8 +7022,14 @@ export const EXERCISES: Exercise[] = [
     ],
     "description": "Pour Pull / OHP. Bande tenue large devant, passer derrière la tête et retour. Amplitude overhead maximale.",
     "exercise_type": null,
+    "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [],
-    "image_url": null
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
   },
   {
     "id": "WAR-099",
@@ -5074,8 +7064,14 @@ export const EXERCISES: Exercise[] = [
     ],
     "description": "Pour OHP / All. Foam roller sous la thoracique, extension par gravité. Libère le segment T4-T8. 10 reps par position.",
     "exercise_type": null,
+    "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [],
-    "image_url": null
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
   },
   {
     "id": "WAR-100",
@@ -5108,8 +7104,14 @@ export const EXERCISES: Exercise[] = [
     ],
     "description": "Pour OHP / Push. Dos et bras contre un mur, glisser les bras vers le haut. Scapulas collées au mur. 3×10. Corrige impingement.",
     "exercise_type": null,
+    "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [],
-    "image_url": null
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
   },
   {
     "id": "WAR-101",
@@ -5143,733 +7145,14 @@ export const EXERCISES: Exercise[] = [
     ],
     "description": "Pour Pull / OHP. Coude à 90°, rotation externe avec disque léger. Renforcement coiffe des rotateurs. 2×12/bras.",
     "exercise_type": null,
+    "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [],
-    "image_url": null
-  },
-  {
-    "id": "FIN-102",
-    "category": "finisher",
-    "name": "Burpees",
-    "muscles_primary": [
-      "Full body"
-    ],
-    "muscles_secondary": [
-      "Core",
-      "Coordination"
-    ],
-    "intent": [
-      "endurance",
-      "cardio"
-    ],
-    "level": "debutant",
-    "bodyweight_compatible": true,
-    "material_required": [],
-    "equipment_tags": [],
-    "locations": [
-      "gym",
-      "home",
-      "outdoor"
-    ],
-    "warmup_target": [],
-    "description": "4×10 ou AMRAP 3 min. Drop en push-up + saut en haut. Rythme élevé. Variante : burpee pull-up pour plus de défi.",
-    "exercise_type": null,
-    "target_programs": [],
-    "image_url": null
-  },
-  {
-    "id": "FIN-103",
-    "category": "finisher",
-    "name": "Jump Squats",
-    "muscles_primary": [
-      "Quadriceps",
-      "Fessiers"
-    ],
-    "muscles_secondary": [
-      "Mollets"
-    ],
-    "intent": [
-      "explosivite",
-      "endurance"
-    ],
-    "level": "debutant",
-    "bodyweight_compatible": true,
-    "material_required": [],
-    "equipment_tags": [],
-    "locations": [
-      "gym",
-      "home",
-      "outdoor"
-    ],
-    "warmup_target": [],
-    "description": "4×12, poids du corps. Descente squat → saut explosif. Atterrissage amorti sur avant-pied. Pas de charge ajoutée.",
-    "exercise_type": null,
-    "target_programs": [],
-    "image_url": null
-  },
-  {
-    "id": "FIN-104",
-    "category": "finisher",
-    "name": "Fentes Sautées",
-    "muscles_primary": [
-      "Quadriceps",
-      "Fessiers"
-    ],
-    "muscles_secondary": [
-      "Mollets",
-      "Core"
-    ],
-    "intent": [
-      "explosivite",
-      "endurance"
-    ],
-    "level": "debutant",
-    "bodyweight_compatible": true,
-    "material_required": [],
-    "equipment_tags": [],
-    "locations": [
-      "gym",
-      "home",
-      "outdoor"
-    ],
-    "warmup_target": [],
-    "description": "3×10/jambe. Ciseau en l'air. Atterrissage absorbé en fente. Excellent cardio bas corps.",
-    "exercise_type": null,
-    "target_programs": [],
-    "image_url": null
-  },
-  {
-    "id": "FIN-105",
-    "category": "finisher",
-    "name": "Jump Rope",
-    "muscles_primary": [
-      "Mollets",
-      "Coordination",
-      "Cardio"
-    ],
-    "muscles_secondary": [
-      "Épaules"
-    ],
-    "intent": [
-      "endurance",
-      "cardio"
-    ],
-    "level": "debutant",
-    "bodyweight_compatible": true,
-    "material_required": [
-      "Corde à sauter"
-    ],
-    "equipment_tags": [
-      "rope"
-    ],
-    "locations": [
-      "gym",
-      "home",
-      "outdoor"
-    ],
-    "warmup_target": [],
-    "description": "3×1 min ou 5×30s. Si débutant : saut sur place rythmé sans corde. Fréquence cardiaque élevée rapidement.",
-    "exercise_type": null,
-    "target_programs": [],
-    "image_url": null
-  },
-  {
-    "id": "FIN-106",
-    "category": "finisher",
-    "name": "KB Swings (Finisher)",
-    "muscles_primary": [
-      "Fessiers",
-      "Ischio",
-      "Core"
-    ],
-    "muscles_secondary": [
-      "Grand dorsal",
-      "Épaules"
-    ],
-    "intent": [
-      "explosivite",
-      "endurance"
-    ],
-    "level": "intermediaire",
-    "bodyweight_compatible": false,
-    "material_required": [
-      "Kettlebell"
-    ],
-    "equipment_tags": [
-      "kettlebell"
-    ],
-    "locations": [
-      "gym",
-      "home",
-      "outdoor"
-    ],
-    "warmup_target": [],
-    "description": "4×15 reps. Charge modérée. Focus vitesse et extension hanches. Dernier push énergétique en fin de séance.",
-    "exercise_type": null,
-    "target_programs": [],
-    "image_url": null
-  },
-  {
-    "id": "FIN-107",
-    "category": "finisher",
-    "name": "KB Snatch (Finisher)",
-    "muscles_primary": [
-      "Full body"
-    ],
-    "muscles_secondary": [
-      "Core",
-      "Épaules"
-    ],
-    "intent": [
-      "explosivite",
-      "endurance"
-    ],
-    "level": "avance",
-    "bodyweight_compatible": false,
-    "material_required": [
-      "Kettlebell (charge légère)"
-    ],
-    "equipment_tags": [
-      "kettlebell"
-    ],
-    "locations": [
-      "gym",
-      "home",
-      "outdoor"
-    ],
-    "warmup_target": [],
-    "description": "3×8/bras. Arraché complet KB. Complexité technique élevée. Charge légère prioritaire sur la technique.",
-    "exercise_type": null,
-    "target_programs": [],
-    "image_url": null
-  },
-  {
-    "id": "FIN-108",
-    "category": "finisher",
-    "name": "Battle Rope (Alternating)",
-    "muscles_primary": [
-      "Épaules",
-      "Core"
-    ],
-    "muscles_secondary": [
-      "Avant-bras"
-    ],
-    "intent": [
-      "endurance",
-      "cardio"
-    ],
-    "level": "intermediaire",
-    "bodyweight_compatible": false,
-    "material_required": [
-      "Battle rope (~10-15 m)"
-    ],
-    "equipment_tags": [
-      "rope"
-    ],
-    "locations": [
-      "gym",
-      "home",
-      "outdoor"
-    ],
-    "warmup_target": [],
-    "description": "3×30s max intensity. Ondes alternées. Cardio bras en fin de séance.",
-    "exercise_type": null,
-    "target_programs": [],
-    "image_url": null
-  },
-  {
-    "id": "FIN-109",
-    "category": "finisher",
-    "name": "Farmer Carry",
-    "muscles_primary": [
-      "Avant-bras",
-      "Trapèze",
-      "Core"
-    ],
-    "muscles_secondary": [
-      "Full body"
-    ],
-    "intent": [
-      "force",
-      "endurance"
-    ],
-    "level": "debutant",
-    "bodyweight_compatible": false,
-    "material_required": [
-      "Haltères lourds ou kettlebells"
-    ],
-    "equipment_tags": [
-      "dumbbell"
-    ],
-    "locations": [
-      "gym",
-      "home"
-    ],
-    "warmup_target": [],
-    "description": "3×40 m avec haltères lourds. Gainage debout, pas stable. Finisher silencieux mais brutal.",
-    "exercise_type": null,
-    "target_programs": [],
-    "image_url": null
-  },
-  {
-    "id": "COR-110",
-    "category": "core_endurance",
-    "name": "Weighted Plank",
-    "muscles_primary": [
-      "Transverse",
-      "Grand droit"
-    ],
-    "muscles_secondary": [
-      "Obliques",
-      "Épaules"
-    ],
-    "intent": [
-      "force",
-      "stabilite"
-    ],
-    "level": "debutant",
-    "bodyweight_compatible": true,
-    "material_required": [
-      "Disque",
-      "Tapis de sol"
-    ],
-    "equipment_tags": [
-      "plate",
-      "mat"
-    ],
-    "locations": [
-      "gym",
-      "home",
-      "outdoor"
-    ],
-    "warmup_target": [],
-    "description": "Planche sur avant-bras, disque posé entre les omoplates. Bassin en rétroversion, ligne épaules-hanches-chevilles maintenue. La charge se progresse disque après disque.",
-    "exercise_type": "core",
-    "target_programs": [
-      "program_muscle_building",
-      "program_strength",
-      "program_bodyweight"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "COR-111",
-    "category": "core_strength",
-    "name": "Weighted Dead Bug",
-    "muscles_primary": [
-      "Transverse",
-      "Grand droit"
-    ],
-    "muscles_secondary": [
-      "Fléchisseurs de hanche"
-    ],
-    "intent": [
-      "force",
-      "stabilite"
-    ],
-    "level": "debutant",
-    "bodyweight_compatible": true,
-    "material_required": [
-      "Haltère",
-      "Tapis de sol"
-    ],
-    "equipment_tags": [
-      "dumbbell",
-      "mat"
-    ],
-    "locations": [
-      "gym",
-      "home",
-      "outdoor"
-    ],
-    "warmup_target": [],
-    "description": "Dos plaqué au sol, haltère tenu bras tendus. Descendre jambe et bras opposés sans décoller les lombaires. Le lest augmente la demande anti-extension.",
-    "exercise_type": "core",
-    "target_programs": [
-      "program_muscle_building",
-      "program_bodyweight"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "COR-112",
-    "category": "core_strength",
-    "name": "Kneeling Cable Fallout",
-    "muscles_primary": [
-      "Grand droit",
-      "Transverse"
-    ],
-    "muscles_secondary": [
-      "Dorsaux",
-      "Triceps"
-    ],
-    "intent": [
-      "force",
-      "hypertrophie"
-    ],
-    "level": "intermediaire",
-    "bodyweight_compatible": false,
-    "material_required": [
-      "Câble haut",
-      "Corde"
-    ],
-    "equipment_tags": [
-      "cable",
-      "rope"
-    ],
-    "locations": [
-      "gym"
-    ],
-    "warmup_target": [],
-    "description": "À genoux face à la poulie haute, corde tenue au-dessus de la tête. Étendre les bras vers l'avant en résistant à la cambrure, puis revenir. Charge réglable au kilo près.",
-    "exercise_type": "core",
-    "target_programs": [
-      "program_muscle_building",
-      "program_strength"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "COR-113",
-    "category": "core_strength",
-    "name": "Weighted Crunch",
-    "muscles_primary": [
-      "Grand droit"
-    ],
-    "muscles_secondary": [
-      "Obliques"
-    ],
-    "intent": [
-      "hypertrophie"
-    ],
-    "level": "debutant",
-    "bodyweight_compatible": true,
-    "material_required": [
-      "Disque",
-      "Tapis de sol"
-    ],
-    "equipment_tags": [
-      "plate",
-      "mat"
-    ],
-    "locations": [
-      "gym",
-      "home",
-      "outdoor"
-    ],
-    "warmup_target": [],
-    "description": "Allongé genoux fléchis, disque tenu contre la poitrine. Enrouler le buste vertèbre par vertèbre sur 30-40° d'amplitude. Expirer en haut, contrôler la descente.",
-    "exercise_type": "core",
-    "target_programs": [
-      "program_muscle_building",
-      "program_bodyweight"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "COR-114",
-    "category": "core_strength",
-    "name": "Weighted Decline Crunch",
-    "muscles_primary": [
-      "Grand droit"
-    ],
-    "muscles_secondary": [
-      "Fléchisseurs de hanche",
-      "Obliques"
-    ],
-    "intent": [
-      "hypertrophie",
-      "force"
-    ],
-    "level": "intermediaire",
-    "bodyweight_compatible": false,
-    "material_required": [
-      "Banc décliné",
-      "Disque"
-    ],
-    "equipment_tags": [
-      "bench",
-      "plate"
-    ],
-    "locations": [
-      "gym"
-    ],
-    "warmup_target": [],
-    "description": "Sur banc décliné, pieds bloqués, disque contre la poitrine. Enrouler le buste sans tirer sur la nuque. L'inclinaison allonge le bras de levier.",
-    "exercise_type": "core",
-    "target_programs": [
-      "program_muscle_building",
-      "program_strength"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "COR-115",
-    "category": "core_strength",
-    "name": "Cable Reverse Crunch",
-    "muscles_primary": [
-      "Grand droit inférieur"
-    ],
-    "muscles_secondary": [
-      "Transverse"
-    ],
-    "intent": [
-      "hypertrophie"
-    ],
-    "level": "intermediaire",
-    "bodyweight_compatible": false,
-    "material_required": [
-      "Câble bas",
-      "Sangles de cheville",
-      "Banc plat"
-    ],
-    "equipment_tags": [
-      "cable",
-      "rings",
-      "bench"
-    ],
-    "locations": [
-      "gym"
-    ],
-    "warmup_target": [],
-    "description": "Allongé, chevilles sanglées à la poulie basse. Enrouler le bassin vers la cage en décollant le sacrum, sans élan. Cible la portion basse du grand droit.",
-    "exercise_type": "core",
-    "target_programs": [
-      "program_muscle_building"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "COR-116",
-    "category": "core_strength",
-    "name": "Half-Kneeling Pallof Press",
-    "muscles_primary": [
-      "Obliques",
-      "Transverse"
-    ],
-    "muscles_secondary": [
-      "Fessiers",
-      "Épaules"
-    ],
-    "intent": [
-      "force",
-      "stabilite"
-    ],
-    "level": "debutant",
-    "bodyweight_compatible": false,
-    "material_required": [
-      "Câble",
-      "Poignée simple"
-    ],
-    "equipment_tags": [
-      "cable"
-    ],
-    "locations": [
-      "gym"
-    ],
-    "warmup_target": [],
-    "description": "En fente à genoux, perpendiculaire à la poulie. Presser la poignée devant le sternum en résistant à la rotation. Le tronc ne bouge pas, c'est là tout le travail.",
-    "exercise_type": "core",
-    "target_programs": [
-      "program_muscle_building",
-      "program_strength"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "COR-117",
-    "category": "core_strength",
-    "name": "Cable Woodchopper (High to Low)",
-    "muscles_primary": [
-      "Obliques"
-    ],
-    "muscles_secondary": [
-      "Grand droit",
-      "Fessiers"
-    ],
-    "intent": [
-      "force",
-      "hypertrophie"
-    ],
-    "level": "intermediaire",
-    "bodyweight_compatible": false,
-    "material_required": [
-      "Câble haut",
-      "Corde"
-    ],
-    "equipment_tags": [
-      "cable",
-      "rope"
-    ],
-    "locations": [
-      "gym"
-    ],
-    "warmup_target": [],
-    "description": "Poulie haute, corde saisie à deux mains. Tirer en diagonale vers la hanche opposée, rotation menée par le tronc et non par les bras. Contrôler le retour.",
-    "exercise_type": "core",
-    "target_programs": [
-      "program_muscle_building",
-      "program_strength"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "COR-118",
-    "category": "core_strength",
-    "name": "Suitcase Carry",
-    "muscles_primary": [
-      "Obliques",
-      "Transverse"
-    ],
-    "muscles_secondary": [
-      "Trapèzes",
-      "Avant-bras"
-    ],
-    "intent": [
-      "force",
-      "stabilite"
-    ],
-    "level": "debutant",
-    "bodyweight_compatible": false,
-    "material_required": [
-      "Kettlebell"
-    ],
-    "equipment_tags": [
-      "kettlebell"
-    ],
-    "locations": [
-      "gym",
-      "home",
-      "outdoor"
-    ],
-    "warmup_target": [],
-    "description": "Marcher sur 20-30 m avec une charge lourde d'un seul côté, épaules de niveau. Le tronc lutte contre l'inclinaison latérale. Alterner les côtés à chaque série.",
-    "exercise_type": "core",
-    "target_programs": [
-      "program_muscle_building",
-      "program_strength",
-      "program_bodyweight"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "COR-119",
-    "category": "core_endurance",
-    "name": "Weighted Side Plank",
-    "muscles_primary": [
-      "Obliques",
-      "Carré des lombes"
-    ],
-    "muscles_secondary": [
-      "Moyen fessier",
-      "Épaules"
-    ],
-    "intent": [
-      "force",
-      "stabilite"
-    ],
-    "level": "intermediaire",
-    "bodyweight_compatible": true,
-    "material_required": [
-      "Disque",
-      "Tapis de sol"
-    ],
-    "equipment_tags": [
-      "plate",
-      "mat"
-    ],
-    "locations": [
-      "gym",
-      "home",
-      "outdoor"
-    ],
-    "warmup_target": [],
-    "description": "Planche latérale sur avant-bras, disque posé sur la hanche haute. Bassin haut, corps aligné de la cheville à l'épaule. Ajouter du poids plutôt que du temps.",
-    "exercise_type": "core",
-    "target_programs": [
-      "program_muscle_building",
-      "program_bodyweight"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "COR-120",
-    "category": "core_strength",
-    "name": "Weighted Hanging Leg Raise",
-    "muscles_primary": [
-      "Grand droit inférieur",
-      "Fléchisseurs de hanche"
-    ],
-    "muscles_secondary": [
-      "Obliques",
-      "Avant-bras"
-    ],
-    "intent": [
-      "force",
-      "hypertrophie"
-    ],
-    "level": "avance",
-    "bodyweight_compatible": true,
-    "material_required": [
-      "Barre de traction",
-      "Haltère"
-    ],
-    "equipment_tags": [
-      "pullup_bar",
-      "dumbbell"
-    ],
-    "locations": [
-      "gym",
-      "home",
-      "outdoor"
-    ],
-    "warmup_target": [],
-    "description": "Suspendu, haltère serré entre les chevilles. Monter jambes tendues jusqu'à l'horizontale en enroulant le bassin. Aucun balancement — descente contrôlée.",
-    "exercise_type": "core",
-    "target_programs": [
-      "program_muscle_building",
-      "program_strength",
-      "program_bodyweight"
-    ],
-    "image_url": null
-  },
-  {
-    "id": "COR-121",
-    "category": "core_endurance",
-    "name": "Weighted Hollow Body Hold",
-    "muscles_primary": [
-      "Grand droit",
-      "Transverse"
-    ],
-    "muscles_secondary": [
-      "Fléchisseurs de hanche"
-    ],
-    "intent": [
-      "force",
-      "stabilite"
-    ],
-    "level": "intermediaire",
-    "bodyweight_compatible": true,
-    "material_required": [
-      "Disque",
-      "Tapis de sol"
-    ],
-    "equipment_tags": [
-      "plate",
-      "mat"
-    ],
-    "locations": [
-      "gym",
-      "home",
-      "outdoor"
-    ],
-    "warmup_target": [],
-    "description": "Lombaires plaquées au sol, bras et jambes tendus décollés, disque tenu bras tendus. Position en banane maintenue sans creuser le bas du dos.",
-    "exercise_type": "core",
-    "target_programs": [
-      "program_muscle_building",
-      "program_bodyweight"
-    ],
-    "image_url": null
+    "video_url": null,
+    "image_url": null,
+    "prescribed_sets": null,
+    "prescribed_duration_sec": null
   }
 ];
 

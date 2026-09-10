@@ -20,12 +20,14 @@ import type { BuildContext } from "./engine";
 import { PERSONAS, PERSONA_PROGRAM_ELIGIBILITY, PROGRAMS, PROGRAM_PHASES } from "./fixtures";
 import { buildSessionPlan, isCycleComplete, nextPlanned, phaseForWeek } from "./plan";
 import type { PlannedSession } from "./plan";
+import { profileFromUser } from "./profile";
 import { resolveProgramId } from "./scoring";
 import type {
   AppUser,
   PersonaScores,
   Protocol,
   UserProgram,
+  TimeBudget,
   TrainingLocation,
   WorkoutRequest,
   WorkoutResponse,
@@ -39,6 +41,12 @@ const STORAGE_KEY = "strength-app.demo.v2";
 
 interface DemoState {
   user: AppUser | null;
+  /**
+   * Session ouverte ou non. Distinct de `user` : se déconnecter ferme la
+   * session mais NE DOIT PAS effacer le compte, sinon se reconnecter repart
+   * du questionnaire avec un programme vide.
+   */
+  signedIn: boolean;
   userProgram: UserProgram | null;
   /** Plan complet du cycle, généré au démarrage du programme. */
   plan: PlannedSession[];
@@ -46,7 +54,13 @@ interface DemoState {
   sessions: WorkoutSession[];
 }
 
-const EMPTY: DemoState = { user: null, userProgram: null, plan: [], sessions: [] };
+const EMPTY: DemoState = {
+  user: null,
+  signedIn: false,
+  userProgram: null,
+  plan: [],
+  sessions: [],
+};
 
 let memory: DemoState = { ...EMPTY };
 
@@ -62,7 +76,10 @@ function read(): DemoState {
   if (!hasLocalStorage()) return memory;
   try {
     const raw = globalThis.localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as DemoState) : { ...EMPTY };
+    if (!raw) return { ...EMPTY };
+    const parsed = JSON.parse(raw) as DemoState;
+    // État écrit avant l'ajout de `signedIn` : un compte présent valait session.
+    return { ...parsed, signedIn: parsed.signedIn ?? Boolean(parsed.user) };
   } catch {
     return { ...EMPTY };
   }
@@ -92,6 +109,11 @@ function nextId(prefix: string): string {
 // Auth simulée
 // ─────────────────────────────────────────────
 
+/** Compte enregistré, session ouverte ou non. */
+export function demoAccountEmail(): string | null {
+  return read().user?.email ?? null;
+}
+
 export function demoSignUp(email: string): AppUser {
   const user: AppUser = {
     id: nextId("demo_user"),
@@ -105,22 +127,37 @@ export function demoSignUp(email: string): AppUser {
     session_duration_target: null,
     onboarding_completed: false,
   };
-  write({ ...EMPTY, user });
+  // Un nouveau compte repart de zéro : programme, plan et séances compris.
+  write({ ...EMPTY, user, signedIn: true });
   return user;
 }
 
+/**
+ * Rouvre la session du compte existant. Le mode démo n'en gère qu'un seul :
+ * un e-mail inconnu alors qu'un compte existe est refusé plutôt que de
+ * remplacer silencieusement le programme en cours.
+ */
 export function demoSignIn(email: string): AppUser {
   const state = read();
-  if (state.user && state.user.email === email) return state.user;
+  if (state.user) {
+    if (state.user.email !== email) {
+      throw new Error(
+        `Le mode démo ne gère qu'un compte à la fois (${state.user.email}).`,
+      );
+    }
+    write({ ...state, signedIn: true });
+    return state.user;
+  }
   return demoSignUp(email);
 }
 
 export function demoSignOut(): void {
-  write({ ...read(), user: null });
+  write({ ...read(), signedIn: false });
 }
 
 export function demoCurrentUser(): AppUser | null {
-  return read().user;
+  const state = read();
+  return state.signedIn ? state.user : null;
 }
 
 // ─────────────────────────────────────────────
@@ -168,7 +205,7 @@ export function demoCompleteOnboarding(
     total_sessions_completed: 0,
   };
 
-  write({ user, userProgram, plan, sessions: [] });
+  write({ user, signedIn: true, userProgram, plan, sessions: [] });
   return { user, userProgram };
 }
 
@@ -211,13 +248,6 @@ export function demoCycleComplete(): boolean {
 // Génération de séance
 // ─────────────────────────────────────────────
 
-function levelForPersona(personaId: string): string {
-  const persona = PERSONAS.find((p) => p.id === personaId);
-  if (persona?.experience_level === "advanced") return "avance";
-  if (persona?.experience_level === "beginner_intermediate") return "intermediaire";
-  return "intermediaire";
-}
-
 /**
  * Exercices vus lors des dernières séances : la sélection les évite en
  * priorité, ce qui fait réellement varier le contenu d'une séance à l'autre.
@@ -255,14 +285,21 @@ export function demoGenerateWorkout(request: WorkoutRequest): WorkoutResponse {
   const focus = planned?.focus ?? request.focus ?? "full_body";
   const label = planned?.session_label ?? focus;
 
-  const levelMax = levelForPersona(request.persona_id);
+  // Le profil du pratiquant prime sur celui du persona : le persona dit une
+  // motivation, le questionnaire dit un niveau réel et un âge.
+  const profile = profileFromUser(state.user);
+  const levelMax = profile.level;
   const energy = request.energy_level ?? 3;
   const location: TrainingLocation = request.location ?? "gym";
+  const timeBudget: TimeBudget = request.time_budget ?? "standard";
 
   const ctx: BuildContext = {
     program,
     phase,
     focus,
+    profile,
+    dayNumber,
+    timeBudget,
     levelMax,
     energy,
     location,
@@ -277,7 +314,8 @@ export function demoGenerateWorkout(request: WorkoutRequest): WorkoutResponse {
       s.day_number === dayNumber &&
       s.status !== "completed" &&
       s.energy_level === (request.energy_level ?? 3) &&
-      s.location === (request.location ?? "gym"),
+      s.location === (request.location ?? "gym") &&
+      s.time_budget === timeBudget,
   );
   if (existing) {
     return {
@@ -307,6 +345,7 @@ export function demoGenerateWorkout(request: WorkoutRequest): WorkoutResponse {
     status: "in_progress",
     energy_level: energy,
     location,
+    time_budget: timeBudget,
     warmup_block: buildWarmup(ctx),
     main_block: buildMain(ctx),
     core_block: buildCore(ctx),

@@ -14,7 +14,7 @@ import {
 } from "../components/ui";
 import { startSession } from "../lib/data";
 import { volumeForEnergy } from "../lib/engine";
-import type { DashboardData, TrainingLocation } from "../lib/types";
+import type { DashboardData, TimeBudget, TrainingLocation } from "../lib/types";
 
 /**
  * Écran de préparation, posé avant chaque séance.
@@ -45,6 +45,59 @@ const LOCATIONS: {
   { value: "outdoor", label: "Plein air", detail: "Poids du corps, bandes, barres fixes" },
 ];
 
+/**
+ * Le créneau annoncé décide de la mise en superset des compounds. Sur du
+ * lourd, le superset coûte en charge : on ne le paie que pour tenir dans le
+ * temps. Les isolations, elles, s'enchaînent dans tous les cas.
+ */
+const TIME_BUDGETS: { value: TimeBudget; label: string; detail: string }[] = [
+  { value: "short", label: "Court", detail: "~30 min — compounds en superset antagoniste" },
+  { value: "standard", label: "Standard", detail: "45 à 60 min — compounds en séries droites" },
+  { value: "long", label: "Large", detail: "75 min et plus — aucune contrainte" },
+];
+
+/** Ligne à cocher — même rendu pour le lieu et pour le créneau. */
+function RadioRow({
+  label,
+  detail,
+  active,
+  onPress,
+}: {
+  label: string;
+  detail: string;
+  active: boolean;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="radio"
+      accessibilityState={{ checked: active }}
+      className={`flex-row items-center gap-3 rounded-[14px] border px-4 py-3.5 mb-2 ${
+        active ? "bg-accent border-accent" : "bg-surface border-line"
+      }`}
+    >
+      <View
+        className={`w-5 h-5 rounded-full border-2 items-center justify-center ${
+          active ? "border-black" : "border-muted"
+        }`}
+      >
+        {active ? <View className="w-2.5 h-2.5 rounded-full bg-black" /> : null}
+      </View>
+      <View className="flex-1">
+        <Text className={`font-body-sb text-[14px] ${active ? "text-black" : "text-ink"}`}>
+          {label}
+        </Text>
+        <Text
+          className={`font-body text-[11px] mt-0.5 ${active ? "text-black/60" : "text-muted"}`}
+        >
+          {detail}
+        </Text>
+      </View>
+    </Pressable>
+  );
+}
+
 export default function PrepareScreen() {
   const router = useRouter();
   const { userId } = useAuth();
@@ -52,6 +105,7 @@ export default function PrepareScreen() {
 
   const [energy, setEnergy] = useState(3);
   const [location, setLocation] = useState<TrainingLocation>("gym");
+  const [timeBudget, setTimeBudget] = useState<TimeBudget>("standard");
   const [starting, setStarting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -71,7 +125,13 @@ export default function PrepareScreen() {
     setError(null);
     setStarting(true);
     try {
-      const workout = await startSession(userId, dashboard, energy, location);
+      const workout = await startSession(
+        userId,
+        dashboard,
+        energy,
+        location,
+        timeBudget,
+      );
       router.replace({
         pathname: "/session",
         params: { sessionId: workout.session_id },
@@ -88,6 +148,7 @@ export default function PrepareScreen() {
 
   return (
     <Screen
+      backdrop="prepare"
       footer={
         <Button
           label="Générer ma séance"
@@ -166,44 +227,34 @@ export default function PrepareScreen() {
       <MonoLabel tone="accent" className="mb-3">
         Où t'entraînes-tu ?
       </MonoLabel>
-      {LOCATIONS.map((loc) => {
-        const active = location === loc.value;
-        return (
-          <Pressable
-            key={loc.value}
-            onPress={() => setLocation(loc.value)}
-            accessibilityRole="radio"
-            accessibilityState={{ checked: active }}
-            className={`flex-row items-center gap-3 rounded-[14px] border px-4 py-3.5 mb-2 ${
-              active ? "bg-accent border-accent" : "bg-surface border-line"
-            }`}
-          >
-            <View
-              className={`w-5 h-5 rounded-full border-2 items-center justify-center ${
-                active ? "border-black" : "border-muted"
-              }`}
-            >
-              {active ? <View className="w-2.5 h-2.5 rounded-full bg-black" /> : null}
-            </View>
-            <View className="flex-1">
-              <Text
-                className={`font-body-sb text-[14px] ${
-                  active ? "text-black" : "text-ink"
-                }`}
-              >
-                {loc.label}
-              </Text>
-              <Text
-                className={`font-body text-[11px] mt-0.5 ${
-                  active ? "text-black/60" : "text-muted"
-                }`}
-              >
-                {loc.detail}
-              </Text>
-            </View>
-          </Pressable>
-        );
-      })}
+      {LOCATIONS.map((loc) => (
+        <RadioRow
+          key={loc.value}
+          label={loc.label}
+          detail={loc.detail}
+          active={location === loc.value}
+          onPress={() => setLocation(loc.value)}
+        />
+      ))}
+
+      {/* C — créneau disponible */}
+      <MonoLabel tone="accent" className="mb-3 mt-6">
+        Combien de temps as-tu ?
+      </MonoLabel>
+      {TIME_BUDGETS.map((slot) => (
+        <RadioRow
+          key={slot.value}
+          label={slot.label}
+          detail={slot.detail}
+          active={timeBudget === slot.value}
+          onPress={() => setTimeBudget(slot.value)}
+        />
+      ))}
+      <Text className="font-body text-[11px] text-muted mt-1.5">
+        Les isolations sont enchaînées en superset dans tous les cas. Sur un
+        créneau court, les compounds le sont aussi — un tirage apparié à une
+        poussée, jamais deux fois la même chaîne.
+      </Text>
     </Screen>
   );
 }

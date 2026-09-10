@@ -14,6 +14,8 @@ import {
   buildMain,
   buildWarmup,
   createRng,
+  fitSessionToBudget,
+  sessionBudgetMinutes,
   sessionSeed,
   textbookLabel,
 } from "./engine";
@@ -21,7 +23,7 @@ import type { BuildContext } from "./engine";
 import { PERSONAS, PERSONA_PROGRAM_ELIGIBILITY, PROGRAMS, PROGRAM_PHASES } from "./fixtures";
 import { buildSessionPlan, isCycleComplete, nextPlanned, phaseForWeek } from "./plan";
 import type { PlannedSession } from "./plan";
-import { profileFromUser } from "./profile";
+import { profileFromAnswers, profileFromUser } from "./profile";
 import { resolveProgramId } from "./scoring";
 import type {
   AppUser,
@@ -182,7 +184,14 @@ export function demoCompleteOnboarding(
   const phases = PROGRAM_PHASES.filter((ph) => ph.program_id === programId);
   const protocol: Protocol = program.default_protocol ?? "full_body";
 
-  const plan = buildSessionPlan(program, phases, protocol, today);
+  // La fréquence annoncée décide du rythme ET de la longueur du cycle.
+  const plan = buildSessionPlan(
+    program,
+    phases,
+    protocol,
+    today,
+    profileFromAnswers(answers).sessionsPerWeek,
+  );
 
   const user: AppUser = {
     ...(state.user ?? demoSignUp("demo@strength.app")),
@@ -339,6 +348,18 @@ export function demoGenerateWorkout(request: WorkoutRequest): WorkoutResponse {
     };
   }
 
+  // Les quatre blocs sont composés indépendamment ; c'est une fois assemblés
+  // qu'on sait si la séance tient dans le créneau annoncé.
+  const blocks = fitSessionToBudget(
+    {
+      warmup: buildWarmup(ctx),
+      main: buildMain(ctx),
+      core: buildCore(ctx),
+      finisher: buildFinisher(ctx),
+    },
+    sessionBudgetMinutes(ctx),
+  );
+
   const session: WorkoutSession = {
     id: nextId("demo_session"),
     user_id: request.user_id,
@@ -353,10 +374,10 @@ export function demoGenerateWorkout(request: WorkoutRequest): WorkoutResponse {
     energy_level: energy,
     location,
     time_budget: timeBudget,
-    warmup_block: buildWarmup(ctx),
-    main_block: buildMain(ctx),
-    core_block: buildCore(ctx),
-    finisher_block: buildFinisher(ctx),
+    warmup_block: blocks.warmup,
+    main_block: blocks.main,
+    core_block: blocks.core,
+    finisher_block: blocks.finisher,
     scheduled_date: planned?.scheduled_date ?? null,
     started_at: null,
     completed_at: null,

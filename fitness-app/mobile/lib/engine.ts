@@ -23,7 +23,9 @@
 
 import { EXERCISES } from "./fixtures";
 import type { Objective, Profile } from "./profile";
+import { estimateMinutes } from "./prescription";
 import { scalingFor } from "./scaling";
+import { HIGH_FREQUENCY_THRESHOLD } from "./plan";
 import {
   LEARNING_LOAD_PCT,
   LEARNING_NOTE,
@@ -351,9 +353,32 @@ export function applyTimeBudget(
   };
 }
 
-/** Volume effectif de la séance : l'énergie, puis le créneau qui la plafonne. */
+/**
+ * À cinq séances par semaine et plus, chaque séance pèse moins.
+ *
+ * C'est le volume HEBDOMADAIRE qui se récupère, pas celui d'une séance. Garder
+ * le même contenu qu'à trois séances revient à demander presque le double de
+ * travail sur la semaine — la fatigue s'accumule et la charge finit par
+ * baisser d'elle-même. Une série de moins par exercice suffit à rendre le
+ * rythme tenable.
+ */
+export function applyFrequency(
+  policy: VolumePolicy,
+  sessionsPerWeek: number,
+): VolumePolicy {
+  if (sessionsPerWeek < HIGH_FREQUENCY_THRESHOLD) return policy;
+  return { ...policy, setsDelta: policy.setsDelta - 1 };
+}
+
+/**
+ * Volume effectif de la séance. Trois plafonds successifs : l'énergie propose,
+ * le créneau du jour plafonne, la fréquence hebdomadaire allège.
+ */
 function sessionPolicy(ctx: BuildContext): VolumePolicy {
-  return applyTimeBudget(volumeForEnergy(ctx.energy), ctx.timeBudget);
+  return applyFrequency(
+    applyTimeBudget(volumeForEnergy(ctx.energy), ctx.timeBudget),
+    ctx.profile.sessionsPerWeek,
+  );
 }
 
 // ─────────────────────────────────────────────
@@ -373,6 +398,12 @@ interface SelectOptions {
   /** Écarte les variantes allégées — tout le monde sauf débutants et 60+. */
   excludeRegressions?: boolean;
   /**
+   * Écarte sauts et mouvements balistiques. Il ne s'agit pas d'un plafond de
+   * difficulté — un squat lourd reste proposé — mais du seul impact : c'est la
+   * réception au sol qui abîme, pas la charge.
+   */
+  excludeHighImpact?: boolean;
+  /**
    * Pool d'échauffement : la catégorie `warmup`, plus tout exercice portant
    * une cible d'échauffement. L'Air Squat sert d'abord à ça.
    */
@@ -385,6 +416,7 @@ function selectExercises(programId: string, opts: SelectOptions): Exercise[] {
 
   return EXERCISES.filter((ex) => {
     if (exclude.has(ex.id)) return false;
+    if (opts.excludeHighImpact && ex.high_impact) return false;
 
     const targets = ex.target_programs ?? [];
     if (targets.length === 0) {
@@ -720,12 +752,14 @@ export function buildWarmup(ctx: BuildContext): ExerciseBlock[] {
     warmupTargets: FOCUS_WARMUP_TARGET_MAP[ctx.focus] ?? ["all"],
     location: ctx.location,
     allowUniversal: true,
+    excludeHighImpact: ctx.profile.avoidsImpact,
   });
   if (pool.length < policy.warmup) {
     pool = selectExercises(ctx.program.id, {
       warmupPool: true,
       location: ctx.location,
       allowUniversal: true,
+      excludeHighImpact: ctx.profile.avoidsImpact,
     });
   }
 
@@ -781,7 +815,12 @@ function buildCircuitMain(ctx: BuildContext): ExerciseBlock[] {
   const count = policy.compounds + policy.isolations;
   const pool = selectVaried(
     ctx.program.id,
-    { categories: CIRCUIT_CATEGORIES, levelMax: ctx.levelMax, location: ctx.location },
+    {
+      categories: CIRCUIT_CATEGORIES,
+      levelMax: ctx.levelMax,
+      location: ctx.location,
+      excludeHighImpact: ctx.profile.avoidsImpact,
+    },
     count,
   );
 
@@ -953,6 +992,8 @@ export function buildMain(ctx: BuildContext): ExerciseBlock[] {
     // Une variante allégée n'a sa place dans le bloc principal que chez un
     // débutant ou un pratiquant âgé. Pour les autres : goblet squat ou barre.
     excludeRegressions: !ctx.profile.allowRegressions,
+    // La réception au sol abîme, pas la charge : un squat lourd reste proposé.
+    excludeHighImpact: ctx.profile.avoidsImpact,
     ...(ctx.focus === "push"
       ? { armGroup: "triceps" as const }
       : ctx.focus === "pull"
@@ -1115,6 +1156,7 @@ export function buildCore(ctx: BuildContext): ExerciseBlock[] {
       levelMax: ctx.levelMax,
       location: ctx.location,
       excludeRegressions: !ctx.profile.allowRegressions,
+      excludeHighImpact: ctx.profile.avoidsImpact,
     },
     policy.core,
   );
@@ -1160,6 +1202,7 @@ export function buildFinisher(ctx: BuildContext): ExerciseBlock[] {
       levelMax: ctx.levelMax,
       location: ctx.location,
       allowUniversal: true,
+      excludeHighImpact: ctx.profile.avoidsImpact,
     },
     2,
   );
@@ -1172,6 +1215,137 @@ export function buildFinisher(ctx: BuildContext): ExerciseBlock[] {
     notes: "Finisher",
     log_results: false,
   }));
+}
+
+// ─────────────────────────────────────────────
+// Faire tenir la séance dans le créneau
+// ─────────────────────────────────────────────
+
+/**
+ * Minutes allouées par créneau.
+ *
+ * Le créneau pilotait le volume sans que personne ne mesure le résultat :
+ * annoncer trente minutes donnait des séances à cinquante-sept. Ces valeurs
+ * sont maintenant une contrainte vérifiée, pas une intention.
+ */
+const BUDGET_MINUTES: Record<TimeBudget, number> = {
+  short: 45,
+  standard: 60,
+};
+
+/** Plancher : en dessous, ce n'est plus une séance, c'est un échauffement. */
+const MIN_COMPOUNDS = 2;
+const MIN_WARMUP = 2;
+const MIN_SETS_UNDER_PRESSURE = 3;
+
+export interface SessionBlocks {
+  warmup: ExerciseBlock[];
+  main: ExerciseBlock[];
+  core: ExerciseBlock[];
+  finisher: ExerciseBlock[];
+}
+
+/**
+ * Budget réel d'une séance : le créneau du jour, plafonné par le temps
+ * déclaré à l'onboarding. Répondre « j'ai le temps » un matin ne peut pas
+ * dépasser ce qu'on a dit pouvoir y consacrer.
+ */
+export function sessionBudgetMinutes(ctx: BuildContext): number {
+  return Math.min(BUDGET_MINUTES[ctx.timeBudget], ctx.profile.sessionMinutesMax);
+}
+
+/** Un superset dont le partenaire a disparu n'est plus un superset. */
+function healSupersets(blocks: ExerciseBlock[]): ExerciseBlock[] {
+  const present = new Set(blocks.map((b) => b.exercise_id));
+  for (const b of blocks) {
+    if (b.superset_with && !present.has(b.superset_with)) {
+      delete b.superset_with;
+      // Il portait un repos nul parce que la paire enchaînait : il le récupère.
+      if (!b.rest_sec) b.rest_sec = 60;
+    }
+  }
+  return blocks;
+}
+
+/**
+ * Rogne la séance jusqu'à ce qu'elle tienne dans le créneau annoncé.
+ *
+ * L'ordre de sacrifice va du plus accessoire au plus structurant : le finisher
+ * d'abord, puis le gainage, puis les isolations, puis l'échauffement, puis les
+ * séries. Les compounds partent en dernier et jamais en dessous de deux — une
+ * séance sans mouvement lourd n'est plus la séance demandée, elle est juste
+ * plus courte.
+ *
+ * Le compound de tête est protégé : c'est lui qui porte le travail du jour, et
+ * c'est souvent lui qui porte le barème de force.
+ */
+export function fitSessionToBudget(
+  session: SessionBlocks,
+  budgetMinutes: number,
+): SessionBlocks {
+  const out: SessionBlocks = {
+    warmup: [...session.warmup],
+    main: [...session.main],
+    core: [...session.core],
+    finisher: [...session.finisher],
+  };
+  // Chaque mesure répare d'abord les supersets orphelins.
+  //
+  // Retirer un mouvement peut casser une paire, et le survivant récupère alors
+  // le repos qu'il n'avait pas — ce qui RALLONGE la séance. Mesurer avant la
+  // réparation laissait passer des séances au-dessus du budget : elles
+  // tenaient au moment du contrôle, plus après. `healSupersets` est idempotent,
+  // l'appeler à chaque mesure ne coûte rien.
+  const total = () => {
+    healSupersets(out.main);
+    return estimateMinutes([...out.warmup, ...out.main, ...out.core, ...out.finisher]);
+  };
+
+  if (total() <= budgetMinutes) return out;
+
+  // 1. Le finisher : c'est du bonus, il saute en entier.
+  out.finisher = [];
+  if (total() <= budgetMinutes) return out;
+
+  // 2. Le gainage, un exercice à la fois.
+  while (out.core.length && total() > budgetMinutes) out.core.pop();
+  if (total() <= budgetMinutes) return out;
+
+  // 3. Les isolations, en partant de la fin.
+  const isIsolation = (b: ExerciseBlock) => b.notes?.startsWith("Isolation");
+  while (out.main.some(isIsolation) && total() > budgetMinutes) {
+    const last = out.main.map(isIsolation).lastIndexOf(true);
+    out.main.splice(last, 1);
+  }
+  if (total() <= budgetMinutes) return out;
+
+  // 4. L'échauffement, sans descendre sous deux mouvements : arriver froid
+  //    sur du lourd coûte plus cher que la séance ne rapporte.
+  while (out.warmup.length > MIN_WARMUP && total() > budgetMinutes) out.warmup.pop();
+  if (total() <= budgetMinutes) return out;
+
+  // 5. Le travail de force EN TROP. Deux séries lourdes à trois minutes de
+  //    repos pèsent trente-sept minutes à elles seules ; le premier mouvement
+  //    porte l'intention de la séance, le second n'est qu'un bonus.
+  while (out.main.filter((b) => b.protocol_label).length > 1 && total() > budgetMinutes) {
+    const last = out.main.map((b) => Boolean(b.protocol_label)).lastIndexOf(true);
+    out.main.splice(last, 1);
+  }
+  if (total() <= budgetMinutes) return out;
+
+  // 6. Les séries des compounds, jusqu'à trois. En dessous, il ne reste plus
+  //    assez de volume pour que la séance compte.
+  for (const b of out.main) {
+    if (total() <= budgetMinutes) break;
+    if (b.protocol_label) continue; // un barème de force ne se rogne pas
+    if (b.sets > MIN_SETS_UNDER_PRESSURE) b.sets = MIN_SETS_UNDER_PRESSURE;
+  }
+  if (total() <= budgetMinutes) return out;
+
+  // 7. Les compounds eux-mêmes, en dernier recours, jamais sous deux.
+  while (out.main.length > MIN_COMPOUNDS && total() > budgetMinutes) out.main.pop();
+
+  return out;
 }
 
 export function findExercise(id: string): Exercise | undefined {

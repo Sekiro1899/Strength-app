@@ -54,7 +54,7 @@ const TIME_BUDGETS: { value: TimeBudget; label: string; detail: string }[] = [
   {
     value: "short",
     label: "Je suis pressé",
-    detail: "~30 min — une série de moins, compounds en superset antagoniste",
+    detail: "30 à 45 min — une série de moins, compounds en superset antagoniste",
   },
   {
     value: "standard",

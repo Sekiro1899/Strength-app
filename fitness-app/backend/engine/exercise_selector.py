@@ -108,6 +108,7 @@ def select_exercises(
     exclude_ids: set[str] | None = None,
     arm_group_only: str | None = None,
     exclude_regressions: bool = False,
+    exclude_high_impact: bool = False,
     warmup_pool: bool = False,
 ) -> list[dict]:
     """Retourne les exercices de la bibliothèque satisfaisant tous les critères."""
@@ -130,6 +131,12 @@ def select_exercises(
         # Une variante allégée n'a sa place dans le bloc principal que chez un
         # débutant ou un pratiquant âgé.
         if exclude_regressions and ex.get("is_regression"):
+            continue
+        # Saut, réception au sol ou barre rattrapée en mouvement : écarté
+        # quand les articulations sont à ménager. Ce n'est pas un plafond de
+        # difficulté — un squat lourd reste proposé : c'est la réception qui
+        # abîme, pas la charge.
+        if exclude_high_impact and ex.get("high_impact"):
             continue
         # Restreint la catégorie `arms` à un seul groupe (jours push / pull).
         if arm_group_only and ex.get("category") == "arms" \

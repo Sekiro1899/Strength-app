@@ -53,6 +53,31 @@ export interface Profile {
    * classique lui parle bien davantage qu'un tirage.
    */
   strengthOriented: boolean;
+  /**
+   * Temps annoncé à l'onboarding pour UNE séance (q5), en minutes.
+   *
+   * Plafond du cycle, distinct du créneau du jour : répondre « j'ai le temps »
+   * un matin ne peut pas dépasser ce qu'on a déclaré pouvoir y consacrer.
+   */
+  sessionMinutesMax: number;
+  /**
+   * Articulations à ménager : pas de sauts ni de mouvements balistiques.
+   *
+   * Deux cas. Après 60 ans, l'impact répété ne se récupère plus de la même
+   * façon. Et un débutant — ou quelqu'un qui reprend — après 45 ans n'a pas
+   * encore les tendons pour amortir des sauts : il lui manque les mois de
+   * pratique qui les préparent, pas la volonté.
+   */
+  avoidsImpact: boolean;
+  /**
+   * Séances par semaine que le pratiquant se dit prêt à tenir (q6).
+   *
+   * C'est le volume HEBDOMADAIRE qui compte, pas celui d'une séance : à cinq
+   * séances par semaine, chacune doit peser moins qu'à trois, sans quoi la
+   * charge cumulée ne se récupère pas. La durée du cycle s'ajuste aussi —
+   * voir `cycleWeeks` dans lib/plan.
+   */
+  sessionsPerWeek: number;
 }
 
 const LEVEL_BY_ANSWER: Record<string, ExerciseLevel> = {
@@ -70,6 +95,33 @@ const OBJECTIVES: Objective[] = [
   "efficiency",
   "complete_athlete",
 ];
+
+/**
+ * Temps par séance déclaré à l'onboarding (q5) — miroir de
+ * `maps_to_duration_max` sur les options du questionnaire.
+ */
+const SESSION_MINUTES: Record<string, number> = {
+  under_45min: 45,
+  "60min": 60,
+  unlimited: 120,
+};
+
+const DEFAULT_SESSION_MINUTES = 60;
+
+/**
+ * Séances par semaine (q6) — la borne HAUTE de la réponse : c'est le rythme
+ * que le pratiquant se dit prêt à tenir, donc celui qu'il faut planifier.
+ */
+const SESSIONS_PER_WEEK: Record<string, number> = {
+  "1_2_sessions": 2,
+  "3_4_sessions": 4,
+  "5_plus_sessions": 5,
+};
+
+const DEFAULT_SESSIONS_PER_WEEK = 3;
+
+/** Tranches d'âge où l'impact ne se récupère plus comme à vingt ans. */
+const SENIOR_BANDS: AgeBand[] = ["45_60", "60_plus"];
 
 const INTENSITY_STYLES: IntensityStyle[] = [
   "loves_intensity",
@@ -95,6 +147,9 @@ export const DEFAULT_PROFILE: Profile = {
   objective: null,
   intensityStyle: null,
   strengthOriented: false,
+  sessionMinutesMax: DEFAULT_SESSION_MINUTES,
+  avoidsImpact: false,
+  sessionsPerWeek: DEFAULT_SESSIONS_PER_WEEK,
 };
 
 export function profileFromAnswers(
@@ -104,6 +159,8 @@ export function profileFromAnswers(
   const rawAge = answer(answers, "q1");
   const rawObjective = answer(answers, "q3");
   const rawIntensity = answer(answers, "q9");
+  const rawSessionTime = answer(answers, "q5");
+  const rawFrequency = answer(answers, "q6");
 
   const level = (rawLevel && LEVEL_BY_ANSWER[rawLevel]) || DEFAULT_PROFILE.level;
   const ageBand = AGE_BANDS.includes(rawAge as AgeBand) ? (rawAge as AgeBand) : null;
@@ -125,6 +182,13 @@ export function profileFromAnswers(
     strengthOriented:
       (objective === "aesthetics" || objective === "strength") &&
       intensityStyle === "prefers_strength_style",
+    sessionMinutesMax:
+      SESSION_MINUTES[rawSessionTime ?? ""] ?? DEFAULT_SESSION_MINUTES,
+    avoidsImpact:
+      ageBand === "60_plus" ||
+      (level === "debutant" && SENIOR_BANDS.includes(ageBand as AgeBand)),
+    sessionsPerWeek:
+      SESSIONS_PER_WEEK[rawFrequency ?? ""] ?? DEFAULT_SESSIONS_PER_WEEK,
   };
 }
 

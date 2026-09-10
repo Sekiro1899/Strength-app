@@ -250,6 +250,7 @@ ENRICHED_FIELDS = (
     "movement_family",  # familles de mouvement (règle de non-répétition)
     "is_regression",    # variantes allégées, réservées débutants et 60+
     "unilateral",       # un côté à la fois : pas de repos entre les côtés
+    "high_impact",      # sauts et balistique, écartés si articulations fragiles
 )
 
 

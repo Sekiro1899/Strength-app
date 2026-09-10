@@ -5,6 +5,8 @@ Assemble les 4 blocs (warmup, main, core, finisher) en une séance complète.
 
 from database import supabase
 from engine.block_builder import (
+    fit_session_to_budget,
+    session_budget_minutes,
     textbook_label,
     BuildContext,
     build_core_block,
@@ -78,16 +80,28 @@ async def generate_workout(request: WorkoutRequest) -> WorkoutResponse:
         objective=profile["objective"],
         strength_oriented=profile["strength_oriented"],
         age_band=profile["age_band"],
+        session_minutes_max=profile["session_minutes_max"],
+        sessions_per_week=profile["sessions_per_week"],
+        avoids_impact=profile["avoids_impact"],
     )
 
     # ── Construire les 4 blocs ──
-    warmup = build_warmup_block(ctx)
-    main = build_main_block(ctx)
+    # Les quatre blocs sont composés indépendamment ; c'est une fois
+    # assemblés qu'on sait si la séance tient dans le créneau annoncé.
+    blocks = fit_session_to_budget(
+        {
+            "warmup": build_warmup_block(ctx),
+            "main": build_main_block(ctx),
+            "core": build_core_block(ctx),
+            "finisher": build_finisher_block(ctx),
+        },
+        session_budget_minutes(ctx),
+    )
+    warmup, main = blocks["warmup"], blocks["main"]
+    core, finisher = blocks["core"], blocks["finisher"]
     # Une séance récitée porte le nom de son programme : le focus prévu au plan
     # ne décrit plus ce qu'elle contient.
     session_label = textbook_label(ctx) or session_label
-    core = build_core_block(ctx)
-    finisher = build_finisher_block(ctx)
 
     # ── Persister dans la table sessions ──
     session_row = {
@@ -134,6 +148,11 @@ async def generate_workout(request: WorkoutRequest) -> WorkoutResponse:
 ROTATION_WINDOW = 2
 
 
+# Temps par seance (q5) et frequence (q6) — miroir de mobile/lib/profile.ts.
+SESSION_MINUTES = {"under_45min": 45, "60min": 60, "unlimited": 120}
+SESSIONS_PER_WEEK = {"1_2_sessions": 2, "3_4_sessions": 4, "5_plus_sessions": 5}
+
+
 def _fetch_profile(user_id: str, persona: dict) -> dict:
     """
     Niveau et tolérance aux régressions, lus dans les réponses au
@@ -162,6 +181,8 @@ def _fetch_profile(user_id: str, persona: dict) -> dict:
     age_band = one("q1")
     objective = one("q3")
     intensity_style = one("q9")
+    session_time = one("q5")
+    frequency = one("q6")
 
     return {
         "level": level,
@@ -177,6 +198,20 @@ def _fetch_profile(user_id: str, persona: dict) -> dict:
         "strength_oriented": (
             objective in ("aesthetics", "strength")
             and intensity_style == "prefers_strength_style"
+        ),
+        # Temps annonce pour UNE seance (q5) : plafond du cycle, distinct du
+        # creneau du jour. Repondre « j'ai le temps » un matin ne peut pas
+        # depasser ce qu'on a dit pouvoir y consacrer.
+        "session_minutes_max": SESSION_MINUTES.get(session_time or "", 60),
+        # Seances par semaine (q6), borne haute : le rythme a planifier.
+        "sessions_per_week": SESSIONS_PER_WEEK.get(frequency or "", 3),
+        # Articulations a menager. Apres 60 ans, l'impact repete ne se
+        # recupere plus de la meme facon ; et un debutant apres 45 ans n'a pas
+        # encore les tendons pour amortir des sauts — il lui manque les mois
+        # de pratique qui les preparent, pas la volonte.
+        "avoids_impact": (
+            age_band == "60_plus"
+            or (level == "debutant" and age_band in ("45_60", "60_plus"))
         ),
     }
 

@@ -11,7 +11,7 @@ import {
   MonoLabel,
   Screen,
 } from "../components/ui";
-import { setsLabel } from "../lib/prescription";
+import { estimateMinutes, setsLabel } from "../lib/prescription";
 import { Backdrop } from "../components/Backdrop";
 import { fetchSession } from "../lib/data";
 import type { ExerciseBlock, WorkoutSession } from "../lib/types";
@@ -38,14 +38,15 @@ export function detailLabel(block: ExerciseBlock): string {
   return parts.join(" · ");
 }
 
-/** Estimation grossière de la durée d'un bloc, pour l'en-tête. */
+/**
+ * Durée affichée en tête de bloc.
+ *
+ * La formule vit dans lib/prescription : c'est la MÊME qui sert au moteur à
+ * faire tenir la séance dans le créneau annoncé. Deux estimations divergentes,
+ * et l'app afficherait un temps qu'elle ne respecte pas.
+ */
 function blockMinutes(blocks: ExerciseBlock[]): number {
-  const seconds = blocks.reduce((total, b) => {
-    const work = b.duration_sec ?? (b.reps ?? 10) * 3;
-    const rest = b.rest_sec ?? 30;
-    return total + b.sets * (work + rest);
-  }, 0);
-  return Math.max(1, Math.round(seconds / 60));
+  return Math.max(1, Math.round(estimateMinutes(blocks)));
 }
 
 export default function SessionScreen() {
@@ -83,9 +84,14 @@ export default function SessionScreen() {
     (n, b) => n + ((session[b.field] as ExerciseBlock[] | null) ?? []).length,
     0,
   );
-  const totalMinutes = BLOCKS.reduce(
-    (n, b) => n + blockMinutes((session[b.field] as ExerciseBlock[] | null) ?? []),
-    0,
+  // Le total se calcule sur TOUS les blocs à plat, pas en additionnant les
+  // arrondis : `blockMinutes` remonte à 1 minute minimum, et un bloc vide —
+  // core ou finisher rognés pour tenir dans le créneau — ajoutait donc une
+  // minute fantôme. La séance s'annonçait à 40 minutes pour 38 réelles.
+  const totalMinutes = Math.round(
+    estimateMinutes(
+      BLOCKS.flatMap((b) => (session[b.field] as ExerciseBlock[] | null) ?? []),
+    ),
   );
 
   return (

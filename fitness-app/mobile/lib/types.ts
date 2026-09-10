@@ -237,6 +237,11 @@ export interface Exercise {
    * côtés, seulement après la paire.
    */
   unilateral: boolean;
+  /**
+   * Saut, réception au sol, ou barre rattrapée en mouvement. À écarter quand
+   * les articulations sont à ménager — voir `Profile.avoidsImpact`.
+   */
+  high_impact: boolean;
   /** Démonstration YouTube. Null = repli sur une recherche par nom. */
   video_url: string | null;
   /**

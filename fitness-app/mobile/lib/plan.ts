@@ -76,6 +76,31 @@ export function phaseForWeek(
  * @param startDate jour de démarrage ; la première séance tombe le premier
  *                  jour d'entraînement à partir de cette date.
  */
+/**
+ * Durée du cycle, ajustée à ce que le pratiquant a annoncé pouvoir tenir.
+ *
+ * Deux raccourcis, et c'est toujours le plus court qui gagne :
+ *
+ * À cinq séances par semaine et plus, le volume hebdomadaire est déjà élevé.
+ * Étaler ça sur dix semaines, c'est demander à quelqu'un de tenir un rythme
+ * soutenu pendant deux mois et demi — la plupart décrochent avant. Six
+ * semaines se terminent, et un cycle terminé vaut mieux qu'un cycle abandonné.
+ *
+ * Sur les programmes en circuit — lactate, préparation athlétique — les
+ * adaptations sont rapides mais la lassitude aussi : quatre semaines, puis on
+ * change. C'est le cas de Corporate Rusher.
+ */
+export const HIGH_FREQUENCY_THRESHOLD = 5;
+export const HIGH_FREQUENCY_WEEKS = 6;
+export const CIRCUIT_WEEKS = 4;
+
+export function cycleWeeks(program: Program, sessionsPerWeek: number): number {
+  const caps = [program.duration_weeks ?? 8];
+  if (program.session_structure === "circuit") caps.push(CIRCUIT_WEEKS);
+  if (sessionsPerWeek >= HIGH_FREQUENCY_THRESHOLD) caps.push(HIGH_FREQUENCY_WEEKS);
+  return Math.min(...caps);
+}
+
 export function buildSessionPlan(
   program: Program,
   phases: ProgramPhase[],
@@ -83,11 +108,11 @@ export function buildSessionPlan(
   startDate: Date,
   sessionsPerWeek?: number,
 ): PlannedSession[] {
-  const weeks = program.duration_weeks ?? 8;
   const perWeek = Math.min(
     Math.max(sessionsPerWeek ?? program.frequency_per_week_min, 1),
     7,
   );
+  const weeks = cycleWeeks(program, perWeek);
   const pattern = WEEKDAYS[perWeek] ?? WEEKDAYS[3];
 
   const anchor = mondayOf(startDate);

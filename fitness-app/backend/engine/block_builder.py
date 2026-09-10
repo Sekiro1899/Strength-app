@@ -47,7 +47,8 @@ class BuildContext:
                  time_budget: str = "standard", persona_id: str | None = None,
                  user_program_id: str = "", week_number: int = 1,
                  objective: str | None = None, strength_oriented: bool = False,
-                 age_band: str | None = None):
+                 age_band: str | None = None, session_minutes_max: int = 60,
+                 sessions_per_week: int = 3, avoids_impact: bool = False):
         self.program = program
         self.phase = phase or {}
         self.focus = focus
@@ -73,9 +74,21 @@ class BuildContext:
         self.week_number = week_number
         self.objective = objective
         self.age_band = age_band
+        # Temps annoncé pour UNE séance (q5) : plafond du cycle.
+        self.session_minutes_max = session_minutes_max
+        # Séances par semaine (q6) : c'est le volume HEBDOMADAIRE qui se
+        # récupère, pas celui d'une séance.
+        self.sessions_per_week = sessions_per_week
+        # Articulations à ménager : ni sauts ni mouvements balistiques.
+        self.avoids_impact = avoids_impact
         # Vient chercher de la charge et de la masse, pas de la sueur (q3 + q9).
         self.strength_oriented = strength_oriented
-        self.policy = apply_time_budget(volume_for_energy(energy), time_budget)
+        # Trois plafonds successifs : l'énergie propose, le créneau du jour
+        # plafonne, la fréquence hebdomadaire allège.
+        self.policy = apply_frequency(
+            apply_time_budget(volume_for_energy(energy), time_budget),
+            sessions_per_week,
+        )
 
 
 def apply_time_budget(policy: dict, budget: str) -> dict:
@@ -102,6 +115,24 @@ def apply_time_budget(policy: dict, budget: str) -> dict:
         "warmup": min(policy["warmup"], 3),
         "with_finisher": False,
     }
+
+
+# À cinq séances par semaine et plus, chaque séance pèse moins.
+HIGH_FREQUENCY_THRESHOLD = 5
+
+
+def apply_frequency(policy: dict, sessions_per_week: int) -> dict:
+    """Allège la séance quand la semaine est déjà chargée.
+
+    C'est le volume HEBDOMADAIRE qui se récupère, pas celui d'une séance.
+    Garder le même contenu qu'à trois séances revient à demander presque le
+    double de travail sur la semaine — la fatigue s'accumule et la charge
+    finit par baisser d'elle-même. Une série de moins par exercice suffit à
+    rendre le rythme tenable.
+    """
+    if sessions_per_week < HIGH_FREQUENCY_THRESHOLD:
+        return policy
+    return {**policy, "sets_delta": policy["sets_delta"] - 1}
 
 
 # Planchers de récupération. Ce sont des PLANCHERS : une phase de force pure
@@ -277,6 +308,7 @@ def build_warmup_block(ctx: BuildContext) -> list[ExerciseBlock]:
         warmup_targets=FOCUS_WARMUP_TARGET_MAP.get(ctx.focus, ["all"]),
         location=ctx.location,
         allow_universal=True,
+        exclude_high_impact=ctx.avoids_impact,
     )
     if len(pool) < count:
         pool = select_exercises(
@@ -284,6 +316,7 @@ def build_warmup_block(ctx: BuildContext) -> list[ExerciseBlock]:
             warmup_pool=True,
             location=ctx.location,
             allow_universal=True,
+            exclude_high_impact=ctx.avoids_impact,
         )
 
     # Règle d'échauffement : on mobilise avant d'activer. Le tirage est libre
@@ -339,6 +372,7 @@ def _build_circuit_main(ctx: BuildContext) -> list[ExerciseBlock]:
         count,
         categories=CIRCUIT_CATEGORIES,
         level_max=ctx.level_max,
+        exclude_high_impact=ctx.avoids_impact,
         location=ctx.location,
     )
     reps = round(
@@ -536,6 +570,9 @@ def build_main_block(ctx: BuildContext) -> list[ExerciseBlock]:
         # Pour les autres qu'un débutant ou un 60+ : goblet squat ou barre,
         # pas d'air squat ni de pompes sur genoux dans le bloc principal.
         exclude_regressions=not ctx.allow_regressions,
+        # La réception au sol abîme, pas la charge : un squat lourd reste
+        # proposé.
+        exclude_high_impact=ctx.avoids_impact,
     )
     if ctx.focus in ("push", "pull"):
         common["arm_group_only"] = "triceps" if ctx.focus == "push" else "biceps"
@@ -704,6 +741,7 @@ def build_core_block(ctx: BuildContext) -> list[ExerciseBlock]:
         ctx.policy["core"],
         exercise_types=["core"],
         level_max=ctx.level_max,
+        exclude_high_impact=ctx.avoids_impact,
         location=ctx.location,
         exclude_regressions=not ctx.allow_regressions,
     )
@@ -754,6 +792,7 @@ def build_finisher_block(ctx: BuildContext) -> list[ExerciseBlock]:
         level_max=ctx.level_max,
         location=ctx.location,
         allow_universal=True,
+        exclude_high_impact=ctx.avoids_impact,
     )
 
     blocks = []
@@ -768,3 +807,130 @@ def build_finisher_block(ctx: BuildContext) -> list[ExerciseBlock]:
         ))
     return blocks
 
+
+# ─────────────────────────────────────────────
+# Faire tenir la séance dans le créneau
+# ─────────────────────────────────────────────
+
+# Minutes allouées par créneau. Le créneau pilotait le volume sans que personne
+# ne mesure le résultat : annoncer trente minutes donnait des séances à
+# cinquante-sept. Ces valeurs sont une contrainte vérifiée, pas une intention.
+BUDGET_MINUTES = {"short": 45, "standard": 60}
+
+# Planchers : en dessous, ce n'est plus une séance, c'est un échauffement.
+MIN_COMPOUNDS = 2
+MIN_WARMUP = 2
+MIN_SETS_UNDER_PRESSURE = 3
+
+# Estimation grossière : trois secondes par répétition, le repos tel qu'il est
+# prescrit. Elle sert à décider, pas à chronométrer. Miroir de `estimateMinutes`
+# dans mobile/lib/prescription.ts — c'est la même valeur qui s'affiche en tête
+# de séance et qui sert ici à la faire tenir dans le créneau.
+SECONDS_PER_REP = 3
+
+
+def estimate_minutes(blocks: list[ExerciseBlock]) -> float:
+    seconds = 0
+    for b in blocks:
+        work = b.duration_sec if b.duration_sec is not None else (b.reps or 10) * SECONDS_PER_REP
+        seconds += b.sets * (work + (b.rest_sec if b.rest_sec is not None else 30))
+    return seconds / 60
+
+
+def session_budget_minutes(ctx: BuildContext) -> int:
+    """
+    Budget réel d'une séance : le créneau du jour, plafonné par le temps
+    déclaré à l'onboarding. Répondre « j'ai le temps » un matin ne peut pas
+    dépasser ce qu'on a dit pouvoir y consacrer.
+    """
+    return min(BUDGET_MINUTES.get(ctx.time_budget, 60), ctx.session_minutes_max)
+
+
+def _heal_supersets(blocks: list[ExerciseBlock]) -> None:
+    """Un superset dont le partenaire a disparu n'est plus un superset."""
+    present = {b.exercise_id for b in blocks}
+    for b in blocks:
+        if b.superset_with and b.superset_with not in present:
+            b.superset_with = None
+            # Il portait un repos nul parce que la paire enchaînait : il le
+            # récupère.
+            if not b.rest_sec:
+                b.rest_sec = 60
+
+
+def fit_session_to_budget(session: dict, budget_minutes: float) -> dict:
+    """
+    Rogne la séance jusqu'à ce qu'elle tienne dans le créneau annoncé.
+
+    L'ordre de sacrifice va du plus accessoire au plus structurant : le finisher
+    d'abord, puis le gainage, puis les isolations, puis l'échauffement, puis le
+    travail de force en trop, puis les séries. Les compounds partent en dernier
+    et jamais en dessous de deux — une séance sans mouvement lourd n'est plus la
+    séance demandée, elle est juste plus courte.
+    """
+    out = {k: list(v) for k, v in session.items()}
+
+    def total() -> float:
+        # Chaque mesure répare d'abord les supersets orphelins : retirer un
+        # mouvement peut casser une paire, et le survivant récupère alors le
+        # repos qu'il n'avait pas — ce qui RALLONGE la séance. Mesurer avant la
+        # réparation laissait passer des séances au-dessus du budget.
+        _heal_supersets(out["main"])
+        return estimate_minutes(out["warmup"] + out["main"] + out["core"] + out["finisher"])
+
+    if total() <= budget_minutes:
+        return out
+
+    # 1. Le finisher : c'est du bonus, il saute en entier.
+    out["finisher"] = []
+    if total() <= budget_minutes:
+        return out
+
+    # 2. Le gainage, un exercice à la fois.
+    while out["core"] and total() > budget_minutes:
+        out["core"].pop()
+    if total() <= budget_minutes:
+        return out
+
+    # 3. Les isolations, en partant de la fin.
+    def is_isolation(b):
+        return bool(b.notes and b.notes.startswith("Isolation"))
+
+    while any(is_isolation(b) for b in out["main"]) and total() > budget_minutes:
+        last = max(i for i, b in enumerate(out["main"]) if is_isolation(b))
+        out["main"].pop(last)
+    if total() <= budget_minutes:
+        return out
+
+    # 4. L'échauffement, sans descendre sous deux mouvements : arriver froid sur
+    #    du lourd coûte plus cher que la séance ne rapporte.
+    while len(out["warmup"]) > MIN_WARMUP and total() > budget_minutes:
+        out["warmup"].pop()
+    if total() <= budget_minutes:
+        return out
+
+    # 5. Le travail de force EN TROP. Deux séries lourdes à trois minutes de
+    #    repos pèsent trente-sept minutes à elles seules ; le premier mouvement
+    #    porte l'intention de la séance, le second n'est qu'un bonus.
+    while sum(1 for b in out["main"] if b.protocol_label) > 1 and total() > budget_minutes:
+        last = max(i for i, b in enumerate(out["main"]) if b.protocol_label)
+        out["main"].pop(last)
+    if total() <= budget_minutes:
+        return out
+
+    # 6. Les séries des compounds, jusqu'à trois.
+    for b in out["main"]:
+        if total() <= budget_minutes:
+            break
+        if b.protocol_label:
+            continue
+        if b.sets > MIN_SETS_UNDER_PRESSURE:
+            b.sets = MIN_SETS_UNDER_PRESSURE
+    if total() <= budget_minutes:
+        return out
+
+    # 7. Les compounds eux-mêmes, en dernier recours, jamais sous deux.
+    while len(out["main"]) > MIN_COMPOUNDS and total() > budget_minutes:
+        out["main"].pop()
+
+    return out

@@ -1375,3 +1375,42 @@ export function fitSessionToBudget(
 export function findExercise(id: string): Exercise | undefined {
   return EXERCISES.find((e) => e.id === id);
 }
+
+// ─────────────────────────────────────────────
+// Réglages exposés
+// ─────────────────────────────────────────────
+
+/**
+ * Les valeurs de réglage du moteur, telles quelles.
+ *
+ * Existe pour le référentiel du panneau admin. Ce ne sont PAS des copies :
+ * l'objet référence les constantes utilisées plus haut, si bien qu'une règle
+ * modifiée dans le moteur change aussi ce que le référentiel affiche. Une page
+ * de documentation écrite à la main mentirait au premier réglage suivant.
+ */
+export const ENGINE_TUNING = {
+  restCompound: COMPOUND_REST_FLOOR,
+  restCompoundShort: COMPOUND_REST_SHORT,
+  restIsolation: ISOLATION_REST,
+  restIsolationShort: ISOLATION_REST_SHORT,
+  restCore: CORE_REST,
+  restUnilateralCompound: UNILATERAL_REST,
+  restUnilateralIsolation: UNILATERAL_REST_ISOLATION,
+  setsCompoundShort: SETS_COMPOUND_SHORT,
+  maxSetsCompound: MAX_SETS_COMPOUND,
+  maxSetsIsolation: MAX_SETS_ISOLATION,
+  highFrequencyThreshold: HIGH_FREQUENCY_THRESHOLD,
+  gentleFrequencyThreshold: GENTLE_FREQUENCY_THRESHOLD,
+  gentleLoadDelta: GENTLE_LOAD_DELTA,
+  strengthProtocols: STRENGTH_PROTOCOLS,
+  strengthEvery: STRENGTH_EVERY,
+  strengthPersonas: [...STRENGTH_PERSONAS],
+  strengthObjectives: [...STRENGTH_OBJECTIVES],
+  textbookOdds: TEXTBOOK_ODDS,
+  textbookOddsYoungOrNovice: TEXTBOOK_ODDS_YOUNG_OR_NOVICE,
+  defaultLoadPct: DEFAULT_LOAD_PCT,
+  budgetMinutes: BUDGET_MINUTES,
+  minCompounds: MIN_COMPOUNDS,
+  minWarmup: MIN_WARMUP,
+  minSetsUnderPressure: MIN_SETS_UNDER_PRESSURE,
+} as const;

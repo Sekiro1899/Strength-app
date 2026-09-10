@@ -44,6 +44,8 @@ import type {
   WorkoutSession,
 } from "./types";
 
+import type { SessionLog, SetLog } from "./metrics";
+
 /** Combien de séances passées comptent pour éviter de resservir un exercice. */
 const ROTATION_WINDOW = 2;
 
@@ -62,6 +64,15 @@ interface DemoState {
   plan: PlannedSession[];
   /** Séances matérialisées (contenu généré au lancement). */
   sessions: WorkoutSession[];
+  /**
+   * Séries réellement réalisées, séance par séance.
+   *
+   * Distinct de `sessions`, qui porte la PRESCRIPTION : ce que le moteur a
+   * demandé et ce que le pratiquant a fait sont deux choses, et seul le second
+   * peut alimenter un tonnage. Survit à la clôture du cycle — l'historique
+   * « depuis le début » traverse les programmes.
+   */
+  logs: SessionLog[];
 }
 
 const EMPTY: DemoState = {
@@ -70,6 +81,7 @@ const EMPTY: DemoState = {
   userProgram: null,
   plan: [],
   sessions: [],
+  logs: [],
 };
 
 let memory: DemoState = { ...EMPTY };
@@ -89,7 +101,13 @@ function read(): DemoState {
     if (!raw) return { ...EMPTY };
     const parsed = JSON.parse(raw) as DemoState;
     // État écrit avant l'ajout de `signedIn` : un compte présent valait session.
-    return { ...parsed, signedIn: parsed.signedIn ?? Boolean(parsed.user) };
+    return {
+      ...parsed,
+      signedIn: parsed.signedIn ?? Boolean(parsed.user),
+      // État écrit avant le journal des séries : pas d'historique, mais le
+      // compte et le programme restent valides.
+      logs: parsed.logs ?? [],
+    };
   } catch {
     return { ...EMPTY };
   }
@@ -135,9 +153,10 @@ export function demoSignUp(email: string): AppUser {
     experience_level: null,
     sessions_per_week: null,
     session_duration_target: null,
+    body_weight_kg: null,
     onboarding_completed: false,
   };
-  // Un nouveau compte repart de zéro : programme, plan et séances compris.
+  // Un nouveau compte repart de zéro : programme, plan, séances et journal.
   write({ ...EMPTY, user, signedIn: true });
   return user;
 }
@@ -222,7 +241,9 @@ export function demoCompleteOnboarding(
     total_sessions_completed: 0,
   };
 
-  write({ user, signedIn: true, userProgram, plan, sessions: [] });
+  // Le journal survit au changement de programme : c'est l'historique du
+  // pratiquant, pas celui du cycle.
+  write({ user, signedIn: true, userProgram, plan, sessions: [], logs: state.logs });
   return { user, userProgram };
 }
 
@@ -454,4 +475,35 @@ export function demoCompleteSession(sessionId: string, completedAt: string): voi
     : null;
 
   write({ ...state, sessions, userProgram });
+}
+
+// ─────────────────────────────────────────────
+// Journal des séries
+// ─────────────────────────────────────────────
+
+/**
+ * Enregistre les séries d'une séance. Idempotent : rejouer la clôture d'une
+ * même séance remplace l'entrée au lieu d'en empiler une seconde, sinon un
+ * double appui sur « Terminer » doublerait le tonnage de la semaine.
+ */
+export function demoSaveSessionLog(
+  sessionId: string,
+  completedAt: string,
+  sets: SetLog[],
+): void {
+  const state = read();
+  const logs = state.logs.filter((l) => l.session_id !== sessionId);
+  logs.push({ session_id: sessionId, completed_at: completedAt, sets });
+  write({ ...state, logs });
+}
+
+export function demoSessionLogs(): SessionLog[] {
+  return read().logs;
+}
+
+/** Poids de corps déclaré. Null tant que le pratiquant ne l'a pas renseigné. */
+export function demoSetBodyWeight(kg: number | null): void {
+  const state = read();
+  if (!state.user) return;
+  write({ ...state, user: { ...state.user, body_weight_kg: kg } });
 }

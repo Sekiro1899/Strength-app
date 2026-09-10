@@ -221,3 +221,12 @@ export const AGE_LABELS: Record<AgeBand, string> = {
   "45_60": "45-60 ans",
   "60_plus": "60 ans et plus",
 };
+
+/** Correspondances du questionnaire, exposées au référentiel de l'admin. */
+export const PROFILE_TUNING = {
+  sessionMinutes: SESSION_MINUTES,
+  sessionsPerWeek: SESSIONS_PER_WEEK,
+  seniorBands: SENIOR_BANDS,
+  defaultSessionMinutes: DEFAULT_SESSION_MINUTES,
+  defaultSessionsPerWeek: DEFAULT_SESSIONS_PER_WEEK,
+} as const;

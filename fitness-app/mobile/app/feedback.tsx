@@ -276,7 +276,7 @@ export default function FeedbackScreen() {
               <Pressable
                 key={option.id}
                 accessibilityRole="radio"
-                accessibilityState={{ checked: active }}
+                aria-checked={active}
                 accessibilityLabel={option.label}
                 onPress={() => setScoreQ1(value)}
                 className={`flex-1 aspect-square rounded-xl border items-center justify-center ${

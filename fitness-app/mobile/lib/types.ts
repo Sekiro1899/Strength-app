@@ -313,6 +313,14 @@ export interface AppUser {
   experience_level: string | null;
   sessions_per_week: number | null;
   session_duration_target: number | null;
+  /**
+   * Poids de corps en kilogrammes, tel que déclaré par le pratiquant.
+   *
+   * Sans lui, une séance de tractions et de dips pèse zéro kilo : la charge
+   * saisie ne compte que le lest. C'est la seule donnée qui rende le tonnage
+   * et la dépense calorique honnêtes — voir lib/metrics.ts.
+   */
+  body_weight_kg: number | null;
   onboarding_completed: boolean;
 }
 

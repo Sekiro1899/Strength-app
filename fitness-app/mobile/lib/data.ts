@@ -26,6 +26,12 @@ import {
 } from "./fixtures";
 import { FOCUS_CATEGORY_MAP, buildSessionLabel, resolveFocus } from "./protocol";
 import { overdueCount } from "./plan";
+import {
+  DEFAULT_BODY_WEIGHT_KG,
+  computeStats,
+  logsThisWeek,
+} from "./metrics";
+import type { SessionLog, SetLog, TrainingStats } from "./metrics";
 import type { PlannedSession } from "./plan";
 import { profileFromUser } from "./profile";
 import type { Profile } from "./profile";
@@ -606,15 +612,27 @@ export async function fetchSession(
   return (data as WorkoutSession) ?? null;
 }
 
+/**
+ * Clôt une séance ET archive les séries réalisées.
+ *
+ * Les deux ensemble, volontairement : jusqu'ici les charges saisies pendant la
+ * séance vivaient dans l'état React de l'écran de suivi et disparaissaient au
+ * démontage. Aucun tonnage n'était donc calculable, quelle que soit
+ * l'assiduité du pratiquant. `sets` peut être vide (séance sans saisie), mais
+ * il n'est plus jamais perdu.
+ */
 export async function completeSession(
   sessionId: string,
   userProgramId: string,
   completedCountBefore: number,
   now: Date,
+  sets: SetLog[] = [],
+  userId?: string,
 ): Promise<void> {
   const completedAt = now.toISOString();
 
   if (isDemoMode()) {
+    demo.demoSaveSessionLog(sessionId, completedAt, sets);
     demo.demoCompleteSession(sessionId, completedAt);
     return;
   }
@@ -625,11 +643,125 @@ export async function completeSession(
     .eq("id", sessionId);
   if (error) throw new Error(error.message);
 
+  if (sets.length && userId) {
+    // Rejouer une clôture ne doit pas doubler le tonnage de la semaine.
+    await supabase.from("session_logs").delete().eq("session_id", sessionId);
+    const { error: logError } = await supabase.from("session_logs").insert(
+      sets.map((set) => ({
+        session_id: sessionId,
+        user_id: userId,
+        exercise_id: set.exercise_id,
+        block_type: set.block_type,
+        set_number: set.set_number,
+        reps_completed: set.reps,
+        load_kg_completed: set.load_kg,
+        rest_sec_planned: set.rest_sec_planned,
+        completed: set.completed,
+        logged_at: completedAt,
+      })),
+    );
+    // Une séance faite reste une séance faite : perdre le journal ne doit pas
+    // faire échouer la clôture, on remonte l'erreur sans annuler.
+    if (logError) console.warn("session_logs :", logError.message);
+  }
+
   const { error: upError } = await supabase
     .from("user_programs")
     .update({ total_sessions_completed: completedCountBefore + 1 })
     .eq("id", userProgramId);
   if (upError) throw new Error(upError.message);
+}
+
+// ─────────────────────────────────────────────
+// Historique d'entraînement
+// ─────────────────────────────────────────────
+
+/** Ce que l'écran « Mes entraînements » affiche. */
+export interface TrainingHistory {
+  /** Semaine calendaire en cours, lundi → dimanche. */
+  week: TrainingStats;
+  /** Depuis la toute première séance, tous programmes confondus. */
+  allTime: TrainingStats;
+  /** Poids de corps utilisé pour le calcul — null s'il n'est pas renseigné. */
+  bodyWeightKg: number | null;
+  /** Date de la première séance archivée, pour dater le cumul. */
+  since: string | null;
+}
+
+export async function fetchTrainingHistory(
+  userId: string,
+  now: Date,
+): Promise<TrainingHistory> {
+  const user = await getCurrentUser(userId);
+  const declared = user?.body_weight_kg ?? null;
+  const weight = declared ?? DEFAULT_BODY_WEIGHT_KG;
+  const byId = new Map(EXERCISES.map((e) => [e.id, e]));
+
+  const logs = isDemoMode()
+    ? demo.demoSessionLogs()
+    : await fetchSessionLogs(userId);
+
+  const sorted = [...logs].sort((a, b) =>
+    a.completed_at.localeCompare(b.completed_at),
+  );
+
+  return {
+    week: computeStats(logsThisWeek(sorted, now), byId, weight),
+    allTime: computeStats(sorted, byId, weight),
+    bodyWeightKg: declared,
+    since: sorted[0]?.completed_at ?? null,
+  };
+}
+
+/** Lignes `session_logs` regroupées par séance. */
+async function fetchSessionLogs(userId: string): Promise<SessionLog[]> {
+  const { data, error } = await supabase
+    .from("session_logs")
+    .select(
+      "session_id, exercise_id, block_type, set_number, reps_completed, load_kg_completed, rest_sec_planned, completed, logged_at",
+    )
+    .eq("user_id", userId)
+    .order("logged_at");
+  if (error) throw new Error(error.message);
+
+  const bySession = new Map<string, SessionLog>();
+  for (const row of data ?? []) {
+    const existing = bySession.get(row.session_id);
+    const log =
+      existing ??
+      ({ session_id: row.session_id, completed_at: row.logged_at, sets: [] } as SessionLog);
+    log.sets.push({
+      exercise_id: row.exercise_id,
+      block_type: row.block_type,
+      set_number: row.set_number ?? 1,
+      reps: row.reps_completed,
+      load_kg: row.load_kg_completed,
+      rest_sec_planned: row.rest_sec_planned,
+      completed: row.completed ?? false,
+    });
+    if (!existing) bySession.set(row.session_id, log);
+  }
+  return [...bySession.values()];
+}
+
+/**
+ * Déclare le poids de corps. Recalcule tout l'historique au passage : le
+ * tonnage des tractions passées est réévalué au nouveau poids, ce qui est
+ * volontaire — c'est la meilleure estimation disponible, pas un archivage.
+ */
+export async function updateBodyWeight(
+  userId: string,
+  kg: number | null,
+): Promise<void> {
+  if (isDemoMode()) {
+    demo.demoSetBodyWeight(kg);
+    return;
+  }
+  const { error } = await supabase
+    .from("users")
+    .update({ body_weight_kg: kg })
+    .eq("id", userId);
+  if (error) throw new Error(error.message);
 }
 
 // ─────────────────────────────────────────────

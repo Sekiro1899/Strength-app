@@ -177,6 +177,14 @@ CREATE TABLE users (
     stripe_customer_id          TEXT,
     stripe_subscription_id      TEXT,
     onboarding_completed        BOOLEAN         DEFAULT FALSE,
+    -- Poids de corps déclaré. Sans lui, une séance de tractions et de
+    -- dips pèse zéro kilo : la charge saisie ne compte que le lest.
+    body_weight_kg              NUMERIC(5,1)
+                                    CHECK (body_weight_kg IS NULL OR body_weight_kg BETWEEN 30 AND 250),
+    -- Accès au panneau d'administration. Gelé par le déclencheur
+    -- freeze_user_role : personne ne se promeut soi-même.
+    role                        VARCHAR(20)     NOT NULL DEFAULT 'member'
+                                    CHECK (role IN ('member', 'admin')),
     created_at                  TIMESTAMPTZ     DEFAULT NOW(),
     updated_at                  TIMESTAMPTZ     DEFAULT NOW()
 );
@@ -218,10 +226,24 @@ CREATE TABLE exercises (
     -- prime sur la prescription du programme. Null = prescription standard.
     prescribed_sets             SMALLINT,
     prescribed_duration_sec     INTEGER,
+    -- Deux exercices de la même famille sont équivalents (tractions et
+    -- tractions négatives) : on ne les enchaîne pas dans une séance.
+    movement_family             VARCHAR(40),
+    -- Variante allégée : sa place est dans le bloc principal d'un
+    -- débutant ou d'un pratiquant âgé, pas dans celui des autres.
+    is_regression               BOOLEAN         NOT NULL DEFAULT FALSE,
+    -- Un côté à la fois : pas de repos ENTRE les deux côtés, seulement
+    -- après la paire.
+    unilateral                  BOOLEAN         NOT NULL DEFAULT FALSE,
+    -- Saut, réception au sol, barre rattrapée en mouvement. Écarté quand
+    -- les articulations sont à ménager (60 ans et plus, reprise à 45+).
+    high_impact                 BOOLEAN         NOT NULL DEFAULT FALSE,
     is_custom                   BOOLEAN         DEFAULT FALSE,
     created_by_user_id          UUID            REFERENCES users(id),
     created_at                  TIMESTAMPTZ     DEFAULT NOW()
 );
+
+CREATE INDEX exercises_movement_family_idx ON exercises (movement_family);
 
 -- ============================================================
 -- 7. QUESTIONNAIRE QUESTIONS
@@ -488,12 +510,28 @@ CREATE INDEX idx_ppe_rank ON persona_program_eligibility(eligibility_rank);
 -- ============================================================
 -- ROW LEVEL SECURITY (Supabase)
 -- ============================================================
+-- Une policy sur une table SANS row level security est inerte : l'accès
+-- retombe alors sur les GRANT par défaut de Supabase, qui donnent le CRUD
+-- complet à anon et authenticated. Comme la clé anon est publiée dans le
+-- bundle du client, oublier une seule de ces lignes ouvre la table en
+-- écriture à tout visiteur. Elles vont par paire avec les policies plus bas.
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_programs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE sessions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE session_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE feedback_responses ENABLE ROW LEVEL SECURITY;
 ALTER TABLE subscriptions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE personas ENABLE ROW LEVEL SECURITY;
+ALTER TABLE programs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE program_phases ENABLE ROW LEVEL SECURITY;
+ALTER TABLE persona_program_eligibility ENABLE ROW LEVEL SECURITY;
+ALTER TABLE exercises ENABLE ROW LEVEL SECURITY;
+ALTER TABLE questionnaire_questions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE questionnaire_options ENABLE ROW LEVEL SECURITY;
+ALTER TABLE feedback_poll_questions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE feedback_poll_options ENABLE ROW LEVEL SECURITY;
+ALTER TABLE program_variants ENABLE ROW LEVEL SECURITY;
+ALTER TABLE alternative_program_pitches ENABLE ROW LEVEL SECURITY;
 
 -- Users can only see/edit their own data
 CREATE POLICY "users_own_data" ON users FOR ALL USING (auth.uid() = id);
@@ -515,3 +553,52 @@ CREATE POLICY "feedback_questions_public_read" ON feedback_poll_questions FOR SE
 CREATE POLICY "feedback_options_public_read" ON feedback_poll_options FOR SELECT USING (true);
 CREATE POLICY "variants_public_read" ON program_variants FOR SELECT USING (true);
 CREATE POLICY "pitches_public_read" ON alternative_program_pitches FOR SELECT USING (true);
+
+-- ============================================================
+-- ADMINISTRATION
+-- ============================================================
+
+-- Le rôle admin ouvre l'écriture sur la bibliothèque d'exercices. Le
+-- masquage de l'écran côté client n'est pas une sécurité : le bundle
+-- JavaScript est lisible par quiconque ouvre l'application.
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS BOOLEAN AS $$
+    SELECT EXISTS (
+        SELECT 1 FROM public.users
+        WHERE id = auth.uid() AND role = 'admin'
+    );
+$$ LANGUAGE sql STABLE SECURITY DEFINER;
+
+CREATE POLICY "exercises_admin_insert" ON exercises
+    FOR INSERT TO authenticated WITH CHECK (public.is_admin());
+CREATE POLICY "exercises_admin_update" ON exercises
+    FOR UPDATE TO authenticated USING (public.is_admin()) WITH CHECK (public.is_admin());
+-- Pas de policy DELETE : un exercice supprimé casserait les références des
+-- séances déjà journalisées (session_logs.exercise_id).
+
+-- Personne ne se promeut soi-même : users_own_data autorise un pratiquant à
+-- modifier SA ligne, colonne role comprise. Seules les écritures portant un
+-- JWT anon ou authenticated sont gelées — l'éditeur SQL du tableau de bord,
+-- qui n'a aucune claim, doit pouvoir accorder le premier rôle admin.
+CREATE OR REPLACE FUNCTION public.freeze_user_role()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.role IS DISTINCT FROM OLD.role
+       AND coalesce(
+             current_setting('request.jwt.claims', true)::jsonb ->> 'role',
+             ''
+           ) IN ('authenticated', 'anon')
+    THEN
+        NEW.role := OLD.role;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER freeze_user_role_trigger
+    BEFORE UPDATE ON users
+    FOR EACH ROW EXECUTE FUNCTION public.freeze_user_role();
+
+-- « Mes entraînements » relit tout l'historique d'un pratiquant à chaque
+-- ouverture : sans cet index, le coût grandit avec l'assiduité.
+CREATE INDEX session_logs_user_logged_idx ON session_logs (user_id, logged_at);

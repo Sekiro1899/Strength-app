@@ -223,6 +223,11 @@ export default function DashboardScreen() {
               onPress={() => router.push("/profile")}
             />
             <GlassBanner
+              label="Mes entraînements"
+              detail="Poids soulevé, dépense, puissance — semaine et cumul"
+              onPress={() => router.push("/training")}
+            />
+            <GlassBanner
               label="Mes séances"
               detail={`${completedCount} terminée${completedCount > 1 ? "s" : ""} · historique complet`}
               onPress={() => router.push("/sessions")}

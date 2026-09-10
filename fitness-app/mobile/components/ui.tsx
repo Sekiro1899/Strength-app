@@ -353,7 +353,7 @@ export function ChoiceRow({
   return (
     <Pressable
       accessibilityRole={multi ? "checkbox" : "radio"}
-      accessibilityState={{ checked: selected }}
+      aria-checked={selected}
       onPress={onPress}
       className={`flex-row items-center gap-3 rounded-[14px] border px-4 py-3.5 mb-2 ${
         selected ? "bg-accent border-accent" : "bg-surface border-line"

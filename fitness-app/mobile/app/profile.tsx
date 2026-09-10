@@ -13,7 +13,9 @@ import {
   MonoLabel,
   Screen,
 } from "../components/ui";
-import { fetchProfile, signOut } from "../lib/data";
+import { BodyWeightCard } from "../components/BodyWeightCard";
+import { fetchAdminAccess } from "../lib/admin";
+import { fetchProfile, signOut, updateBodyWeight } from "../lib/data";
 import type { ProfileView } from "../lib/data";
 import { AGE_LABELS, LEVEL_LABELS } from "../lib/profile";
 import { PERSONA_COLORS } from "../lib/theme";
@@ -37,6 +39,8 @@ export default function ProfileScreen() {
   const { userId, email, refresh } = useAuth();
 
   const [view, setView] = useState<ProfileView | null>(null);
+  /** L'entrée admin ne s'affiche que pour un compte qui y a droit. */
+  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -55,6 +59,19 @@ export default function ProfileScreen() {
     load();
   }, [load]);
 
+  useEffect(() => {
+    if (!userId) return;
+    let active = true;
+    // Masquer l'entrée est un confort, pas une sécurité : le verrou est la
+    // policy RLS côté Supabase, et l'écran lui-même revérifie l'accès.
+    fetchAdminAccess(userId)
+      .then((access) => active && setIsAdmin(access.allowed))
+      .catch(() => active && setIsAdmin(false));
+    return () => {
+      active = false;
+    };
+  }, [userId]);
+
   if (loading) return <Loading label="Chargement du profil" />;
 
   if (!view) {
@@ -66,7 +83,8 @@ export default function ProfileScreen() {
     );
   }
 
-  const { persona, program, profile, completedCount, totalPlanned, streak } = view;
+  const { user, persona, program, profile, completedCount, totalPlanned, streak } =
+    view;
   const accent = persona ? PERSONA_COLORS[persona.code] : undefined;
 
   return (
@@ -75,10 +93,22 @@ export default function ProfileScreen() {
       footer={
         <View className="gap-2.5">
           <Button
-            label="Mes séances"
+            label="Mes entraînements"
             variant="glass"
+            onPress={() => router.push("/training")}
+          />
+          <Button
+            label="Mes séances"
+            variant="ghost"
             onPress={() => router.push("/sessions")}
           />
+          {isAdmin ? (
+            <Button
+              label="Administration"
+              variant="ghost"
+              onPress={() => router.push("/admin")}
+            />
+          ) : null}
           <Button
             label="Se déconnecter"
             variant="ghost"
@@ -121,6 +151,15 @@ export default function ProfileScreen() {
           ) : null}
         </GlassCard>
       ) : null}
+
+      <BodyWeightCard
+        value={user.body_weight_kg}
+        onSave={async (kg) => {
+          if (!userId) return;
+          await updateBodyWeight(userId, kg);
+          await load();
+        }}
+      />
 
       <GlassCard className="mb-3">
         <MonoLabel className="text-[9px]">Ce qui pilote mes séances</MonoLabel>

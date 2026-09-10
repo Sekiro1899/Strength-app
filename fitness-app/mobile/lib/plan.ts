@@ -245,3 +245,12 @@ export function overdueCount(
     (s) => s.scheduled_date < iso && !completedDayNumbers.has(s.day_number),
   ).length;
 }
+
+/** Réglages de durée de cycle, exposés au référentiel de l'admin. */
+export const PLAN_TUNING = {
+  circuitWeeksByFrequency: CIRCUIT_WEEKS_BY_FREQUENCY,
+  referenceSessionsPerWeek: REFERENCE_SESSIONS_PER_WEEK,
+  minSessionsPerWeek: MIN_SESSIONS_PER_WEEK,
+  minCycleWeeks: MIN_CYCLE_WEEKS,
+  maxCycleWeeks: MAX_CYCLE_WEEKS,
+} as const;

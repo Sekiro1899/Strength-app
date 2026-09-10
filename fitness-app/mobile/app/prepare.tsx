@@ -79,7 +79,7 @@ function RadioRow({
     <Pressable
       onPress={onPress}
       accessibilityRole="radio"
-      accessibilityState={{ checked: active }}
+      aria-checked={active}
       className={`flex-row items-center gap-3 rounded-[14px] border px-4 py-3.5 mb-2 ${
         active ? "bg-accent border-accent" : "bg-surface border-line"
       }`}
@@ -192,7 +192,7 @@ export default function PrepareScreen() {
               key={level.value}
               onPress={() => setEnergy(level.value)}
               accessibilityRole="radio"
-              accessibilityState={{ checked: active }}
+              aria-checked={active}
               accessibilityLabel={level.label}
               className={`flex-1 items-center py-3 rounded-xl border ${
                 active ? "bg-accent border-accent" : "bg-surface border-line"

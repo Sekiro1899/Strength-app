@@ -43,6 +43,7 @@ const SCREEN_BACKDROPS: Record<string, number> = {
   feedback: 2, // 03-airbike
   sessions: 1, // 02-stack   — historique
   profile: 4, // 05-rings
+  training: 1, // 02-stack   — les chiffres, la fonte
 };
 
 /**

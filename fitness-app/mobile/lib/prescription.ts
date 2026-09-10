@@ -41,7 +41,7 @@ export function setsLabel(block: ExerciseBlock): string {
  * Grossière par construction — trois secondes par répétition, le repos tel
  * qu'il est prescrit. Elle sert à décider, pas à chronométrer.
  */
-const SECONDS_PER_REP = 3;
+export const SECONDS_PER_REP = 3;
 
 export function estimateMinutes(blocks: ExerciseBlock[]): number {
   const seconds = blocks.reduce((total, b) => {

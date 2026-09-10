@@ -25,7 +25,6 @@ import { EXERCISES } from "./fixtures";
 import type { Objective, Profile } from "./profile";
 import { estimateMinutes } from "./prescription";
 import { scalingFor } from "./scaling";
-import { HIGH_FREQUENCY_THRESHOLD } from "./plan";
 import {
   LEARNING_LOAD_PCT,
   LEARNING_NOTE,
@@ -362,12 +361,36 @@ export function applyTimeBudget(
  * baisser d'elle-même. Une série de moins par exercice suffit à rendre le
  * rythme tenable.
  */
+const HIGH_FREQUENCY_THRESHOLD = 5;
+
+/**
+ * Seuil abaissé pour les entrées en charge à ménager.
+ *
+ * Un débutant, ou quelqu'un passé 45 ans, qui insiste pour venir quatre fois
+ * par semaine : on ne le lui refuse pas — c'est sa motivation, et elle vaut
+ * mieux que trois séances qu'il ne fera pas. Mais quatre séances par semaine
+ * chez lui pèsent ce que cinq pèsent ailleurs, alors on allège plus tôt, et on
+ * baisse aussi la charge : c'est la répétition qui use, pas la série isolée.
+ */
+const GENTLE_FREQUENCY_THRESHOLD = 4;
+const GENTLE_LOAD_DELTA = -10;
+
 export function applyFrequency(
   policy: VolumePolicy,
   sessionsPerWeek: number,
+  gentleProgression = false,
 ): VolumePolicy {
-  if (sessionsPerWeek < HIGH_FREQUENCY_THRESHOLD) return policy;
-  return { ...policy, setsDelta: policy.setsDelta - 1 };
+  const threshold = gentleProgression
+    ? GENTLE_FREQUENCY_THRESHOLD
+    : HIGH_FREQUENCY_THRESHOLD;
+  if (sessionsPerWeek < threshold) return policy;
+  return {
+    ...policy,
+    setsDelta: policy.setsDelta - 1,
+    loadDelta: gentleProgression
+      ? policy.loadDelta + GENTLE_LOAD_DELTA
+      : policy.loadDelta,
+  };
 }
 
 /**
@@ -378,6 +401,7 @@ function sessionPolicy(ctx: BuildContext): VolumePolicy {
   return applyFrequency(
     applyTimeBudget(volumeForEnergy(ctx.energy), ctx.timeBudget),
     ctx.profile.sessionsPerWeek,
+    ctx.profile.needsGentleProgression,
   );
 }
 

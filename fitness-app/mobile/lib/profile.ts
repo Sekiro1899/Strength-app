@@ -78,6 +78,15 @@ export interface Profile {
    * voir `cycleWeeks` dans lib/plan.
    */
   sessionsPerWeek: number;
+  /**
+   * Entrée en charge à ménager : débutant, ou passé 45 ans.
+   *
+   * Distinct de `avoidsImpact`, qui ne parle que des sauts. Ici c'est la
+   * RÉCUPÉRATION qui est en jeu : ces profils encaissent moins bien la
+   * répétition, pas un mouvement en particulier. Quatre séances par semaine ne
+   * leur sont pas refusées — mais chacune pèse moins.
+   */
+  needsGentleProgression: boolean;
 }
 
 const LEVEL_BY_ANSWER: Record<string, ExerciseLevel> = {
@@ -150,6 +159,7 @@ export const DEFAULT_PROFILE: Profile = {
   sessionMinutesMax: DEFAULT_SESSION_MINUTES,
   avoidsImpact: false,
   sessionsPerWeek: DEFAULT_SESSIONS_PER_WEEK,
+  needsGentleProgression: false,
 };
 
 export function profileFromAnswers(
@@ -189,6 +199,8 @@ export function profileFromAnswers(
       (level === "debutant" && SENIOR_BANDS.includes(ageBand as AgeBand)),
     sessionsPerWeek:
       SESSIONS_PER_WEEK[rawFrequency ?? ""] ?? DEFAULT_SESSIONS_PER_WEEK,
+    needsGentleProgression:
+      level === "debutant" || SENIOR_BANDS.includes(ageBand as AgeBand),
   };
 }
 

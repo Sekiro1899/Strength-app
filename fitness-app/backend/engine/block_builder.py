@@ -48,7 +48,8 @@ class BuildContext:
                  user_program_id: str = "", week_number: int = 1,
                  objective: str | None = None, strength_oriented: bool = False,
                  age_band: str | None = None, session_minutes_max: int = 60,
-                 sessions_per_week: int = 3, avoids_impact: bool = False):
+                 sessions_per_week: int = 3, avoids_impact: bool = False,
+                 needs_gentle_progression: bool = False):
         self.program = program
         self.phase = phase or {}
         self.focus = focus
@@ -81,6 +82,10 @@ class BuildContext:
         self.sessions_per_week = sessions_per_week
         # Articulations à ménager : ni sauts ni mouvements balistiques.
         self.avoids_impact = avoids_impact
+        # Entrée en charge à ménager : débutant, ou passé 45 ans. Distinct de
+        # `avoids_impact`, qui ne parle que des sauts — ici c'est la
+        # RÉCUPÉRATION qui est en jeu.
+        self.needs_gentle_progression = needs_gentle_progression
         # Vient chercher de la charge et de la masse, pas de la sueur (q3 + q9).
         self.strength_oriented = strength_oriented
         # Trois plafonds successifs : l'énergie propose, le créneau du jour
@@ -88,6 +93,7 @@ class BuildContext:
         self.policy = apply_frequency(
             apply_time_budget(volume_for_energy(energy), time_budget),
             sessions_per_week,
+            needs_gentle_progression,
         )
 
 
@@ -120,8 +126,18 @@ def apply_time_budget(policy: dict, budget: str) -> dict:
 # À cinq séances par semaine et plus, chaque séance pèse moins.
 HIGH_FREQUENCY_THRESHOLD = 5
 
+# Seuil abaissé pour les entrées en charge à ménager. Un débutant, ou
+# quelqu'un passé 45 ans, qui insiste pour venir quatre fois par semaine : on
+# ne le lui refuse pas — c'est sa motivation, et elle vaut mieux que trois
+# séances qu'il ne fera pas. Mais quatre séances par semaine chez lui pèsent
+# ce que cinq pèsent ailleurs, alors on allège plus tôt, et on baisse aussi la
+# charge : c'est la répétition qui use, pas la série isolée.
+GENTLE_FREQUENCY_THRESHOLD = 4
+GENTLE_LOAD_DELTA = -10
 
-def apply_frequency(policy: dict, sessions_per_week: int) -> dict:
+
+def apply_frequency(policy: dict, sessions_per_week: int,
+                    gentle_progression: bool = False) -> dict:
     """Allège la séance quand la semaine est déjà chargée.
 
     C'est le volume HEBDOMADAIRE qui se récupère, pas celui d'une séance.
@@ -130,9 +146,16 @@ def apply_frequency(policy: dict, sessions_per_week: int) -> dict:
     finit par baisser d'elle-même. Une série de moins par exercice suffit à
     rendre le rythme tenable.
     """
-    if sessions_per_week < HIGH_FREQUENCY_THRESHOLD:
+    threshold = (GENTLE_FREQUENCY_THRESHOLD if gentle_progression
+                 else HIGH_FREQUENCY_THRESHOLD)
+    if sessions_per_week < threshold:
         return policy
-    return {**policy, "sets_delta": policy["sets_delta"] - 1}
+    return {
+        **policy,
+        "sets_delta": policy["sets_delta"] - 1,
+        "load_delta": (policy["load_delta"] + GENTLE_LOAD_DELTA
+                       if gentle_progression else policy["load_delta"]),
+    }
 
 
 # Planchers de récupération. Ce sont des PLANCHERS : une phase de force pure

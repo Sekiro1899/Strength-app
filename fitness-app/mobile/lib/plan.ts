@@ -77,28 +77,86 @@ export function phaseForWeek(
  *                  jour d'entraînement à partir de cette date.
  */
 /**
- * Durée du cycle, ajustée à ce que le pratiquant a annoncé pouvoir tenir.
+ * Durée du cycle : elle s'ajuste à la fréquence hebdomadaire.
  *
- * Deux raccourcis, et c'est toujours le plus court qui gagne :
+ * Un cycle représente une QUANTITÉ DE TRAVAIL, pas une durée. Qui s'entraîne
+ * cinq fois par semaine parcourt en six semaines ce que quelqu'un à deux
+ * séances met quinze semaines à faire — la même progression, à des rythmes
+ * différents. Figer la durée reviendrait soit à sous-charger les assidus, soit
+ * à demander aux autres de tenir un programme qu'ils ne finiront pas.
  *
- * À cinq séances par semaine et plus, le volume hebdomadaire est déjà élevé.
- * Étaler ça sur dix semaines, c'est demander à quelqu'un de tenir un rythme
- * soutenu pendant deux mois et demi — la plupart décrochent avant. Six
- * semaines se terminent, et un cycle terminé vaut mieux qu'un cycle abandonné.
- *
- * Sur les programmes en circuit — lactate, préparation athlétique — les
- * adaptations sont rapides mais la lassitude aussi : quatre semaines, puis on
- * change. C'est le cas de Corporate Rusher.
+ * Sur les programmes en circuit, les paliers sont donnés tels quels : les
+ * adaptations cardio sont rapides mais la lassitude aussi, et la courbe n'y
+ * suit pas le simple produit semaines x séances.
  */
-export const HIGH_FREQUENCY_THRESHOLD = 5;
-export const HIGH_FREQUENCY_WEEKS = 6;
-export const CIRCUIT_WEEKS = 4;
+const CIRCUIT_WEEKS_BY_FREQUENCY: Record<number, number> = {
+  2: 10,
+  3: 7,
+  4: 4,
+  5: 4,
+};
+
+/**
+ * Les durées inscrites sur les programmes en split supposent trois séances par
+ * semaine. C'est la référence à partir de laquelle le cycle s'étire ou se
+ * resserre.
+ */
+const REFERENCE_SESSIONS_PER_WEEK = 3;
+
+/**
+ * Une séance par semaine ne construit rien : le temps de récupération dépasse
+ * le temps d'adaptation, et le pratiquant recommence à chaque fois. Deux est
+ * le plancher.
+ */
+export const MIN_SESSIONS_PER_WEEK = 2;
+
+const MIN_CYCLE_WEEKS = 4;
+const MAX_CYCLE_WEEKS = 16;
 
 export function cycleWeeks(program: Program, sessionsPerWeek: number): number {
-  const caps = [program.duration_weeks ?? 8];
-  if (program.session_structure === "circuit") caps.push(CIRCUIT_WEEKS);
-  if (sessionsPerWeek >= HIGH_FREQUENCY_THRESHOLD) caps.push(HIGH_FREQUENCY_WEEKS);
-  return Math.min(...caps);
+  const perWeek = Math.max(sessionsPerWeek, MIN_SESSIONS_PER_WEEK);
+
+  if (program.session_structure === "circuit") {
+    const table = CIRCUIT_WEEKS_BY_FREQUENCY;
+    return table[Math.min(perWeek, 5)] ?? table[5];
+  }
+
+  // Ailleurs, le volume total du cycle est conservé : autant de séances,
+  // réparties sur autant de semaines qu'il en faut.
+  const totalSessions = (program.duration_weeks ?? 8) * REFERENCE_SESSIONS_PER_WEEK;
+  const weeks = Math.round(totalSessions / perWeek);
+  return Math.min(Math.max(weeks, MIN_CYCLE_WEEKS), MAX_CYCLE_WEEKS);
+}
+
+export function scalePhases(
+  phases: ProgramPhase[],
+  fullWeeks: number,
+  targetWeeks: number,
+): ProgramPhase[] {
+  const ordered = [...phases].sort((a, b) => a.phase_number - b.phase_number);
+  if (!ordered.length || targetWeeks >= fullWeeks) return ordered;
+  // Moins de semaines que de phases : chacune en garde une, les dernières
+  // sautent. Mieux vaut perdre une phase entière qu'un demi-cycle de chacune.
+  if (targetWeeks <= ordered.length) return ordered.slice(0, targetWeeks).map(one);
+
+  const ideal = ordered.map((p) => (p.duration_weeks * targetWeeks) / fullWeeks);
+  const weeks = ideal.map((v) => Math.max(1, Math.floor(v)));
+  let remaining = targetWeeks - weeks.reduce((a, b) => a + b, 0);
+
+  // Les restes les plus élevés d'abord ; à égalité, la phase la plus précoce.
+  const order = ideal
+    .map((v, i) => ({ i, frac: v - Math.floor(v) }))
+    .sort((a, b) => b.frac - a.frac || a.i - b.i);
+  for (let k = 0; remaining > 0; k = (k + 1) % order.length) {
+    weeks[order[k].i] += 1;
+    remaining -= 1;
+  }
+
+  return ordered.map((phase, i) => ({ ...phase, duration_weeks: weeks[i] }));
+}
+
+function one(phase: ProgramPhase): ProgramPhase {
+  return { ...phase, duration_weeks: 1 };
 }
 
 export function buildSessionPlan(
@@ -113,6 +171,8 @@ export function buildSessionPlan(
     7,
   );
   const weeks = cycleWeeks(program, perWeek);
+  // Le cycle raccourci garde toutes ses phases, comprimées.
+  const scaled = scalePhases(phases, program.duration_weeks ?? weeks, weeks);
   const pattern = WEEKDAYS[perWeek] ?? WEEKDAYS[3];
 
   const anchor = mondayOf(startDate);
@@ -121,7 +181,7 @@ export function buildSessionPlan(
 
   let dayNumber = 0;
   for (let week = 1; week <= weeks; week++) {
-    const phase = phaseForWeek(phases, week);
+    const phase = phaseForWeek(scaled, week);
 
     for (let i = 0; i < pattern.length; i++) {
       const date = new Date(anchor);

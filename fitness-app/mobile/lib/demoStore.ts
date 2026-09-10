@@ -21,7 +21,14 @@ import {
 } from "./engine";
 import type { BuildContext } from "./engine";
 import { PERSONAS, PERSONA_PROGRAM_ELIGIBILITY, PROGRAMS, PROGRAM_PHASES } from "./fixtures";
-import { buildSessionPlan, isCycleComplete, nextPlanned, phaseForWeek } from "./plan";
+import {
+  buildSessionPlan,
+  cycleWeeks,
+  isCycleComplete,
+  nextPlanned,
+  phaseForWeek,
+  scalePhases,
+} from "./plan";
 import type { PlannedSession } from "./plan";
 import { profileFromAnswers, profileFromUser } from "./profile";
 import { resolveProgramId } from "./scoring";
@@ -286,9 +293,18 @@ export function demoGenerateWorkout(request: WorkoutRequest): WorkoutResponse {
 
   const weekNumber = planned?.week_number ?? request.week_number ?? 1;
   const phases = PROGRAM_PHASES.filter((ph) => ph.program_id === program.id);
+  // Le repli suit le MÊME découpage que le plan : sur un cycle raccourci les
+  // phases sont comprimées, pas tronquées, et la semaine 3 n'y tombe donc pas
+  // sur la même phase que dans le programme à pleine longueur.
+  const perWeek = profileFromUser(state.user).sessionsPerWeek;
+  const scaledPhases = scalePhases(
+    phases,
+    program.duration_weeks ?? cycleWeeks(program, perWeek),
+    cycleWeeks(program, perWeek),
+  );
   const phase =
     phases.find((ph) => ph.id === (planned?.phase_id ?? request.phase_id)) ??
-    phaseForWeek(phases, weekNumber);
+    phaseForWeek(scaledPhases, weekNumber);
 
   const protocol: Protocol =
     planned?.protocol ?? request.protocol ?? program.default_protocol ?? "full_body";

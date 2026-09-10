@@ -83,6 +83,7 @@ async def generate_workout(request: WorkoutRequest) -> WorkoutResponse:
         session_minutes_max=profile["session_minutes_max"],
         sessions_per_week=profile["sessions_per_week"],
         avoids_impact=profile["avoids_impact"],
+        needs_gentle_progression=profile["needs_gentle_progression"],
     )
 
     # ── Construire les 4 blocs ──
@@ -212,6 +213,10 @@ def _fetch_profile(user_id: str, persona: dict) -> dict:
         "avoids_impact": (
             age_band == "60_plus"
             or (level == "debutant" and age_band in ("45_60", "60_plus"))
+        ),
+        # Entrée en charge à ménager : la répétition use plus vite ici.
+        "needs_gentle_progression": (
+            level == "debutant" or age_band in ("45_60", "60_plus")
         ),
     }
 

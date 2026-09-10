@@ -14,6 +14,12 @@ import { COLORS, GYM_PHOTO_URL } from "../lib/theme";
  * Les photos sont déjà en noir et blanc dans le dépôt ; ici on les fond vers
  * le fond : elles doivent se deviner, jamais concurrencer le texte.
  *
+ * Le fond COUVRE l'écran. Il a d'abord été posé sur une bande de 460 px ancrée
+ * en haut : sur une fenêtre large, la photo étant au format portrait, `cover`
+ * n'en montrait qu'un bandeau d'un cinquième, et tout ce qui était sous la
+ * bande retombait sur un aplat. En pleine hauteur, le recadrage est centré et
+ * le dégradé suffit à rendre le texte lisible jusqu'en bas.
+ *
  * `variant` fixe quelle photo revient sur quel écran : le dashboard garde
  * toujours la sienne, un fond qui change à chaque rendu donnerait le tournis.
  *
@@ -27,7 +33,7 @@ export function Backdrop({ variant = "default" }: { variant?: string }) {
       pointerEvents="none"
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
-      style={{ position: "absolute", top: 0, left: 0, right: 0, height: 460 }}
+      style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
     >
       {photo || GYM_PHOTO_URL ? (
         <Image
@@ -35,16 +41,29 @@ export function Backdrop({ variant = "default" }: { variant?: string }) {
           resizeMode="cover"
           // Le noir et blanc vient du fichier lui-même, pas d'un filtre CSS :
           // identique sur web et sur natif, et sans coût au rendu.
-          style={{ width: "100%", height: "100%", opacity: 0.32 }}
+          //
+          // L'opacité se lit avec le dégradé ci-dessous, pas seule : à 0,52
+          // sous un voile de 0,30 en haut, la photo ressort à ~0,36 — assez
+          // pour reconnaître la salle, assez peu pour que le texte tienne.
+          style={{ width: "100%", height: "100%", opacity: 0.52 }}
         />
       ) : (
         <GeometricGym />
       )}
 
-      {/* Le fond doit s'effacer sous le contenu, pas rivaliser avec lui. */}
+      {/*
+        Le voile s'épaissit vers le bas : la photo se donne à voir en haut, là
+        où il n'y a qu'un titre, et disparaît sous les cartes et les listes.
+        Il ne devient jamais tout à fait opaque — un fond qui s'arrête net
+        trahit le montage.
+      */}
       <LinearGradient
-        colors={["rgba(10,10,15,0.55)", "rgba(10,10,15,0.88)", COLORS.bg]}
-        locations={[0, 0.55, 1]}
+        colors={[
+          "rgba(10,10,15,0.30)",
+          "rgba(10,10,15,0.64)",
+          "rgba(10,10,15,0.93)",
+        ]}
+        locations={[0, 0.45, 1]}
         style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
       />
     </View>

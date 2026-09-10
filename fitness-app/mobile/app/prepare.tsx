@@ -51,9 +51,16 @@ const LOCATIONS: {
  * temps. Les isolations, elles, s'enchaînent dans tous les cas.
  */
 const TIME_BUDGETS: { value: TimeBudget; label: string; detail: string }[] = [
-  { value: "short", label: "Court", detail: "~30 min — compounds en superset antagoniste" },
-  { value: "standard", label: "Standard", detail: "45 à 60 min — compounds en séries droites" },
-  { value: "long", label: "Large", detail: "75 min et plus — aucune contrainte" },
+  {
+    value: "short",
+    label: "Je suis pressé",
+    detail: "~30 min — une série de moins, compounds en superset antagoniste",
+  },
+  {
+    value: "standard",
+    label: "J'ai le temps",
+    detail: "45 à 60 min — séries droites et repos complets",
+  },
 ];
 
 /** Ligne à cocher — même rendu pour le lieu et pour le créneau. */

@@ -11,6 +11,8 @@ import {
   MonoLabel,
   Screen,
 } from "../components/ui";
+import { setsLabel } from "../lib/prescription";
+import { Backdrop } from "../components/Backdrop";
 import { fetchSession } from "../lib/data";
 import type { ExerciseBlock, WorkoutSession } from "../lib/types";
 
@@ -25,12 +27,6 @@ const BLOCKS: {
   { field: "finisher_block", symbol: "◆", name: "Finisher" },
 ];
 
-/** "4 × 8" ou "3 × 30 s" — la métrique dominante, en mono lime. */
-export function setsLabel(block: ExerciseBlock): string {
-  if (block.reps !== undefined) return `${block.sets} × ${block.reps}`;
-  if (block.duration_sec !== undefined) return `${block.sets} × ${block.duration_sec}s`;
-  return `${block.sets} série${block.sets > 1 ? "s" : ""}`;
-}
 
 /** "75% 1RM · Repos 90s" — le détail secondaire, en muted. */
 export function detailLabel(block: ExerciseBlock): string {
@@ -94,6 +90,7 @@ export default function SessionScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-bg">
+      <Backdrop variant="session" />
       <ScrollView
         contentContainerStyle={{ paddingVertical: 20, paddingBottom: 32 }}
         showsVerticalScrollIndicator={false}

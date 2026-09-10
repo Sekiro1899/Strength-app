@@ -26,6 +26,7 @@ from engine.exercise_selector import (
     select_varied,
     volume_for_energy,
 )
+from engine.scaling import scaling_for
 from models.workout import ExerciseBlock
 
 
@@ -35,7 +36,7 @@ class BuildContext:
     def __init__(self, program, phase, focus, level_max, energy, location,
                  rng: random.Random, recent_ids: set[str] | None = None,
                  allow_regressions: bool = False, day_number: int = 1,
-                 time_budget: str = "standard"):
+                 time_budget: str = "standard", persona_id: str | None = None):
         self.program = program
         self.phase = phase or {}
         self.focus = focus
@@ -52,14 +53,158 @@ class BuildContext:
         # Créneau annoncé : sur du lourd le superset coûte en charge, on ne le
         # paie que pour tenir dans le temps.
         self.time_budget = time_budget
-        self.policy = volume_for_energy(energy)
+        # Le persona décide de l'ampleur du travail de force (voir _strength_plan).
+        self.persona_id = persona_id
+        self.policy = apply_time_budget(volume_for_energy(energy), time_budget)
 
 
-def _resolve_load_pct(phase: dict, program: dict) -> int:
-    for key in ("load_pct_1rm", "load_pct_1rm_start"):
-        if phase.get(key):
-            return phase[key]
-    return program.get("load_pct_1rm_min") or 65
+def apply_time_budget(policy: dict, budget: str) -> dict:
+    """Le créneau annoncé PRIME sur l'énergie déclarée.
+
+    Se sentir en forme ne crée pas de temps. Un pratiquant qui annonçait trente
+    minutes et une énergie de 5 recevait la séance étoffée — un compound de
+    plus, une isolation de plus, une série de plus partout — donc une séance
+    qu'il ne pouvait pas finir. L'énergie module la CHARGE ; c'est le temps
+    disponible qui décide du VOLUME.
+
+    Le plafond n'est jamais un plancher : annoncer un créneau court ne rallonge
+    pas la séance de quelqu'un d'épuisé.
+    """
+    if budget != "short":
+        return policy
+    return {
+        **policy,
+        # `load_delta` n'est pas touché : être frais reste payant sur la barre.
+        "sets_delta": min(policy["sets_delta"], 0),
+        "compounds": min(policy["compounds"], 3),
+        "isolations": min(policy["isolations"], 2),
+        "core": min(policy["core"], 1),
+        "warmup": min(policy["warmup"], 3),
+        "with_finisher": False,
+    }
+
+
+# Planchers de récupération. Ce sont des PLANCHERS : une phase de force pure
+# qui réclame trois minutes garde ses trois minutes. Ils n'empêchent que le cas
+# inverse — une série lourde expédiée avec une minute de repos, où la charge
+# s'effondre d'une série à l'autre et où la prescription ne veut plus rien dire.
+COMPOUND_REST_FLOOR = 120
+COMPOUND_REST_SHORT = 90
+ISOLATION_REST = 75
+ISOLATION_REST_SHORT = 60
+
+# Créneau court : une série de moins sur les compounds, pas un repos de moins.
+SETS_COMPOUND_SHORT = 3
+
+# Plafond de séries, tous reports compris. Quand le pool est étroit, le volume
+# perdu se reporte sur les séries (`fit_to_pool` puis `compensate`) ; les deux
+# reports pouvaient se cumuler et sortir six séries par compound, soit quarante
+# minutes rien que sur les compounds à deux minutes de repos.
+MAX_SETS_COMPOUND = 5
+MAX_SETS_ISOLATION = 4
+
+
+def rep_window(rep_min: int, rep_max: int, index: int) -> tuple[int, int]:
+    """Fenêtre de répétitions prescrite.
+
+    Une plage centrée sur la moyenne de la phase tombait sur des bornes
+    impaires — « 9-11 » — qu'aucun pratiquant n'a en tête. On découpe la plage
+    du programme en fenêtres de deux répétitions calées sur les paliers usuels
+    (8-10, 10-12, 12-14) et on en fait tourner une par séance.
+    """
+    if rep_max <= rep_min:
+        return rep_min, rep_min
+    # Une plage déjà courte EST la fenêtre : 8-10 ne se redécoupe pas.
+    if rep_max - rep_min <= 3:
+        return rep_min, rep_max
+    windows = [(lo, lo + 2) for lo in range(rep_min, rep_max - 1, 2)]
+    if not windows:
+        return rep_min, rep_max
+    return windows[abs(index) % len(windows)]
+
+
+# Travail de force ponctuel, greffé sur une séance d'hypertrophie. Le but n'est
+# PAS de produire une séance Starting Strength : c'est un programme à part
+# entière, avec sa propre progression de charge. Ce qu'on greffe, c'est un
+# exercice — cinq séries de cinq sur le premier mouvement lourd — pendant que
+# le reste de la séance garde son tempo, trois ou quatre séries de dix.
+STRENGTH_PROTOCOLS = [
+    {"label": "5×5 force", "sets": 5, "reps": 5, "load_delta": 12, "rest_sec": 180},
+    {"label": "3×5 Starting Strength", "sets": 3, "reps": 5, "load_delta": 17, "rest_sec": 180},
+    {"label": "5×3 force maximale", "sets": 5, "reps": 3, "load_delta": 22, "rest_sec": 210},
+]
+
+# Personas orientés charge : barème complet, sur les deux premiers compounds.
+STRENGTH_PERSONAS = {"persona_smb", "persona_bf"}
+
+# Une séance sur trois porte du travail de force.
+STRENGTH_EVERY = 3
+
+# Familles qui supportent le lourd : un 5x5 sur des élévations latérales n'a
+# aucun sens.
+HEAVY_FAMILIES = {
+    "squat", "hinge", "horizontal_push", "vertical_push",
+    "horizontal_pull", "vertical_pull", "dip",
+}
+
+
+def _strength_plan(ctx: "BuildContext") -> dict | None:
+    """Protocole de force du jour, ou None si la séance n'en porte pas."""
+    # Un circuit se joue sur la densité, pas sur la charge.
+    if ctx.program.get("session_structure") == "circuit":
+        return None
+    # Cinq séries à trois minutes de repos, c'est vingt-cinq minutes sur un
+    # seul mouvement : hors de question quand le créneau est déjà compté.
+    if ctx.time_budget == "short":
+        return None
+    # Du lourd sur un jour sans jus, c'est comme ça qu'on se blesse.
+    if ctx.energy < 3:
+        return None
+    if ctx.day_number % STRENGTH_EVERY != 0:
+        return None
+
+    dedicated = ctx.persona_id in STRENGTH_PERSONAS
+    cycle = ctx.day_number // STRENGTH_EVERY
+    return {
+        # Ailleurs que chez les deux personas de force, on s'en tient au 5x5 :
+        # c'est le schéma que tout le monde reconnaît.
+        "protocol": (STRENGTH_PROTOCOLS[cycle % len(STRENGTH_PROTOCOLS)]
+                     if dedicated else STRENGTH_PROTOCOLS[0]),
+        "lifts": 2 if dedicated else 1,
+    }
+
+
+def _apply_strength(block, exercise, protocol, bodyweight_only: bool) -> bool:
+    """Réécrit un bloc au barème de force.
+
+    Retourne False si le mouvement ne s'y prête pas — le bloc garde alors sa
+    prescription d'hypertrophie.
+    """
+    if exercise.get("movement_family") not in HEAVY_FAMILIES:
+        return False
+
+    block.sets = protocol["sets"]
+    block.reps = protocol["reps"]
+    # Le barème impose un nombre sec : plus de fourchette à afficher.
+    block.reps_max = None
+    if block.load_pct_1rm is not None:
+        # 92 % reste un maximum de travail : au-delà on est sur un test de 1RM.
+        block.load_pct_1rm = min(block.load_pct_1rm + protocol["load_delta"], 92)
+    block.rest_sec = protocol["rest_sec"]
+    block.protocol_label = protocol["label"]
+    block.notes = (f"{protocol['label']} — lesté dès que la série passe propre"
+                   if bodyweight_only
+                   else f"{protocol['label']} — {protocol['sets']}x{protocol['reps']} lourd")
+    return True
+
+
+# Charge de travail par défaut, en pourcentage du 1RM. Six phases sur treize
+# seulement portent une charge explicite ; les autres retombent ici.
+DEFAULT_LOAD_PCT = 65
+
+
+def _resolve_load_pct(phase: dict) -> int:
+    return phase.get("load_pct_1rm") or DEFAULT_LOAD_PCT
 
 
 def build_warmup_block(ctx: BuildContext) -> list[ExerciseBlock]:
@@ -140,7 +285,7 @@ def _build_circuit_main(ctx: BuildContext) -> list[ExerciseBlock]:
         ((ctx.phase.get("rep_range_min") or 8) + (ctx.phase.get("rep_range_max") or 10)) / 2
     )
     rest = ctx.phase.get("rest_sec_min") or 60
-    load = max(_resolve_load_pct(ctx.phase, ctx.program) + ctx.policy["load_delta"], 40)
+    load = max(_resolve_load_pct(ctx.phase) + ctx.policy["load_delta"], 40)
     count, sets = fit_to_pool(len(pool), count, max(2, 3 + ctx.policy["sets_delta"]))
 
     blocks = []
@@ -162,6 +307,9 @@ def _build_circuit_main(ctx: BuildContext) -> list[ExerciseBlock]:
             load_pct_1rm=None if (is_cardio or imposed) else load,
             rest_sec=rest,
             notes="Circuit — format imposé" if imposed else f"Circuit — tour {i + 1}",
+            # Un circuit au poids de corps enchaîne tractions et dips : la même
+            # question de progression s'y pose qu'en séance de musculation.
+            scaling=scaling_for(ex["id"]),
             log_results=True,
         ))
     return blocks
@@ -175,13 +323,27 @@ def build_main_block(ctx: BuildContext) -> list[ExerciseBlock]:
     categories = FOCUS_CATEGORY_MAP.get(ctx.focus, ["push", "pull", "legs"])
     bodyweight_only = ctx.program.get("load_intensity") == "bodyweight"
 
+    short = ctx.time_budget == "short"
+
+    # Quatre séries de dix tractions à soixante secondes de repos, ce n'est pas
+    # une séance dure, c'est une séance ratée : la charge s'effondre dès la
+    # troisième série. Sur du compound on part de deux minutes. Quand le créneau
+    # manque, on ne rogne pas le repos — on retire une série et on descend à
+    # quatre-vingt-dix secondes, ce qui préserve la qualité de chaque série.
+    rest = max(
+        ctx.phase.get("rest_sec_min") or ctx.program.get("rest_between_sets_sec_min") or 0,
+        COMPOUND_REST_SHORT if short else COMPOUND_REST_FLOOR,
+    )
+    rest_isolation = ISOLATION_REST_SHORT if short else ISOLATION_REST
+
     sets_compounds = max(2, (ctx.phase.get("sets_compounds") or 4) + ctx.policy["sets_delta"])
+    if short:
+        sets_compounds = min(sets_compounds, SETS_COMPOUND_SHORT)
     sets_isolation = max(2, (ctx.phase.get("sets_isolation") or 3) + ctx.policy["sets_delta"])
     rep_min = ctx.phase.get("rep_range_min") or ctx.program.get("rep_range_min") or 8
     rep_max = ctx.phase.get("rep_range_max") or ctx.program.get("rep_range_max") or 12
-    rest = ctx.phase.get("rest_sec_min") or ctx.program.get("rest_between_sets_sec_min") or 90
     load = min(
-        max(_resolve_load_pct(ctx.phase, ctx.program) + ctx.policy["load_delta"], 40),
+        max(_resolve_load_pct(ctx.phase) + ctx.policy["load_delta"], 40),
         100,
     )
 
@@ -214,7 +376,8 @@ def build_main_block(ctx: BuildContext) -> list[ExerciseBlock]:
         n_compounds, ctx.rng, ctx.recent_ids,
         priority_key=emphasis, strict_families=True,
     )
-    sets_compounds = compensate(sets_compounds, n_compounds, len(compounds))
+    sets_compounds = min(compensate(sets_compounds, n_compounds, len(compounds)),
+                         MAX_SETS_COMPOUND)
     ctx.rng.shuffle(compounds)
     used = {e["id"] for e in compounds}
 
@@ -229,18 +392,18 @@ def build_main_block(ctx: BuildContext) -> list[ExerciseBlock]:
         n_isolations, ctx.rng, ctx.recent_ids,
         strict_families=True,
     )
-    sets_isolation = compensate(sets_isolation, n_isolations, len(isolations))
+    sets_isolation = min(compensate(sets_isolation, n_isolations, len(isolations)),
+                         MAX_SETS_ISOLATION)
     ctx.rng.shuffle(isolations)
 
-    # Une prescription centrée sur 11 se lit mal : on rend la plage dont 11 est
-    # le milieu. Une phase qui impose un nombre sec (5x5) n'est pas élargie.
-    spread = 1 if rep_max > rep_min else 0
-    mid = round((rep_min + rep_max) / 2)
-    reps = max(rep_min, mid - spread)
-    reps_max = min(rep_max, mid + spread) if spread else None
-    iso_mid = min(mid + 2, rep_max + 2)
-    iso_reps = iso_mid - spread
-    iso_reps_max = iso_mid + spread if spread else None
+    # La fenêtre tourne d'une séance à l'autre à l'intérieur de la plage de la
+    # phase : 8-10 cette fois, 10-12 la prochaine. L'isolation travaille deux
+    # répétitions plus haut que le compound, décalée d'un cran pour que les deux
+    # ne changent pas en même temps.
+    reps, reps_top = rep_window(rep_min, rep_max, ctx.day_number)
+    iso_reps, iso_reps_top = rep_window(rep_min + 2, rep_max + 3, ctx.day_number + 1)
+    reps_max = reps_top if reps_top > reps else None
+    iso_reps_max = iso_reps_top if iso_reps_top > iso_reps else None
 
     def rng_label(lo, hi):
         return f"{lo}-{hi}" if hi and hi != lo else f"{lo}"
@@ -257,9 +420,26 @@ def build_main_block(ctx: BuildContext) -> list[ExerciseBlock]:
             load_pct_1rm=None if bodyweight_only else load,
             rest_sec=rest,
             notes=f"Compound — {sets_compounds}x{rng_label(reps, reps_max)}",
+            # Sur des tractions ou des dips, la prescription seule ne suffit
+            # pas : il faut dire par où monter et par où descendre.
+            scaling=scaling_for(ex["id"]),
             # Seuls les compounds portent la progression.
             log_results=True,
         ))
+
+    # Le travail de force se greffe sur les compounds de TÊTE, jamais sur toute
+    # la séance : le reste garde son tempo d'hypertrophie. On vise le premier
+    # mouvement ÉLIGIBLE, pas le premier tout court — viser strictement la tête
+    # de séance ne déclenchait le barème qu'une fois sur deux, selon que le
+    # tirage avait ouvert sur un squat ou sur du gainage.
+    plan = _strength_plan(ctx)
+    if plan:
+        applied = 0
+        for block, ex in zip(blocks, compounds):
+            if applied >= plan["lifts"]:
+                break
+            if _apply_strength(block, ex, plan["protocol"], bodyweight_only):
+                applied += 1
 
     isolation_blocks = []
     for ex in isolations:
@@ -270,8 +450,9 @@ def build_main_block(ctx: BuildContext) -> list[ExerciseBlock]:
             reps=iso_reps,
             reps_max=iso_reps_max,
             load_pct_1rm=None if bodyweight_only else max(load - 10, 40),
-            rest_sec=max(rest - 15, 30),
+            rest_sec=rest_isolation,
             notes=f"Isolation — {sets_isolation}x{rng_label(iso_reps, iso_reps_max)}",
+            scaling=scaling_for(ex["id"]),
             # Pas de saisie de charge sur l'isolation : on coche et on enchaîne.
             log_results=False,
         ))
@@ -282,6 +463,10 @@ def build_main_block(ctx: BuildContext) -> list[ExerciseBlock]:
     family_of = {ex["id"]: ex.get("movement_family") for ex in compounds + isolations}
 
     def antagonists(a, b) -> bool:
+        # Une série lourde se prend seule : l'apparier reviendrait à
+        # préfatiguer le mouvement même qu'on cherche à charger.
+        if a.protocol_label or b.protocol_label:
+            return False
         fa, fb = family_of.get(a.exercise_id), family_of.get(b.exercise_id)
         return (fa in PUSH_FAMILIES and fb in PULL_FAMILIES) or \
                (fa in PULL_FAMILIES and fb in PUSH_FAMILIES)

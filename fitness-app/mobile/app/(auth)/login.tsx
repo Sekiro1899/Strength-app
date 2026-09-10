@@ -87,7 +87,7 @@ export default function LoginScreen() {
       className="flex-1 bg-bg"
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <Screen scroll={false}>
+      <Screen scroll={false} backdrop="auth">
         <View className="flex-1 justify-between">
           <View>
             <MonoLabel tone="accent" className="mb-5">

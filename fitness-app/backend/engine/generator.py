@@ -71,6 +71,7 @@ async def generate_workout(request: WorkoutRequest) -> WorkoutResponse:
         allow_regressions=profile["allow_regressions"],
         day_number=request.day_number,
         time_budget=request.time_budget,
+        persona_id=request.persona_id,
     )
 
     # ── Construire les 4 blocs ──

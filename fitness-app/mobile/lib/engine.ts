@@ -23,6 +23,7 @@
 
 import { EXERCISES } from "./fixtures";
 import type { Profile } from "./profile";
+import { scalingFor } from "./scaling";
 import type {
   Exercise,
   ExerciseBlock,
@@ -63,6 +64,35 @@ const CIRCUIT_CATEGORIES = ["complex", "explosive", "conditioning"];
 function armGroup(ex: Exercise): "triceps" | "biceps" {
   return ex.muscles_primary.some((m) => /triceps/i.test(m)) ? "triceps" : "biceps";
 }
+
+/**
+ * Planchers de récupération.
+ *
+ * Ce sont des PLANCHERS : une phase de force pure qui réclame trois minutes
+ * garde ses trois minutes. Ils ne servent qu'à empêcher le cas inverse — une
+ * série lourde expédiée avec une minute de repos, où la charge s'effondre
+ * d'une série à l'autre et où la prescription ne veut plus rien dire.
+ */
+const COMPOUND_REST_FLOOR = 120;
+const COMPOUND_REST_SHORT = 90;
+const ISOLATION_REST = 75;
+const ISOLATION_REST_SHORT = 60;
+
+/** Créneau court : une série de moins sur les compounds, pas un repos de moins. */
+const SETS_COMPOUND_SHORT = 3;
+
+/**
+ * Plafond de séries, tous reports compris.
+ *
+ * Quand le pool est étroit, le volume perdu se reporte sur les séries
+ * (`fitToPool` puis `compensate`). Les deux reports pouvaient se cumuler et
+ * sortir des séances à six séries par compound : à deux minutes de repos, cela
+ * fait quarante minutes rien que sur les compounds. Passé cinq séries le
+ * report ne conserve plus le volume, il rend la séance infaisable — mieux vaut
+ * la perdre un peu.
+ */
+const MAX_SETS_COMPOUND = 5;
+const MAX_SETS_ISOLATION = 4;
 
 const LEVEL_ORDER: Record<string, number> = {
   debutant: 0,
@@ -257,6 +287,40 @@ export function volumeForEnergy(energy: number): VolumePolicy {
   }
 }
 
+/**
+ * Le créneau annoncé PRIME sur l'énergie déclarée.
+ *
+ * Se sentir en forme ne crée pas de temps. Un pratiquant qui annonçait trente
+ * minutes et une énergie de 5 recevait jusqu'ici la séance étoffée — un
+ * compound de plus, une isolation de plus, une série de plus partout — donc
+ * une séance qu'il ne pouvait pas finir. L'énergie continue de moduler la
+ * CHARGE ; c'est le temps disponible qui décide du VOLUME.
+ *
+ * Le plafond n'est jamais un plancher : annoncer un créneau court ne rallonge
+ * pas la séance de quelqu'un d'épuisé.
+ */
+export function applyTimeBudget(
+  policy: VolumePolicy,
+  budget: TimeBudget,
+): VolumePolicy {
+  if (budget !== "short") return policy;
+  return {
+    ...policy,
+    // `loadDelta` n'est pas touché : être frais reste payant sur la barre.
+    setsDelta: Math.min(policy.setsDelta, 0),
+    compounds: Math.min(policy.compounds, 3),
+    isolations: Math.min(policy.isolations, 2),
+    core: Math.min(policy.core, 1),
+    warmup: Math.min(policy.warmup, 3),
+    withFinisher: false,
+  };
+}
+
+/** Volume effectif de la séance : l'énergie, puis le créneau qui la plafonne. */
+function sessionPolicy(ctx: BuildContext): VolumePolicy {
+  return applyTimeBudget(volumeForEnergy(ctx.energy), ctx.timeBudget);
+}
+
 // ─────────────────────────────────────────────
 // Sélection
 // ─────────────────────────────────────────────
@@ -417,6 +481,8 @@ function compensate(sets: number, wanted: number, actual: number): number {
 
 export interface BuildContext {
   program: Program;
+  /** Persona : décide de l'ampleur du travail de force (voir STRENGTH). */
+  personaId: string | null;
   phase: ProgramPhase | null;
   focus: Focus;
   /** Profil du pratiquant — plafond de niveau et tolérance aux régressions. */
@@ -433,8 +499,143 @@ export interface BuildContext {
   rng: () => number;
 }
 
-function resolveLoadPct(phase: ProgramPhase | null, program: Program): number {
-  return phase?.load_pct_1rm ?? program.rep_range_min ?? 65;
+/**
+ * Fenêtre de répétitions prescrite.
+ *
+ * Une plage centrée sur la moyenne de la phase tombait sur des bornes
+ * impaires — « 9-11 » — qu'aucun pratiquant n'a en tête. On découpe la plage
+ * du programme en fenêtres de deux répétitions calées sur les paliers usuels
+ * (8-10, 10-12, 12-14) et on en fait tourner une par séance : la prescription
+ * reste dans le cadre de la phase, et deux séances de suite cessent de
+ * demander exactement le même effort.
+ */
+function repWindow(min: number, max: number, index: number): [number, number] {
+  if (max <= min) return [min, min];
+  // Une plage déjà courte EST la fenêtre : 8-10 ne se redécoupe pas.
+  if (max - min <= 3) return [min, max];
+  const windows: [number, number][] = [];
+  for (let lo = min; lo + 2 <= max; lo += 2) windows.push([lo, lo + 2]);
+  if (windows.length === 0) return [min, max];
+  return windows[Math.abs(index) % windows.length];
+}
+
+/**
+ * Travail de force ponctuel, greffé sur une séance d'hypertrophie.
+ *
+ * Le but n'est PAS de produire une séance Starting Strength : c'est un
+ * programme à part entière, avec sa propre progression de charge, et il n'a
+ * rien à faire au milieu d'un tirage. Ce qu'on greffe, c'est un exercice —
+ * cinq séries de cinq sur le premier mouvement lourd — pendant que le reste
+ * de la séance garde le tempo habituel, trois ou quatre séries de dix.
+ *
+ * Deux personas font exception : Summer Muscle Builder et Brut Force viennent
+ * chercher de la charge, et y ont droit sur les deux premiers compounds, avec
+ * les déclinaisons plus lourdes du barème. Les isolations n'y passent jamais.
+ */
+interface StrengthProtocol {
+  label: string;
+  sets: number;
+  reps: number;
+  /** Points de 1RM ajoutés : moins de répétitions, donc plus lourd. */
+  loadDelta: number;
+  rest_sec: number;
+}
+
+const STRENGTH_PROTOCOLS: StrengthProtocol[] = [
+  { label: "5×5 force", sets: 5, reps: 5, loadDelta: 12, rest_sec: 180 },
+  { label: "3×5 Starting Strength", sets: 3, reps: 5, loadDelta: 17, rest_sec: 180 },
+  { label: "5×3 force maximale", sets: 5, reps: 3, loadDelta: 22, rest_sec: 210 },
+];
+
+/** Personas orientés charge : barème complet, sur les deux premiers compounds. */
+const STRENGTH_PERSONAS = new Set(["persona_smb", "persona_bf"]);
+
+/** Une séance sur trois porte du travail de force. */
+const STRENGTH_EVERY = 3;
+
+/**
+ * Familles qui supportent le lourd. Un 5x5 sur des élévations latérales n'a
+ * aucun sens — le barème ne s'applique qu'aux mouvements qui portent la charge.
+ */
+const HEAVY_FAMILIES = new Set([
+  "squat",
+  "hinge",
+  "horizontal_push",
+  "vertical_push",
+  "horizontal_pull",
+  "vertical_pull",
+  "dip",
+]);
+
+interface StrengthPlan {
+  protocol: StrengthProtocol;
+  /** Nombre de compounds de tête concernés. */
+  lifts: number;
+}
+
+function strengthPlan(ctx: BuildContext): StrengthPlan | null {
+  // Un circuit se joue sur la densité, pas sur la charge.
+  if (ctx.program.session_structure === "circuit") return null;
+  // Cinq séries à trois minutes de repos, c'est vingt-cinq minutes sur un seul
+  // mouvement : hors de question quand le créneau est déjà compté.
+  if (ctx.timeBudget === "short") return null;
+  // Du lourd sur un jour sans jus, c'est comme ça qu'on se blesse.
+  if (ctx.energy < 3) return null;
+  if (ctx.dayNumber % STRENGTH_EVERY !== 0) return null;
+
+  const dedicated = STRENGTH_PERSONAS.has(ctx.personaId ?? "");
+  const cycle = Math.floor(ctx.dayNumber / STRENGTH_EVERY);
+  return {
+    // Ailleurs que chez les deux personas de force, on s'en tient au 5x5 :
+    // c'est le schéma que tout le monde reconnaît.
+    protocol: dedicated
+      ? STRENGTH_PROTOCOLS[cycle % STRENGTH_PROTOCOLS.length]
+      : STRENGTH_PROTOCOLS[0],
+    lifts: dedicated ? 2 : 1,
+  };
+}
+
+/**
+ * Réécrit un bloc au barème de force. Retourne `false` si le mouvement ne s'y
+ * prête pas — le bloc garde alors sa prescription d'hypertrophie.
+ */
+function applyStrength(
+  block: ExerciseBlock,
+  exercise: Exercise,
+  protocol: StrengthProtocol,
+  bodyweightOnly: boolean,
+): boolean {
+  if (!HEAVY_FAMILIES.has(exercise.movement_family ?? "")) return false;
+
+  block.sets = protocol.sets;
+  block.reps = protocol.reps;
+  // Le barème impose un nombre sec : plus de fourchette à afficher.
+  delete block.reps_max;
+  if (block.load_pct_1rm !== undefined) {
+    // 92 % reste un maximum de travail : au-delà on est sur du test de 1RM.
+    block.load_pct_1rm = Math.min(block.load_pct_1rm + protocol.loadDelta, 92);
+  }
+  block.rest_sec = protocol.rest_sec;
+  block.protocol_label = protocol.label;
+  block.notes = bodyweightOnly
+    ? `${protocol.label} — lesté dès que la série passe propre`
+    : `${protocol.label} — ${protocol.sets}x${protocol.reps} lourd`;
+  return true;
+}
+
+/**
+ * Charge de travail, en pourcentage du 1RM.
+ *
+ * Six phases sur treize seulement portent une charge explicite. Les autres
+ * laissaient le champ vide et retombaient ici sur `program.rep_range_min` —
+ * un NOMBRE DE RÉPÉTITIONS lu comme un pourcentage. Huit, remonté au plancher
+ * de 40, et toute une phase de Progressive Overload se prescrivait à 40 % de
+ * 1RM : un échauffement présenté comme du travail.
+ */
+const DEFAULT_LOAD_PCT = 65;
+
+function resolveLoadPct(phase: ProgramPhase | null): number {
+  return phase?.load_pct_1rm ?? DEFAULT_LOAD_PCT;
 }
 
 // ─────────────────────────────────────────────
@@ -442,7 +643,7 @@ function resolveLoadPct(phase: ProgramPhase | null, program: Program): number {
 // ─────────────────────────────────────────────
 
 export function buildWarmup(ctx: BuildContext): ExerciseBlock[] {
-  const policy = volumeForEnergy(ctx.energy);
+  const policy = sessionPolicy(ctx);
 
   let pool = selectExercises(ctx.program.id, {
     warmupPool: true,
@@ -506,8 +707,8 @@ export function buildWarmup(ctx: BuildContext): ExerciseBlock[] {
 }
 
 function buildCircuitMain(ctx: BuildContext): ExerciseBlock[] {
-  const policy = volumeForEnergy(ctx.energy);
-  const count = volumeForEnergy(ctx.energy).compounds + volumeForEnergy(ctx.energy).isolations;
+  const policy = sessionPolicy(ctx);
+  const count = policy.compounds + policy.isolations;
   const pool = selectVaried(
     ctx.program.id,
     { categories: CIRCUIT_CATEGORIES, levelMax: ctx.levelMax, location: ctx.location },
@@ -518,7 +719,7 @@ function buildCircuitMain(ctx: BuildContext): ExerciseBlock[] {
     ((ctx.phase?.rep_range_min ?? 8) + (ctx.phase?.rep_range_max ?? 10)) / 2,
   );
   const rest = ctx.phase?.rest_sec_min ?? 60;
-  const load = Math.max(resolveLoadPct(ctx.phase, ctx.program) + policy.loadDelta, 40);
+  const load = Math.max(resolveLoadPct(ctx.phase) + policy.loadDelta, 40);
   const fit = fitToPool(pool.length, count, Math.max(2, 3 + policy.setsDelta));
 
   return pickBalanced(
@@ -542,6 +743,9 @@ function buildCircuitMain(ctx: BuildContext): ExerciseBlock[] {
           : { reps, load_pct_1rm: load }),
       rest_sec: rest,
       notes: imposed ? "Circuit — format imposé" : `Circuit — tour ${i + 1}`,
+      // Un circuit au poids de corps enchaîne tractions et dips : la même
+      // question de progression s'y pose qu'en séance de musculation.
+      ...(scalingFor(ex.id) ? { scaling: scalingFor(ex.id)! } : {}),
       log_results: true,
     };
   });
@@ -550,17 +754,32 @@ function buildCircuitMain(ctx: BuildContext): ExerciseBlock[] {
 export function buildMain(ctx: BuildContext): ExerciseBlock[] {
   if (ctx.program.session_structure === "circuit") return buildCircuitMain(ctx);
 
-  const policy = volumeForEnergy(ctx.energy);
+  const policy = sessionPolicy(ctx);
   const categories = FOCUS_CATEGORY_MAP[ctx.focus] ?? ["push", "pull", "legs"];
   const bodyweightOnly = ctx.program.id === "program_bodyweight";
 
-  const setsCompounds = Math.max(2, (ctx.phase?.sets_compounds ?? 4) + policy.setsDelta);
+  const short = ctx.timeBudget === "short";
+
+  // Quatre séries de dix tractions à soixante secondes de repos, ce n'est pas
+  // une séance dure, c'est une séance ratée : la charge s'effondre dès la
+  // troisième série. Sur du compound on part de deux minutes. Quand le créneau
+  // manque, on ne rogne pas le repos — on retire une série et on descend à
+  // quatre-vingt-dix secondes, ce qui préserve la qualité de chaque série.
+  const rest = Math.max(
+    ctx.phase?.rest_sec_min ?? 0,
+    short ? COMPOUND_REST_SHORT : COMPOUND_REST_FLOOR,
+  );
+  const restIsolation = short ? ISOLATION_REST_SHORT : ISOLATION_REST;
+
+  const setsCompounds = Math.min(
+    Math.max(2, (ctx.phase?.sets_compounds ?? 4) + policy.setsDelta),
+    short ? SETS_COMPOUND_SHORT : Infinity,
+  );
   const setsIsolation = Math.max(2, (ctx.phase?.sets_isolation ?? 3) + policy.setsDelta);
   const repMin = ctx.phase?.rep_range_min ?? ctx.program.rep_range_min ?? 8;
   const repMax = ctx.phase?.rep_range_max ?? ctx.program.rep_range_max ?? 12;
-  const rest = ctx.phase?.rest_sec_min ?? 90;
   const load = Math.min(
-    Math.max(resolveLoadPct(ctx.phase, ctx.program) + policy.loadDelta, 40),
+    Math.max(resolveLoadPct(ctx.phase) + policy.loadDelta, 40),
     100,
   );
 
@@ -621,18 +840,23 @@ export function buildMain(ctx: BuildContext): ExerciseBlock[] {
 
   // La contrainte de famille peut rendre moins d'exercices que demandé : on
   // reporte le volume manquant sur les séries, comme pour un pool étroit.
-  const compoundSets = compensate(compoundFit.sets, compoundFit.count, compounds.length);
-  const isolationSets = compensate(isolationFit.sets, isolationFit.count, isolations.length);
+  const compoundSets = Math.min(
+    compensate(compoundFit.sets, compoundFit.count, compounds.length),
+    MAX_SETS_COMPOUND,
+  );
+  const isolationSets = Math.min(
+    compensate(isolationFit.sets, isolationFit.count, isolations.length),
+    MAX_SETS_ISOLATION,
+  );
 
-  // Une prescription centrée sur 11 se lit mal : on rend la plage dont 11 est
-  // le milieu. Une phase qui impose un nombre sec (5x5) n'est pas élargie.
-  const spread = repMax > repMin ? 1 : 0;
-  const mid = Math.round((repMin + repMax) / 2);
-  const reps = Math.max(repMin, mid - spread);
-  const repsMax = spread ? Math.min(repMax, mid + spread) : undefined;
-  const isoMid = Math.min(mid + 2, repMax + 2);
-  const isoReps = isoMid - spread;
-  const isoRepsMax = spread ? isoMid + spread : undefined;
+  // La fenêtre tourne d'une séance à l'autre à l'intérieur de la plage de la
+  // phase : 8-10 cette fois, 10-12 la prochaine. L'isolation travaille deux
+  // répétitions plus haut que le compound, décalée d'un cran pour que les deux
+  // ne changent pas en même temps.
+  const [reps, repsTop] = repWindow(repMin, repMax, ctx.dayNumber);
+  const [isoReps, isoRepsTop] = repWindow(repMin + 2, repMax + 3, ctx.dayNumber + 1);
+  const repsMax = repsTop > reps ? repsTop : undefined;
+  const isoRepsMax = isoRepsTop > isoReps ? isoRepsTop : undefined;
 
   const range = (lo: number, hi?: number) => (hi && hi !== lo ? `${lo}-${hi}` : `${lo}`);
 
@@ -645,10 +869,28 @@ export function buildMain(ctx: BuildContext): ExerciseBlock[] {
     ...(bodyweightOnly ? {} : { load_pct_1rm: load }),
     rest_sec: rest,
     notes: `Compound — ${compoundSets}x${range(reps, repsMax)}`,
+    // Sur des tractions ou des dips, la prescription seule ne suffit pas :
+    // il faut dire par où monter et par où descendre.
+    ...(scalingFor(ex.id) ? { scaling: scalingFor(ex.id)! } : {}),
     // Seuls les compounds portent la progression : c'est là que la charge se
     // suit d'une séance à l'autre.
     log_results: true,
   }));
+
+  // Le travail de force se greffe sur les compounds de TÊTE, jamais sur toute
+  // la séance : le reste garde son tempo d'hypertrophie.
+  const plan = strengthPlan(ctx);
+  if (plan) {
+    // On vise le premier mouvement ÉLIGIBLE, pas le premier tout court : viser
+    // strictement la tête de séance ne déclenchait le barème qu'une fois sur
+    // deux, selon que le tirage avait ouvert sur un squat ou sur du gainage.
+    let applied = 0;
+    for (let i = 0; i < compoundBlocks.length && applied < plan.lifts; i++) {
+      if (applyStrength(compoundBlocks[i], compounds[i], plan.protocol, bodyweightOnly)) {
+        applied++;
+      }
+    }
+  }
 
   const isolationBlocks: ExerciseBlock[] = isolations.map((ex) => ({
     exercise_id: ex.id,
@@ -657,8 +899,9 @@ export function buildMain(ctx: BuildContext): ExerciseBlock[] {
     reps: isoReps,
     ...(isoRepsMax ? { reps_max: isoRepsMax } : {}),
     ...(bodyweightOnly ? {} : { load_pct_1rm: Math.max(load - 10, 40) }),
-    rest_sec: Math.max(rest - 15, 30),
+    rest_sec: restIsolation,
     notes: `Isolation — ${isolationSets}x${range(isoReps, isoRepsMax)}`,
+    ...(scalingFor(ex.id) ? { scaling: scalingFor(ex.id)! } : {}),
     // Pas de saisie de charge sur l'isolation : on coche la série et on
     // enchaîne. La progression se mesure sur les compounds.
     log_results: false,
@@ -672,6 +915,9 @@ export function buildMain(ctx: BuildContext): ExerciseBlock[] {
     [...compounds, ...isolations].map((ex) => [ex.id, ex.movement_family]),
   );
   const antagonists = (a: ExerciseBlock, b: ExerciseBlock) => {
+    // Une série lourde se prend seule : l'apparier reviendrait à préfatiguer
+    // le mouvement même qu'on cherche à charger.
+    if (a.protocol_label || b.protocol_label) return false;
     const fa = familyOf.get(a.exercise_id) ?? "";
     const fb = familyOf.get(b.exercise_id) ?? "";
     return (
@@ -694,7 +940,7 @@ export function buildMain(ctx: BuildContext): ExerciseBlock[] {
 
 export function buildCore(ctx: BuildContext): ExerciseBlock[] {
   if (!ctx.program.has_core_block) return [];
-  const policy = volumeForEnergy(ctx.energy);
+  const policy = sessionPolicy(ctx);
 
   const pool = selectVaried(
     ctx.program.id,
@@ -731,7 +977,7 @@ export function buildCore(ctx: BuildContext): ExerciseBlock[] {
 }
 
 export function buildFinisher(ctx: BuildContext): ExerciseBlock[] {
-  const policy = volumeForEnergy(ctx.energy);
+  const policy = sessionPolicy(ctx);
   // Énergie au plus bas : on supprime le finisher plutôt que de le bâcler.
   if (!policy.withFinisher) return [];
 

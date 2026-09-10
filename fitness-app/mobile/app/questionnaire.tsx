@@ -121,6 +121,7 @@ export default function QuestionnaireScreen() {
 
   return (
     <Screen
+      backdrop="questionnaire"
       footer={
         <View className="flex-row gap-2.5">
           {index > 0 ? (

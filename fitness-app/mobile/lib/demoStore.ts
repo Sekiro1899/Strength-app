@@ -295,6 +295,7 @@ export function demoGenerateWorkout(request: WorkoutRequest): WorkoutResponse {
 
   const ctx: BuildContext = {
     program,
+    personaId: state.user?.persona_id ?? request.persona_id ?? null,
     phase,
     focus,
     profile,

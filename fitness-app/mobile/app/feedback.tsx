@@ -225,6 +225,7 @@ export default function FeedbackScreen() {
 
   return (
     <Screen
+      backdrop="feedback"
       footer={
         <View className="flex-row gap-2.5">
           {step > 0 ? (

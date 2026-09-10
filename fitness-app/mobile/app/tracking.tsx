@@ -13,7 +13,10 @@ import {
   ProgressBar,
   Screen,
 } from "../components/ui";
+import { Backdrop } from "../components/Backdrop";
 import { ExerciseVideo } from "../components/ExerciseVideo";
+import { ScalingNote } from "../components/ScalingNote";
+import { formatTarget } from "../lib/prescription";
 import { ACCENT_GRADIENT, COLORS, GRADIENT_DIRECTION } from "../lib/theme";
 import {
   completeSession,
@@ -22,6 +25,10 @@ import {
   fetchSession,
 } from "../lib/data";
 import type { BlockType, ExerciseBlock, WorkoutSession } from "../lib/types";
+
+/** Sur l'écran de suivi la prescription porte son unité : « 10-12 reps ». */
+const targetWithUnit = (block: ExerciseBlock) => formatTarget(block, true);
+
 
 const BLOCK_ORDER: { field: keyof WorkoutSession; type: BlockType; name: string }[] = [
   { field: "warmup_block", type: "warmup", name: "Warmup" },
@@ -43,15 +50,6 @@ interface SetEntry {
   load: string;
   reps: string;
   done: boolean;
-}
-
-/** Prescription lisible : une plage plutôt qu'un nombre sec. */
-function formatTarget(block: ExerciseBlock): string {
-  if (block.duration_sec !== undefined) return `${block.duration_sec}s`;
-  if (block.reps === undefined) return "—";
-  return block.reps_max && block.reps_max !== block.reps
-    ? `${block.reps}-${block.reps_max} reps`
-    : `${block.reps} reps`;
 }
 
 function formatClock(seconds: number): string {
@@ -204,6 +202,7 @@ export default function TrackingScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-bg">
+      <Backdrop variant="tracking" />
       <ScrollView
         contentContainerStyle={{ paddingVertical: 16, paddingBottom: 32 }}
         showsVerticalScrollIndicator={false}
@@ -245,13 +244,22 @@ export default function TrackingScreen() {
                 </Display>
               </>
             ) : (
-              <Display size={26} className="text-center">
-                {current.block.name}
-              </Display>
+              <>
+                {/* Une séance d'hypertrophie qui porte un exercice lourd doit
+                    le dire : sinon le 5x5 passe pour une coquille. */}
+                {current.block.protocol_label ? (
+                  <Text className="font-mono text-[10px] uppercase tracking-label-lg text-accent mb-2.5">
+                    ⚡ {current.block.protocol_label}
+                  </Text>
+                ) : null}
+                <Display size={26} className="text-center">
+                  {current.block.name}
+                </Display>
+              </>
             )}
             <Text className="font-mono text-[10px] uppercase tracking-label text-muted mt-2.5">
               {current.blockName}
-              {` · ${current.block.sets}×${formatTarget(current.block)}`}
+              {` · ${current.block.sets}×${targetWithUnit(current.block)}`}
               {current.block.load_pct_1rm !== undefined
                 ? ` · ${current.block.load_pct_1rm}% 1RM`
                 : ""}
@@ -269,6 +277,11 @@ export default function TrackingScreen() {
               videoUrl={exerciseVideoUrl(current.partner.exercise_id)}
             />
           ) : null}
+
+          {/* Comment monter, comment descendre — sur les mouvements où la
+              prescription seule ne suffit pas (tractions, dips). */}
+          {current.block.scaling ? <ScalingNote scaling={current.block.scaling} /> : null}
+          {current.partner?.scaling ? <ScalingNote scaling={current.partner.scaling} /> : null}
 
           {/* Sans saisie de charge : chaque série se coche quand même, et le
               minuteur de repos part comme sur un compound. */}
@@ -291,8 +304,8 @@ export default function TrackingScreen() {
                   <View className="flex-1 pr-2">
                     <Text className="font-body-sb text-[14px] text-ink">
                       {current.partner
-                        ? `${formatTarget(current.block)} + ${formatTarget(current.partner)}`
-                        : formatTarget(current.block)}
+                        ? `${targetWithUnit(current.block)} + ${targetWithUnit(current.partner)}`
+                        : targetWithUnit(current.block)}
                     </Text>
                     <Text className="font-body text-[11px] text-muted mt-1">
                       {current.partner

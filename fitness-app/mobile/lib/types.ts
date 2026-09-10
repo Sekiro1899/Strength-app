@@ -180,7 +180,12 @@ export type TrainingLocation = "gym" | "home" | "outdoor";
  * à tenir la séance dans le créneau disponible, et n'apparaît donc que quand
  * ce créneau est contraint.
  */
-export type TimeBudget = "short" | "standard" | "long";
+/**
+ * Créneau annoncé avant la séance. Deux réponses suffisent : soit on est
+ * pressé, soit non. Un troisième palier « large » ne changeait rien à la
+ * composition — il ne faisait qu'ajouter une question sans conséquence.
+ */
+export type TimeBudget = "short" | "standard";
 
 /** Décide dans quel bloc l'exercice tombe — prime sur la catégorie. */
 export type ExerciseType = "compound" | "isolation" | "core" | "cardio";
@@ -362,6 +367,28 @@ export interface ExerciseBlock {
   notes?: string;
   /** False sur warmup et finisher : pas de saisie de résultats côté client. */
   log_results?: boolean;
+  /**
+   * Nom du protocole de force quand la prescription en suit un (5x5, 3x5).
+   * Purement informatif : la charge et les séries sont déjà dans le bloc.
+   */
+  protocol_label?: string;
+  /** Comment monter ou descendre en difficulté — voir lib/scaling.ts. */
+  scaling?: ExerciseScaling;
+}
+
+/**
+ * Progression d'un exercice au poids de corps : ce qu'on fait quand les
+ * répétitions demandées sont trop faciles, et quand elles sont hors d'atteinte.
+ */
+export interface ExerciseScaling {
+  /** Vers le haut — ceinture lestée, gilet. */
+  harder: string;
+  /** Vers le bas — élastique, variante assistée. */
+  easier: string;
+  /** Démonstration de la variante allégée. */
+  video_url?: string | null;
+  /** Terme de recherche vidéo quand aucun lien n'est encore indexé. */
+  video_query: string;
 }
 
 /** Miroir de models.workout.WorkoutRequest (defaults Pydantic inclus). */

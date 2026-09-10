@@ -2,12 +2,12 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import { useAuth } from "./_layout";
-import { Backdrop } from "../components/Backdrop";
 import {
   Button,
   Display,
   ErrorText,
   GlassCard,
+  GlassIconButton,
   Loading,
   MonoLabel,
   Screen,
@@ -77,82 +77,79 @@ export default function SessionsScreen() {
   if (loading) return <Loading label="Chargement des séances" />;
 
   return (
-    <View className="flex-1 bg-bg">
-      <Backdrop variant="sessions" />
-      <Screen>
-        <View className="flex-row items-center gap-3 mb-6">
-          <Button label="‹" variant="glass" onPress={() => router.back()} />
-        </View>
+    <Screen backdrop="sessions">
+      <View className="flex-row items-center mb-6">
+        <GlassIconButton icon="‹" label="Retour" onPress={() => router.back()} />
+      </View>
 
-        <MonoLabel tone="accent" className="mb-2">
-          Mes séances
-        </MonoLabel>
-        <Display size={26} className="mb-1">
-          {done} terminée{done > 1 ? "s" : ""}
-        </Display>
-        <Text className="font-body text-[12px] text-muted mb-6">
-          {sessions.length} séance{sessions.length > 1 ? "s" : ""} générée
-          {sessions.length > 1 ? "s" : ""} jusqu'ici
-        </Text>
+      <MonoLabel tone="accent" className="mb-2">
+        Mes séances
+      </MonoLabel>
+      <Display size={26} className="mb-1">
+        {done} terminée{done > 1 ? "s" : ""}
+      </Display>
+      <Text className="font-body text-[12px] text-muted mb-6">
+        {sessions.length} séance{sessions.length > 1 ? "s" : ""} générée
+        {sessions.length > 1 ? "s" : ""} jusqu'ici
+      </Text>
 
-        <ErrorText message={error} />
+      <ErrorText message={error} />
 
-        {sessions.length === 0 ? (
-          <GlassCard>
-            <Text className="font-body-sb text-[14px] text-ink">
-              Aucune séance pour l'instant
-            </Text>
-            <Text className="font-body text-[12px] text-muted mt-1">
-              Lance ta première séance depuis le tableau de bord — elle
-              apparaîtra ici avec son contenu.
-            </Text>
-          </GlassCard>
-        ) : null}
+      {sessions.length === 0 ? (
+        <GlassCard>
+          <Text className="font-body-sb text-[14px] text-ink">
+            Aucune séance pour l'instant
+          </Text>
+          <Text className="font-body text-[12px] text-muted mt-1">
+            Lance ta première séance depuis le tableau de bord — elle
+            apparaîtra ici avec son contenu.
+          </Text>
+        </GlassCard>
+      ) : null}
 
-        {sessions.map((session) => {
-          const openable = session.status !== "planned";
-          return (
-            <Pressable
-              key={session.id}
-              accessibilityRole={openable ? "button" : undefined}
-              disabled={!openable}
-              onPress={() =>
-                router.push({
-                  pathname: "/tracking",
-                  params: { sessionId: session.id },
-                })
-              }
-              className="mb-2 active:opacity-70"
-            >
-              <GlassCard>
-                <View className="flex-row items-center">
-                  <View className="flex-1">
-                    <Text className="font-body-sb text-[14px] text-ink">
-                      {session.session_label ?? "Séance"}
-                    </Text>
-                    <Text className="font-body text-[11px] text-muted mt-0.5">
-                      Jour {session.day_number} · semaine {session.week_number} ·{" "}
-                      {countExercises(session)} exercices
-                    </Text>
-                  </View>
-                  <View className="items-end">
-                    <Text
-                      className={`font-mono text-[10px] uppercase tracking-label ${
-                        STATUS_TONE[session.status]
-                      }`}
-                    >
-                      {STATUS_LABEL[session.status]}
-                    </Text>
-                    <Text className="font-body text-[11px] text-muted mt-0.5">
-                      {formatDay(session.scheduled_date)}
-                    </Text>
-                  </View>
+      {sessions.map((session) => {
+        const openable = session.status !== "planned";
+        return (
+          <Pressable
+            key={session.id}
+            accessibilityRole={openable ? "button" : undefined}
+            disabled={!openable}
+            onPress={() =>
+              router.push({
+                pathname: "/tracking",
+                params: { sessionId: session.id },
+              })
+            }
+            className="mb-2 active:opacity-70"
+          >
+            <GlassCard>
+              <View className="flex-row items-center">
+                <View className="flex-1">
+                  <Text className="font-body-sb text-[14px] text-ink">
+                    {session.session_label ?? "Séance"}
+                  </Text>
+                  <Text className="font-body text-[11px] text-muted mt-0.5">
+                    Jour {session.day_number} · semaine {session.week_number} ·{" "}
+                    {countExercises(session)} exercices
+                  </Text>
                 </View>
-              </GlassCard>
-            </Pressable>
-          );
-        })}
-      </Screen>
-    </View>
+                <View className="items-end">
+                  <Text
+                    className={`font-mono text-[10px] uppercase tracking-label ${
+                      STATUS_TONE[session.status]
+                    }`}
+                  >
+                    {STATUS_LABEL[session.status]}
+                  </Text>
+                  <Text className="font-body text-[11px] text-muted mt-0.5">
+                    {formatDay(session.scheduled_date)}
+                  </Text>
+                </View>
+              </View>
+            </GlassCard>
+          </Pressable>
+        );
+      })}
+    </Screen>
   );
 }

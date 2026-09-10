@@ -22,7 +22,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
-import { glassStyle } from "./Backdrop";
+import { Backdrop, glassStyle } from "./Backdrop";
 import { COLORS, GRADIENT_DIRECTION } from "../lib/theme";
 
 // ─────────────────────────────────────────────
@@ -38,11 +38,14 @@ export function Screen({
   scroll = true,
   center = false,
   footer,
+  backdrop,
 }: {
   children: ReactNode;
   scroll?: boolean;
   center?: boolean;
   footer?: ReactNode;
+  /** Nom de variante : pose une photo d'ambiance derrière le contenu. */
+  backdrop?: string;
 }) {
   const body = (
     <View
@@ -54,6 +57,7 @@ export function Screen({
 
   return (
     <SafeAreaView className="flex-1 bg-bg">
+      {backdrop ? <Backdrop variant={backdrop} /> : null}
       {scroll ? (
         <ScrollView
           className="flex-1"
@@ -85,6 +89,32 @@ export function Card({
     <View className={`bg-surface border border-line rounded-card p-4 ${className}`}>
       {children}
     </View>
+  );
+}
+
+/**
+ * Bouton carré vitré — retour, fermeture. `Button` est pleine largeur : le
+ * réutiliser pour une icône l'étire en pilule.
+ */
+export function GlassIconButton({
+  icon,
+  label,
+  onPress,
+}: {
+  icon: string;
+  label: string;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      onPress={onPress}
+      style={glassStyle}
+      className="w-10 h-10 rounded-xl items-center justify-center active:opacity-70"
+    >
+      <Text className="text-ink text-[20px] leading-[22px]">{icon}</Text>
+    </Pressable>
   );
 }
 

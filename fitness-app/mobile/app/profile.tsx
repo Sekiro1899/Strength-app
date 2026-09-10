@@ -2,13 +2,13 @@ import { useCallback, useEffect, useState } from "react";
 import { Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import { useAuth } from "./_layout";
-import { Backdrop } from "../components/Backdrop";
 import {
   Body,
   Button,
   Display,
   ErrorText,
   GlassCard,
+  GlassIconButton,
   Loading,
   MonoLabel,
   Screen,
@@ -70,112 +70,110 @@ export default function ProfileScreen() {
   const accent = persona ? PERSONA_COLORS[persona.code] : undefined;
 
   return (
-    <View className="flex-1 bg-bg">
-      <Backdrop variant="profile" />
-      <Screen
-        footer={
-          <View className="gap-2.5">
-            <Button
-              label="Mes séances"
-              variant="glass"
-              onPress={() => router.push("/sessions")}
-            />
-            <Button
-              label="Se déconnecter"
-              variant="ghost"
-              onPress={async () => {
-                await signOut();
-                refresh();
-                router.replace("/login");
-              }}
-            />
-          </View>
-        }
-      >
-        <View className="flex-row items-center gap-3 mb-6">
-          <Button label="‹" variant="glass" onPress={() => router.back()} />
+    <Screen
+      backdrop="profile"
+      footer={
+        <View className="gap-2.5">
+          <Button
+            label="Mes séances"
+            variant="glass"
+            onPress={() => router.push("/sessions")}
+          />
+          <Button
+            label="Se déconnecter"
+            variant="ghost"
+            onPress={async () => {
+              await signOut();
+              refresh();
+              router.replace("/login");
+            }}
+          />
         </View>
+      }
+    >
+      <View className="flex-row items-center mb-6">
+        <GlassIconButton icon="‹" label="Retour" onPress={() => router.back()} />
+      </View>
 
-        <MonoLabel tone="accent" className="mb-2">
-          Mon profil
-        </MonoLabel>
-        <Display size={26} className="mb-1">
-          {(email ?? "athlète").split("@")[0]}
-        </Display>
-        <Body className="text-[12px] mb-6">{email}</Body>
+      <MonoLabel tone="accent" className="mb-2">
+        Mon profil
+      </MonoLabel>
+      <Display size={26} className="mb-1">
+        {(email ?? "athlète").split("@")[0]}
+      </Display>
+      <Body className="text-[12px] mb-6">{email}</Body>
 
-        <ErrorText message={error} />
+      <ErrorText message={error} />
 
-        {persona ? (
-          <GlassCard className="mb-3">
-            <MonoLabel className="text-[9px]">Persona</MonoLabel>
-            <Text
-              className="font-display text-[22px] mt-1"
-              style={accent ? { color: accent } : undefined}
-            >
-              {persona.name}
-            </Text>
-            {persona.tagline ? (
-              <Text className="font-body text-[12px] text-muted mt-1">
-                {persona.tagline}
-              </Text>
-            ) : null}
-          </GlassCard>
-        ) : null}
-
+      {persona ? (
         <GlassCard className="mb-3">
-          <MonoLabel className="text-[9px]">Ce qui pilote mes séances</MonoLabel>
-          <View className="mt-2">
-            <Row label="Programme" value={program?.name ?? "—"} />
-            <Row label="Niveau" value={LEVEL_LABELS[profile.level]} />
-            <Row
-              label="Âge"
-              value={profile.ageBand ? AGE_LABELS[profile.ageBand] : "—"}
-            />
-            <Row
-              label="Variantes allégées"
-              value={
-                profile.allowRegressions
-                  ? "Autorisées dans le bloc principal"
-                  : "Écartées — charge libre privilégiée"
-              }
-            />
-          </View>
-          <Text className="font-body text-[11px] text-muted mt-3">
-            {profile.allowRegressions
-              ? "Air squat, pompes sur genoux et bench dips restent proposés : ils servent à installer le mouvement."
-              : "Air squat, pompes sur genoux et bench dips sont réservés à l'échauffement — en séance, le moteur préfère goblet squat et barre."}
+          <MonoLabel className="text-[9px]">Persona</MonoLabel>
+          <Text
+            className="font-display text-[22px] mt-1"
+            style={accent ? { color: accent } : undefined}
+          >
+            {persona.name}
           </Text>
+          {persona.tagline ? (
+            <Text className="font-body text-[12px] text-muted mt-1">
+              {persona.tagline}
+            </Text>
+          ) : null}
         </GlassCard>
+      ) : null}
 
-        <GlassCard>
-          <MonoLabel className="text-[9px]">Avancement</MonoLabel>
-          <View className="flex-row mt-2">
-            <View className="flex-1">
-              <Text className="font-display text-accent text-[26px]">
-                {completedCount}
-                <Text className="font-body text-[12px] text-muted"> / {totalPlanned}</Text>
-              </Text>
-              <Text className="font-body text-[11px] text-muted mt-0.5">
-                séances du cycle
-              </Text>
-            </View>
-            <View className="w-px bg-line mx-4" />
-            <View className="flex-1">
-              <Text className="font-display text-ink text-[26px]">
-                {streak}
-                <Text className="font-body text-[12px] text-muted">
-                  {" "}
-                  {streak > 1 ? "jours" : "jour"}
-                </Text>
-              </Text>
-              <Text className="font-body text-[11px] text-muted mt-0.5">
-                série en cours
-              </Text>
-            </View>
+      <GlassCard className="mb-3">
+        <MonoLabel className="text-[9px]">Ce qui pilote mes séances</MonoLabel>
+        <View className="mt-2">
+          <Row label="Programme" value={program?.name ?? "—"} />
+          <Row label="Niveau" value={LEVEL_LABELS[profile.level]} />
+          <Row
+            label="Âge"
+            value={profile.ageBand ? AGE_LABELS[profile.ageBand] : "—"}
+          />
+          <Row
+            label="Variantes allégées"
+            value={
+              profile.allowRegressions
+                ? "Autorisées dans le bloc principal"
+                : "Écartées — charge libre privilégiée"
+            }
+          />
+        </View>
+        <Text className="font-body text-[11px] text-muted mt-3">
+          {profile.allowRegressions
+            ? "Air squat, pompes sur genoux et bench dips restent proposés : ils servent à installer le mouvement."
+            : "Air squat, pompes sur genoux et bench dips sont réservés à l'échauffement — en séance, le moteur préfère goblet squat et barre."}
+        </Text>
+      </GlassCard>
+
+      <GlassCard>
+        <MonoLabel className="text-[9px]">Avancement</MonoLabel>
+        <View className="flex-row mt-2">
+          <View className="flex-1">
+            <Text className="font-display text-accent text-[26px]">
+              {completedCount}
+              <Text className="font-body text-[12px] text-muted"> / {totalPlanned}</Text>
+            </Text>
+            <Text className="font-body text-[11px] text-muted mt-0.5">
+              séances du cycle
+            </Text>
           </View>
-        </GlassCard>
-      </Screen>
-    </View>
+          <View className="w-px bg-line mx-4" />
+          <View className="flex-1">
+            <Text className="font-display text-ink text-[26px]">
+              {streak}
+              <Text className="font-body text-[12px] text-muted">
+                {" "}
+                {streak > 1 ? "jours" : "jour"}
+              </Text>
+            </Text>
+            <Text className="font-body text-[11px] text-muted mt-0.5">
+              série en cours
+            </Text>
+          </View>
+        </View>
+      </GlassCard>
+    </Screen>
   );
 }

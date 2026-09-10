@@ -11,9 +11,8 @@ import { COLORS, GYM_PHOTO_URL } from "../lib/theme";
  *   2. `GYM_PHOTO_URL` si une URL distante est renseignée,
  *   3. sinon une composition géométrique, pour qu'il y ait toujours un fond.
  *
- * La photo est passée en noir et blanc et fondue vers le fond : elle doit se
- * deviner, jamais concurrencer le texte. La désaturation est appliquée à
- * l'affichage — les originaux en couleur conviennent.
+ * Les photos sont déjà en noir et blanc dans le dépôt ; ici on les fond vers
+ * le fond : elles doivent se deviner, jamais concurrencer le texte.
  *
  * `variant` fixe quelle photo revient sur quel écran : le dashboard garde
  * toujours la sienne, un fond qui change à chaque rendu donnerait le tournis.
@@ -34,18 +33,9 @@ export function Backdrop({ variant = "default" }: { variant?: string }) {
         <Image
           source={photo ?? { uri: GYM_PHOTO_URL as string }}
           resizeMode="cover"
-          style={{
-            width: "100%",
-            height: "100%",
-            opacity: 0.3,
-            // Noir et blanc. `filter` n'existe que sur le web ; côté natif le
-            // dégradé sombre posé par-dessus neutralise déjà l'essentiel de
-            // la couleur, faute de quoi il faudrait une dépendance de plus.
-            ...Platform.select({
-              web: { filter: "grayscale(1) contrast(1.1) brightness(0.85)" },
-              default: {},
-            }),
-          }}
+          // Le noir et blanc vient du fichier lui-même, pas d'un filtre CSS :
+          // identique sur web et sur natif, et sans coût au rendu.
+          style={{ width: "100%", height: "100%", opacity: 0.32 }}
         />
       ) : (
         <GeometricGym />

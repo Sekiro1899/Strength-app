@@ -251,6 +251,7 @@ export default function TrackingScreen() {
             )}
             <Text className="font-mono text-[10px] uppercase tracking-label text-muted mt-2.5">
               {current.blockName}
+              {` · ${current.block.sets}×${formatTarget(current.block)}`}
               {current.block.load_pct_1rm !== undefined
                 ? ` · ${current.block.load_pct_1rm}% 1RM`
                 : ""}

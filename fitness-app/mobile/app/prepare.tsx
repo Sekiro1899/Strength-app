@@ -148,6 +148,7 @@ export default function PrepareScreen() {
 
   return (
     <Screen
+      backdrop="prepare"
       footer={
         <Button
           label="Générer ma séance"

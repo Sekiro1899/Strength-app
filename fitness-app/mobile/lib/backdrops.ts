@@ -1,21 +1,20 @@
 /**
  * Photos d'ambiance affichées en fond d'écran.
  *
- * Elles sont désaturées et fondues à l'affichage (voir components/Backdrop),
- * donc les originaux en couleur conviennent.
+ * Le noir et blanc est cuit dans les fichiers, pas appliqué en CSS : le rendu
+ * est donc identique sur web et sur natif, où `filter` n'existe pas. Le fondu,
+ * lui, reste à l'affichage (voir components/Backdrop).
  *
- * POUR LES ACTIVER : dépose les fichiers dans assets/backdrops/ (voir le
- * README qui s'y trouve) puis décommente les lignes ci-dessous. Tant que la
- * liste est vide, le fond retombe sur une composition géométrique — l'app
- * fonctionne dans les deux cas, aucun `require` ne pointe vers un fichier
- * absent, ce qui casserait le bundle.
+ * Pour en ajouter une : dépose le fichier dans assets/backdrops/ en suivant la
+ * recette du README, puis ajoute son `require` ici. Une liste vide n'est pas
+ * une erreur — le fond retombe alors sur une composition géométrique.
  */
 export const BACKDROPS: number[] = [
-  // require("../assets/backdrops/01-wraps.jpg"),
-  // require("../assets/backdrops/02-stack.jpg"),
-  // require("../assets/backdrops/03-airbike.jpg"),
-  // require("../assets/backdrops/04-spin.jpg"),
-  // require("../assets/backdrops/05-rings.jpg"),
+  require("../assets/backdrops/01-wraps.jpg"),
+  require("../assets/backdrops/02-stack.jpg"),
+  require("../assets/backdrops/03-airbike.jpg"),
+  require("../assets/backdrops/04-spin.jpg"),
+  require("../assets/backdrops/05-rings.jpg"),
 ];
 
 /**

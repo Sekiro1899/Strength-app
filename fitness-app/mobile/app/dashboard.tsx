@@ -4,6 +4,7 @@ import { useFocusEffect, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { useAuth } from "./_layout";
+import { Backdrop } from "../components/Backdrop";
 import {
   Body,
   Button,
@@ -11,6 +12,7 @@ import {
   Chip,
   Display,
   ErrorText,
+  GlassBanner,
   GradientCard,
   Loading,
   MonoLabel,
@@ -140,6 +142,7 @@ export default function DashboardScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-bg">
+      <Backdrop variant="dashboard" />
       <ScrollView
         contentContainerStyle={{ paddingVertical: 20, paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
@@ -210,6 +213,21 @@ export default function DashboardScreen() {
               </Text>
             </View>
           </Card>
+
+          {/* Accès au profil et à l'historique — un compte existe forcément
+              ici, l'écran n'est atteignable qu'une fois connecté. */}
+          <View className="gap-2 mb-4">
+            <GlassBanner
+              label="Mon profil"
+              detail="Persona, niveau, ce qui pilote mes séances"
+              onPress={() => router.push("/profile")}
+            />
+            <GlassBanner
+              label="Mes séances"
+              detail={`${completedCount} terminée${completedCount > 1 ? "s" : ""} · historique complet`}
+              onPress={() => router.push("/sessions")}
+            />
+          </View>
 
           {/* Programme en cours */}
           <View className="mb-4">

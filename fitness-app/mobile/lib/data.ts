@@ -27,6 +27,8 @@ import {
 import { FOCUS_CATEGORY_MAP, buildSessionLabel, resolveFocus } from "./protocol";
 import { overdueCount } from "./plan";
 import type { PlannedSession } from "./plan";
+import { profileFromUser } from "./profile";
+import type { Profile } from "./profile";
 import { computeStreak, resolveProgramId } from "./scoring";
 import { isDemoMode, supabase } from "./supabase";
 import type {
@@ -44,6 +46,7 @@ import type {
   ProgramPhase,
   Protocol,
   QuestionnaireOption,
+  TimeBudget,
   TrainingLocation,
   QuestionnaireQuestion,
   UserProgram,
@@ -470,6 +473,7 @@ export async function startSession(
   dashboard: DashboardData,
   energyLevel: number,
   location: TrainingLocation,
+  timeBudget: TimeBudget,
 ): Promise<WorkoutResponse> {
   const request = {
     user_id: userId,
@@ -482,11 +486,99 @@ export async function startSession(
     protocol: dashboard.nextSession.protocol,
     energy_level: energyLevel,
     location,
+    time_budget: timeBudget,
     available_equipment: [] as string[],
   };
 
   if (isDemoMode()) return demo.demoGenerateWorkout(request);
   return generateWorkout(request);
+}
+
+/** Vue composée de l'écran profil. */
+export interface ProfileView {
+  user: AppUser;
+  persona: Persona | null;
+  program: Program | null;
+  profile: Profile;
+  completedCount: number;
+  totalPlanned: number;
+  streak: number;
+}
+
+export async function fetchProfile(
+  userId: string,
+  now: Date,
+): Promise<ProfileView | null> {
+  if (isDemoMode()) {
+    const user = demo.demoCurrentUser();
+    if (!user) return null;
+    const up = demo.demoProgram();
+    const sessions = demo.demoSessions();
+    const completed = sessions.filter((s) => s.status === "completed");
+    return {
+      user,
+      persona: PERSONAS.find((p) => p.id === user.persona_id) ?? null,
+      program: PROGRAMS.find((p) => p.id === up?.program_id) ?? null,
+      profile: profileFromUser(user),
+      completedCount: completed.length,
+      totalPlanned: demo.demoPlan().length,
+      streak: computeStreak(
+        completed.map((s) => s.completed_at).filter(Boolean) as string[],
+        now,
+      ),
+    };
+  }
+
+  const user = await getCurrentUser(userId);
+  if (!user) return null;
+
+  const [{ data: up }, { data: sessions }] = await Promise.all([
+    supabase
+      .from("user_programs")
+      .select("*")
+      .eq("user_id", userId)
+      .eq("status", "active")
+      .maybeSingle(),
+    supabase
+      .from("sessions")
+      .select("status, completed_at")
+      .eq("user_id", userId),
+  ]);
+
+  const completed = (sessions ?? []).filter((s) => s.status === "completed");
+  const program = up
+    ? ((await supabase.from("programs").select("*").eq("id", up.program_id).maybeSingle())
+        .data as Program | null)
+    : null;
+
+  return {
+    user,
+    persona: PERSONAS.find((p) => p.id === user.persona_id) ?? null,
+    program,
+    profile: profileFromUser(user),
+    completedCount: completed.length,
+    totalPlanned: up?.total_sessions_planned ?? 0,
+    streak: computeStreak(
+      completed.map((s) => s.completed_at).filter(Boolean) as string[],
+      now,
+    ),
+  };
+}
+
+/** Historique des séances, la plus récente d'abord. */
+export async function fetchSessionHistory(
+  userId: string,
+): Promise<WorkoutSession[]> {
+  if (isDemoMode()) {
+    return [...demo.demoSessions()].sort((a, b) => b.day_number - a.day_number);
+  }
+  const { data, error } = await supabase
+    .from("sessions")
+    .select("*")
+    .eq("user_id", userId)
+    .order("day_number", { ascending: false });
+  if (error) throw new Error(error.message);
+  return (data as WorkoutSession[]) ?? [];
 }
 
 /**

@@ -22,6 +22,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
+import { glassStyle } from "./Backdrop";
 import { COLORS, GRADIENT_DIRECTION } from "../lib/theme";
 
 // ─────────────────────────────────────────────
@@ -84,6 +85,47 @@ export function Card({
     <View className={`bg-surface border border-line rounded-card p-4 ${className}`}>
       {children}
     </View>
+  );
+}
+
+/** Carte vitrée — se pose sur le fond d'écran sans l'effacer. */
+export function GlassCard({
+  children,
+  className = "",
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <View style={glassStyle} className={`rounded-card p-4 ${className}`}>
+      {children}
+    </View>
+  );
+}
+
+/** Bandeau vitré cliquable — accès profil et historique depuis le dashboard. */
+export function GlassBanner({
+  label,
+  detail,
+  onPress,
+}: {
+  label: string;
+  detail: string;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      onPress={onPress}
+      style={glassStyle}
+      className="flex-row items-center rounded-card px-4 py-3.5 active:opacity-70"
+    >
+      <View className="flex-1">
+        <Text className="font-body-sb text-[14px] text-ink">{label}</Text>
+        <Text className="font-body text-[11px] text-muted mt-0.5">{detail}</Text>
+      </View>
+      <Text className="text-muted text-[18px] leading-[20px]">›</Text>
+    </Pressable>
   );
 }
 
@@ -190,12 +232,34 @@ export function Button({
 }: {
   label: string;
   onPress: () => void;
-  variant?: "primary" | "ghost" | "persona";
+  variant?: "primary" | "ghost" | "persona" | "glass";
   disabled?: boolean;
   loading?: boolean;
   color?: string;
 }) {
   const inactive = disabled || loading;
+
+  // Verre : translucide, bordure claire, flou du fond sur le web. Pour une
+  // action secondaire qui doit rester lisible par-dessus le fond d'écran.
+  if (variant === "glass") {
+    return (
+      <Pressable
+        accessibilityRole="button"
+        className={`rounded-2xl py-4 items-center active:opacity-70 ${
+          inactive ? "opacity-40" : ""
+        }`}
+        style={glassStyle}
+        onPress={onPress}
+        disabled={inactive}
+      >
+        {loading ? (
+          <ActivityIndicator color={COLORS.ink} />
+        ) : (
+          <Text className="font-body-sb text-[14px] text-ink">{label}</Text>
+        )}
+      </Pressable>
+    );
+  }
 
   if (variant === "ghost") {
     return (

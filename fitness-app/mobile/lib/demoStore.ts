@@ -20,12 +20,14 @@ import type { BuildContext } from "./engine";
 import { PERSONAS, PERSONA_PROGRAM_ELIGIBILITY, PROGRAMS, PROGRAM_PHASES } from "./fixtures";
 import { buildSessionPlan, isCycleComplete, nextPlanned, phaseForWeek } from "./plan";
 import type { PlannedSession } from "./plan";
+import { profileFromUser } from "./profile";
 import { resolveProgramId } from "./scoring";
 import type {
   AppUser,
   PersonaScores,
   Protocol,
   UserProgram,
+  TimeBudget,
   TrainingLocation,
   WorkoutRequest,
   WorkoutResponse,
@@ -246,13 +248,6 @@ export function demoCycleComplete(): boolean {
 // Génération de séance
 // ─────────────────────────────────────────────
 
-function levelForPersona(personaId: string): string {
-  const persona = PERSONAS.find((p) => p.id === personaId);
-  if (persona?.experience_level === "advanced") return "avance";
-  if (persona?.experience_level === "beginner_intermediate") return "intermediaire";
-  return "intermediaire";
-}
-
 /**
  * Exercices vus lors des dernières séances : la sélection les évite en
  * priorité, ce qui fait réellement varier le contenu d'une séance à l'autre.
@@ -290,14 +285,21 @@ export function demoGenerateWorkout(request: WorkoutRequest): WorkoutResponse {
   const focus = planned?.focus ?? request.focus ?? "full_body";
   const label = planned?.session_label ?? focus;
 
-  const levelMax = levelForPersona(request.persona_id);
+  // Le profil du pratiquant prime sur celui du persona : le persona dit une
+  // motivation, le questionnaire dit un niveau réel et un âge.
+  const profile = profileFromUser(state.user);
+  const levelMax = profile.level;
   const energy = request.energy_level ?? 3;
   const location: TrainingLocation = request.location ?? "gym";
+  const timeBudget: TimeBudget = request.time_budget ?? "standard";
 
   const ctx: BuildContext = {
     program,
     phase,
     focus,
+    profile,
+    dayNumber,
+    timeBudget,
     levelMax,
     energy,
     location,
@@ -312,7 +314,8 @@ export function demoGenerateWorkout(request: WorkoutRequest): WorkoutResponse {
       s.day_number === dayNumber &&
       s.status !== "completed" &&
       s.energy_level === (request.energy_level ?? 3) &&
-      s.location === (request.location ?? "gym"),
+      s.location === (request.location ?? "gym") &&
+      s.time_budget === timeBudget,
   );
   if (existing) {
     return {
@@ -342,6 +345,7 @@ export function demoGenerateWorkout(request: WorkoutRequest): WorkoutResponse {
     status: "in_progress",
     energy_level: energy,
     location,
+    time_budget: timeBudget,
     warmup_block: buildWarmup(ctx),
     main_block: buildMain(ctx),
     core_block: buildCore(ctx),

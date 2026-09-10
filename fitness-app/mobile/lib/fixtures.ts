@@ -1479,6 +1479,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Barre droite ou EZ, prise supination. Flexion pure, sans balancement. Poignets neutres. Coudes fixes contre le torse.",
     "exercise_type": "isolation",
     "movement_pattern": null,
+    "movement_family": "elbow_flexion",
+    "is_regression": false,
     "target_programs": [
       "program_muscle_building"
     ],
@@ -1516,6 +1518,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Haltères en alternance, supination en cours de mouvement. Active le chef long du biceps sur la torsion.",
     "exercise_type": "isolation",
     "movement_pattern": null,
+    "movement_family": "elbow_flexion",
+    "is_regression": false,
     "target_programs": [
       "program_muscle_building"
     ],
@@ -1555,6 +1559,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Chaque set alterne entre prise serrée et large sur la barre EZ. Prise serrée : chef long. Prise large : chef court.",
     "exercise_type": "isolation",
     "movement_pattern": null,
+    "movement_family": "elbow_flexion",
+    "is_regression": false,
     "target_programs": [
       "program_muscle_building"
     ],
@@ -1593,6 +1599,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Prise neutre (paumes face à face). Cible le brachialis et avant-bras. Peut se faire alterné ou simultané.",
     "exercise_type": "isolation",
     "movement_pattern": null,
+    "movement_family": "elbow_flexion",
+    "is_regression": false,
     "target_programs": [
       "program_muscle_building"
     ],
@@ -1631,6 +1639,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Montée en supination puis rotation du poignet en pronation avant la descente. Double stimulation : concentrique biceps, excentrique avant-bras.",
     "exercise_type": "isolation",
     "movement_pattern": null,
+    "movement_family": "elbow_flexion",
+    "is_regression": false,
     "target_programs": [
       "program_muscle_building"
     ],
@@ -1668,6 +1678,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Câble haut, barre droite ou corde. Coudes fixes, extension complète. Prise pronation standard. Fort volume possible.",
     "exercise_type": "isolation",
     "movement_pattern": null,
+    "movement_family": "elbow_extension",
+    "is_regression": false,
     "target_programs": [
       "program_lactate",
       "program_muscle_building"
@@ -1705,6 +1717,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Câble derrière la tête, prise supination ou corde. Étirement complet du chef long en position haute. Coudes proches des oreilles.",
     "exercise_type": "isolation",
     "movement_pattern": null,
+    "movement_family": "elbow_extension",
+    "is_regression": false,
     "target_programs": [
       "program_muscle_building"
     ],
@@ -1742,6 +1756,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Même que pushdown mais prise inversée ou barre angled. Variation pour changer l'angle de force.",
     "exercise_type": "isolation",
     "movement_pattern": null,
+    "movement_family": "elbow_extension",
+    "is_regression": false,
     "target_programs": [
       "program_muscle_building"
     ],
@@ -1781,6 +1797,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Allongé sur banc, barre EZ. Descente vers le front ou au-dessus du crâne, coudes fixes. Extension complète. Charge modérée, contrôle strict.",
     "exercise_type": "isolation",
     "movement_pattern": null,
+    "movement_family": "elbow_extension",
+    "is_regression": false,
     "target_programs": [
       "program_muscle_building",
       "program_strength"
@@ -1822,6 +1840,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Mains sur un banc derrière soi, pieds au sol ou surélevés. Descente en fléchissant les coudes. Attention contrainte épaule en rotation interne.",
     "exercise_type": "isolation",
     "movement_pattern": null,
+    "movement_family": "elbow_extension",
+    "is_regression": true,
     "target_programs": [
       "program_bodyweight",
       "program_lactate",
@@ -1866,6 +1886,8 @@ export const EXERCISES: Exercise[] = [
     "description": "DB en position de rack. Squat profond, remontée explosive servant de relance pour le press overhead. Mouvement continu. Charge modérée.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_lactate",
       "program_athletic",
@@ -1909,6 +1931,8 @@ export const EXERCISES: Exercise[] = [
     "description": "RDL jusqu'en bas, puis à la remontée enchaîner un curl alterné par bras. Double stimulus postérieur + fléchisseurs. Charge limitée par le curl.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_lactate",
       "program_muscle_building",
@@ -1955,6 +1979,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Triple mouvement : clean depuis position suspendue → squat avant → push press. Chaîne cinétique complète. Référence CrossFit / athlètes.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_lactate",
       "program_athletic",
@@ -1998,6 +2024,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Push-up → row bras droit → row bras gauche. Anti-rotation core maximal. Haltères hexagonaux pour stabilité au sol.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_lactate",
       "program_athletic",
@@ -2043,6 +2071,8 @@ export const EXERCISES: Exercise[] = [
     "description": "KB tenu à bout de bras tout au long. Passage de allongé → assis → genou → debout → retour. Complexité motrice maximale.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_lactate",
       "program_athletic",
@@ -2087,6 +2117,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Fente arrière, puis à la remontée enchaîner un curl alterné. Coordination haut/bas du corps. Charge limitée par le curl.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_lactate",
       "program_muscle_building",
@@ -2133,6 +2165,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Swing bilatéral → attraper la KB en position goblet → squat profond contrôlé. Transition ballistique → contrôlé. Enseigne l'absorption de force.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_lactate",
       "program_athletic",
@@ -2179,6 +2213,8 @@ export const EXERCISES: Exercise[] = [
     "description": "10 jump squats → 10 fentes sautées → 15 KB swings. Repos 60-90s. ×3-4 rounds. Charge légère. Objectif VO2max + puissance.",
     "exercise_type": "cardio",
     "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_lactate",
       "program_athletic"
@@ -2223,6 +2259,8 @@ export const EXERCISES: Exercise[] = [
     "description": "RDL → Hang clean → Front squat → Push press → Back squat. Sans poser la barre. ×5 cycles = 1 round. AMRAP ou EMOM possible.",
     "exercise_type": "cardio",
     "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_lactate",
       "program_athletic",
@@ -2269,6 +2307,8 @@ export const EXERCISES: Exercise[] = [
     "description": "10 thrusters → 8 renegade rows → 20 m farmer carry. Circuit métabolique complet.",
     "exercise_type": "cardio",
     "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_lactate",
       "program_athletic",
@@ -2312,6 +2352,8 @@ export const EXERCISES: Exercise[] = [
     "description": "AMRAP 8 min : 5 burpee pull-ups → 8 jump squats → 6 push-ups explosifs. Score = nombre de rounds.",
     "exercise_type": "cardio",
     "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_lactate",
       "program_athletic"
@@ -2352,6 +2394,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Benchmark CrossFit. 20 minutes, autant de tours que possible : 5 tractions, 10 pompes, 15 air squats. Rythme régulier plutôt que départ rapide. Scaler avec des tractions australiennes et des pompes sur genoux.",
     "exercise_type": "cardio",
     "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_lactate",
       "program_athletic",
@@ -2392,6 +2436,8 @@ export const EXERCISES: Exercise[] = [
     "description": "3 tours : 15 jump squats, 12 pompes, 20 fentes alternées. 60 s de repos entre les tours, aucun repos à l'intérieur d'un tour. Aucun matériel.",
     "exercise_type": "cardio",
     "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_lactate",
       "program_athletic",
@@ -2433,6 +2479,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Benchmark CrossFit. Au début de chaque minute, pendant 30 minutes : 5 tractions, 10 pompes, 15 air squats. Le repos est ce qu'il reste de la minute. On s'arrête dès qu'une minute n'est plus tenue.",
     "exercise_type": "cardio",
     "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_lactate",
       "program_athletic",
@@ -2472,6 +2520,8 @@ export const EXERCISES: Exercise[] = [
     "description": "4 tours : 10 pompes spiderman (genou vers le coude à la descente), 12 burpees, 10 tractions australiennes sous une barre basse. 90 s de repos entre les tours.",
     "exercise_type": "cardio",
     "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_lactate",
       "program_athletic",
@@ -2511,6 +2561,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Bras appuyés sur les supports. Jambes tendues ou fléchies montées jusqu'à l'horizontale ou plus. Contrôle du balancement. Focus bas du ventre.",
     "exercise_type": "core",
     "movement_pattern": "hip_flexion",
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_strength"
     ],
@@ -2550,6 +2602,8 @@ export const EXERCISES: Exercise[] = [
     "description": "En suspension à la barre. Jambes tendues montées à 90° ou plus. Forte composante stabilisation épaule. Version avancée : L-sit hang.",
     "exercise_type": "core",
     "movement_pattern": "hip_flexion",
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_bodyweight",
       "program_strength",
@@ -2592,6 +2646,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Sur genoux ou debout (avancé). Roulement vers l'avant, extension maximale sans toucher le sol. Retour contrôlé. Fort activation core en allongement.",
     "exercise_type": "core",
     "movement_pattern": "anti_extension",
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_lactate",
       "program_strength"
@@ -2632,6 +2688,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Barre tenue à bout de bras. Rotation du torse d'un côté à l'autre. Charge progressive possible. Utile pour sports de rotation (surf, raquette).",
     "exercise_type": "core",
     "movement_pattern": "rotation",
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_strength"
     ],
@@ -2670,6 +2728,8 @@ export const EXERCISES: Exercise[] = [
     "description": "À genoux face au câble, corde derrière la nuque. Flexion du torse vers le bas, coudes vers les genoux. Résistance constante. Pas de balancement.",
     "exercise_type": "core",
     "movement_pattern": "flexion",
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_muscle_building"
     ],
@@ -2711,6 +2771,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Assis sur un banc, barre légère sur les épaules. Flexion de hanche vers l'avant, dos plat. Renforcement lombaire et mobilité.",
     "exercise_type": "core",
     "movement_pattern": "extension",
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_lactate",
       "program_strength"
@@ -2754,6 +2816,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Assis ou en suspension, KB fixé sur le pied ou cheville. Élévation du genou contre résistance. Référence KOT / Ben Patrick.",
     "exercise_type": "core",
     "movement_pattern": "hip_flexion",
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_lactate",
       "program_strength"
@@ -2788,6 +2852,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Allongé, bras et jambes en étoile. Crunch en ramenant coude opposé au genou opposé. Enchaînement bilatéral en rythme HIIT. Référence Jeff Cavalière / AthleanX.",
     "exercise_type": "core",
     "movement_pattern": "flexion",
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_bodyweight",
       "program_lactate",
@@ -2828,6 +2894,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Assis à 45°, pieds levés. Rotation du torse alternée gauche-droite en rythme rapide. Mode HIIT : 30-45s non-stop.",
     "exercise_type": "core",
     "movement_pattern": "rotation",
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_bodyweight",
       "program_lactate",
@@ -2867,6 +2935,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Position de push-up, genoux amenés alternativement vers la poitrine en rythme rapide. Transition parfaite core → cardio.",
     "exercise_type": "core",
     "movement_pattern": "hip_flexion",
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_bodyweight",
       "program_lactate",
@@ -2906,6 +2976,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Alterné entre position planche et V inversé. Mobilité thoracique + gainage. Rythme lent pour contrôle ou rapide pour cardio.",
     "exercise_type": "core",
     "movement_pattern": "anti_extension",
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_bodyweight",
       "program_lactate",
@@ -2943,6 +3015,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Allongé, pédalage alterné avec rotation coude-genou opposé. Rythme contrôlé cible mieux les obliques que rythme rapide.",
     "exercise_type": "core",
     "movement_pattern": "flexion",
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_bodyweight",
       "program_lactate",
@@ -2982,6 +3056,8 @@ export const EXERCISES: Exercise[] = [
     "description": "À quatre pattes, genoux à 5 cm du sol. Avancée alternée bras/jambe opposé sur 10-20 m. Gainage complet en mouvement.",
     "exercise_type": "core",
     "movement_pattern": "anti_extension",
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_bodyweight",
       "program_lactate",
@@ -3027,6 +3103,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Planche sur avant-bras, disque posé entre les omoplates. Bassin en rétroversion, ligne épaules-hanches-chevilles maintenue. La charge se progresse disque après disque.",
     "exercise_type": "core",
     "movement_pattern": "anti_extension",
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_muscle_building",
       "program_strength",
@@ -3071,6 +3149,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Dos plaqué au sol, haltère tenu bras tendus. Descendre jambe et bras opposés sans décoller les lombaires. Le lest augmente la demande anti-extension.",
     "exercise_type": "core",
     "movement_pattern": "anti_extension",
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_muscle_building",
       "program_bodyweight"
@@ -3113,6 +3193,8 @@ export const EXERCISES: Exercise[] = [
     "description": "À genoux face à la poulie haute, corde tenue au-dessus de la tête. Étendre les bras vers l'avant en résistant à la cambrure, puis revenir. Charge réglable au kilo près.",
     "exercise_type": "core",
     "movement_pattern": "anti_extension",
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_muscle_building",
       "program_strength"
@@ -3154,6 +3236,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Allongé genoux fléchis, disque tenu contre la poitrine. Enrouler le buste vertèbre par vertèbre sur 30-40° d'amplitude. Expirer en haut, contrôler la descente.",
     "exercise_type": "core",
     "movement_pattern": "flexion",
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_muscle_building",
       "program_bodyweight"
@@ -3195,6 +3279,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Sur banc décliné, pieds bloqués, disque contre la poitrine. Enrouler le buste sans tirer sur la nuque. L'inclinaison allonge le bras de levier.",
     "exercise_type": "core",
     "movement_pattern": "flexion",
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_muscle_building",
       "program_strength"
@@ -3236,6 +3322,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Allongé, chevilles sanglées à la poulie basse. Enrouler le bassin vers la cage en décollant le sacrum, sans élan. Cible la portion basse du grand droit.",
     "exercise_type": "core",
     "movement_pattern": "flexion",
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_muscle_building"
     ],
@@ -3276,6 +3364,8 @@ export const EXERCISES: Exercise[] = [
     "description": "En fente à genoux, perpendiculaire à la poulie. Presser la poignée devant le sternum en résistant à la rotation. Le tronc ne bouge pas, c'est là tout le travail.",
     "exercise_type": "core",
     "movement_pattern": "rotation",
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_muscle_building",
       "program_strength"
@@ -3317,6 +3407,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Poulie haute, corde saisie à deux mains. Tirer en diagonale vers la hanche opposée, rotation menée par le tronc et non par les bras. Contrôler le retour.",
     "exercise_type": "core",
     "movement_pattern": "rotation",
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_muscle_building",
       "program_strength"
@@ -3359,6 +3451,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Marcher sur 20-30 m avec une charge lourde d'un seul côté, épaules de niveau. Le tronc lutte contre l'inclinaison latérale. Alterner les côtés à chaque série.",
     "exercise_type": "core",
     "movement_pattern": "anti_lateral_flexion",
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_muscle_building",
       "program_strength",
@@ -3404,6 +3498,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Planche latérale sur avant-bras, disque posé sur la hanche haute. Bassin haut, corps aligné de la cheville à l'épaule. Ajouter du poids plutôt que du temps.",
     "exercise_type": "core",
     "movement_pattern": "anti_lateral_flexion",
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_muscle_building",
       "program_bodyweight"
@@ -3448,6 +3544,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Suspendu, haltère serré entre les chevilles. Monter jambes tendues jusqu'à l'horizontale en enroulant le bassin. Aucun balancement — descente contrôlée.",
     "exercise_type": "core",
     "movement_pattern": "hip_flexion",
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_muscle_building",
       "program_strength",
@@ -3492,6 +3590,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Lombaires plaquées au sol, bras et jambes tendus décollés, disque tenu bras tendus. Position en banane maintenue sans creuser le bas du dos.",
     "exercise_type": "core",
     "movement_pattern": "anti_extension",
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_muscle_building",
       "program_bodyweight"
@@ -3535,6 +3635,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Protocole EMOM. Swing bilatéral, hanches = moteur. Charge légère, vitesse > charge. 15-20 reps/minute. Référence kettlebell sport.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_lactate",
       "program_athletic"
@@ -3578,6 +3680,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Squat avec barre, pause sur box basse, extension explosive en saut. Charge très légère ou technique confirmée obligatoire.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_athletic"
     ],
@@ -3620,6 +3724,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Charge 30-40% du DL max. Triple extension explosive jusqu'au saut. Atterrissage absorbé. Référence force athlétique.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_athletic",
       "program_strength"
@@ -3663,6 +3769,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Axe rotationnel (≠ swing sagittal). Rotation du torse + swing de côté à côté. Utile pour sports de raquette et surf.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_lactate",
       "program_athletic"
@@ -3707,6 +3815,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Arraché KB unilatéral. Protocole EMOM. 8-10 reps/bras/minute. Cardiorespiratoire intense. Aucune charge si technique non maîtrisée.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_lactate",
       "program_athletic"
@@ -3749,6 +3859,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Si maîtrisé : double-unders, alternance pieds. Si débutant : saut sur place rythmé. Objectif : vitesse, pas la charge. Excellent warmup ou finisher.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [
       "program_lactate",
       "program_athletic"
@@ -3786,6 +3898,8 @@ export const EXERCISES: Exercise[] = [
     "description": "4×10 ou AMRAP 3 min. Drop en push-up + saut en haut. Rythme élevé. Variante : burpee pull-up pour plus de défi.",
     "exercise_type": null,
     "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [],
     "video_url": null,
     "image_url": null,
@@ -3820,6 +3934,8 @@ export const EXERCISES: Exercise[] = [
     "description": "4×12, poids du corps. Descente squat → saut explosif. Atterrissage amorti sur avant-pied. Pas de charge ajoutée.",
     "exercise_type": null,
     "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [],
     "video_url": null,
     "image_url": null,
@@ -3855,6 +3971,8 @@ export const EXERCISES: Exercise[] = [
     "description": "3×10/jambe. Ciseau en l'air. Atterrissage absorbé en fente. Excellent cardio bas corps.",
     "exercise_type": null,
     "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [],
     "video_url": null,
     "image_url": null,
@@ -3894,6 +4012,8 @@ export const EXERCISES: Exercise[] = [
     "description": "3×1 min ou 5×30s. Si débutant : saut sur place rythmé sans corde. Fréquence cardiaque élevée rapidement.",
     "exercise_type": null,
     "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [],
     "video_url": null,
     "image_url": null,
@@ -3934,6 +4054,8 @@ export const EXERCISES: Exercise[] = [
     "description": "4×15 reps. Charge modérée. Focus vitesse et extension hanches. Dernier push énergétique en fin de séance.",
     "exercise_type": null,
     "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [],
     "video_url": null,
     "image_url": null,
@@ -3972,6 +4094,8 @@ export const EXERCISES: Exercise[] = [
     "description": "3×8/bras. Arraché complet KB. Complexité technique élevée. Charge légère prioritaire sur la technique.",
     "exercise_type": null,
     "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [],
     "video_url": null,
     "image_url": null,
@@ -4010,6 +4134,8 @@ export const EXERCISES: Exercise[] = [
     "description": "3×30s max intensity. Ondes alternées. Cardio bras en fin de séance.",
     "exercise_type": null,
     "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [],
     "video_url": null,
     "image_url": null,
@@ -4048,6 +4174,8 @@ export const EXERCISES: Exercise[] = [
     "description": "3×40 m avec haltères lourds. Gainage debout, pas stable. Finisher silencieux mais brutal.",
     "exercise_type": null,
     "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [],
     "video_url": null,
     "image_url": null,
@@ -4086,6 +4214,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Haltère ou KB tenu en coupe devant la poitrine. Descente profonde, coudes entre les genoux. Excellent pour la mobilité de hanche et la technique squat.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": "squat",
+    "is_regression": false,
     "target_programs": [
       "program_lactate",
       "program_muscle_building"
@@ -4130,6 +4260,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Barre en high bar ou low bar. Descente sous parallèle, genoux dans l'axe des orteils. Montée explosive. Fondateur Starting Strength.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": "squat",
+    "is_regression": false,
     "target_programs": [
       "program_muscle_building",
       "program_strength"
@@ -4171,6 +4303,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Sur une jambe, haltères dans les mains. Charnière de hanche, dos plat. Torse parallèle au sol en bas. Charge excentrique ischio. Référence KOT.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": "hinge",
+    "is_regression": false,
     "target_programs": [
       "program_muscle_building",
       "program_strength"
@@ -4210,6 +4344,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Pieds larges en sumo, orteils à 45°. Haltère en coupe. Descente profonde. Cible adducteurs et fessiers plus que le goblet classique.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": "squat",
+    "is_regression": false,
     "target_programs": [
       "program_muscle_building"
     ],
@@ -4254,6 +4390,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Écartement large, barre en position haute. Bon pour la mobilité de hanche et les adducteurs sous charge lourde.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": "squat",
+    "is_regression": false,
     "target_programs": [
       "program_muscle_building",
       "program_strength"
@@ -4298,6 +4436,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Dos appuyé sur banc, barre sur les hanches. Extension complète de hanche en haut, contraction isométrique finale. Référence Bret Contreras.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": "hip_extension",
+    "is_regression": false,
     "target_programs": [
       "program_muscle_building"
     ],
@@ -4341,6 +4481,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Pieds dans la largeur des hanches, barre au-dessus des mid-foot. Prise mixte ou crochet. Dos neutre. Starting Strength fondamental.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": "hinge",
+    "is_regression": false,
     "target_programs": [
       "program_muscle_building",
       "program_strength"
@@ -4385,6 +4527,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Écartement très large, barre entre les jambes, prise pronation. Torse plus vertical. Bonne alternative pour morphologies courtes de buste.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": "hinge",
+    "is_regression": false,
     "target_programs": [
       "program_muscle_building",
       "program_strength"
@@ -4427,6 +4571,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Haltère sur le côté (comme une valise). Anti-flexion latérale du core. Asymétrie utile pour corriger déséquilibres gauche/droite.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": "hinge",
+    "is_regression": false,
     "target_programs": [
       "program_muscle_building",
       "program_strength"
@@ -4471,6 +4617,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Barre dans le creux des coudes, bras fléchis. Position très verticale du torse. Fort engagement du core. Référence Westside / Ed Coan.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": "squat",
+    "is_regression": false,
     "target_programs": [
       "program_strength"
     ],
@@ -4512,6 +4660,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Barre insérée dans angle landmine. Mouvement en arc vers le haut. Axe de traction différent du DL classique, moins de stress lombaire.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": "hinge",
+    "is_regression": false,
     "target_programs": [
       "program_muscle_building",
       "program_strength"
@@ -4555,6 +4705,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Pied arrière surélevé sur banc, pied avant avancé. Descente verticale. Fort volume possible. Référence Jeremy Ethier unilatéral.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": "lunge",
+    "is_regression": false,
     "target_programs": [
       "program_lactate",
       "program_muscle_building",
@@ -4594,6 +4746,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Genou à 90°. Le soléaire est plus actif en position fléchie. Amplitude complète : descente profonde, contraction max en haut.",
     "exercise_type": "isolation",
     "movement_pattern": null,
+    "movement_family": "calf",
+    "is_regression": false,
     "target_programs": [
       "program_lactate",
       "program_muscle_building"
@@ -4632,6 +4786,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Debout sur une marche. Descente lente (3-4s), montée explosive. Amplitude totale. Possible avec sac à dos lesté si pas de machine.",
     "exercise_type": "isolation",
     "movement_pattern": null,
+    "movement_family": "calf",
+    "is_regression": false,
     "target_programs": [
       "program_lactate",
       "program_muscle_building"
@@ -4669,6 +4825,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Au sol, une jambe tendue, l'autre fléchie. Extension de hanche unilatérale. Régression du hip thrust. Bon pour activation pré-workout.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": "hip_extension",
+    "is_regression": false,
     "target_programs": [
       "program_bodyweight",
       "program_lactate",
@@ -4707,6 +4865,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Pieds joints plante contre plante (position grenouille). Flexion externe de hanche maximale. Cible différemment les fessiers. Référence Ben Patrick / KOT.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": "hip_extension",
+    "is_regression": false,
     "target_programs": [
       "program_bodyweight",
       "program_muscle_building"
@@ -4744,6 +4904,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Allongé sur le côté ou debout. Élévation latérale contrôlée. Stabilisation bassin. Compatible rééducation genou.",
     "exercise_type": "isolation",
     "movement_pattern": null,
+    "movement_family": "abduction",
+    "is_regression": false,
     "target_programs": [
       "program_bodyweight",
       "program_lactate",
@@ -4780,10 +4942,15 @@ export const EXERCISES: Exercise[] = [
       "home",
       "outdoor"
     ],
-    "warmup_target": [],
+    "warmup_target": [
+      "squat",
+      "leg"
+    ],
     "description": "Squat au poids de corps, cuisses sous la parallèle, talons au sol, genoux dans l'axe des pieds. Base de tout travail de jambes sans matériel.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": "squat",
+    "is_regression": true,
     "target_programs": [
       "program_bodyweight",
       "program_muscle_building",
@@ -4824,6 +4991,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Fentes avant enchaînées en avançant. Genou arrière effleure le sol, buste droit. Compter les répétitions par jambe.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": "lunge",
+    "is_regression": false,
     "target_programs": [
       "program_bodyweight",
       "program_muscle_building",
@@ -4863,6 +5032,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Montée sur un banc ou une marche, jambe d'appui seule, sans pousser sur la jambe libre. Descente contrôlée. Un banc de parc convient.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": "lunge",
+    "is_regression": false,
     "target_programs": [
       "program_bodyweight",
       "program_muscle_building",
@@ -4902,6 +5073,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Squat sur une jambe, l'autre tendue devant. S'aider d'un poteau ou d'une sangle au début. Demande mobilité de cheville et gainage.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": "lunge",
+    "is_regression": false,
     "target_programs": [
       "program_bodyweight",
       "program_muscle_building",
@@ -4939,6 +5112,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Genoux au sol, chevilles bloquées (banc, partenaire, barre basse). Descendre le buste le plus lentement possible, remonter en poussant des mains. Excentrique très exigeant : peu de répétitions.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": "hinge",
+    "is_regression": false,
     "target_programs": [
       "program_bodyweight",
       "program_muscle_building",
@@ -4981,6 +5156,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Allongé perpendiculaire au banc, haltère tenu à deux mains. Arc de cercle de la poitrine vers l'arrière de la tête. Étirement max du dorsal. Coudes légèrement fléchis.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": "pullover",
+    "is_regression": false,
     "target_programs": [
       "program_muscle_building"
     ],
@@ -5022,6 +5199,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Prise pronation (paumes en avant), mains ~1.5× largeur épaules. Tirer coudes vers les hanches. Chin au-dessus de la barre. Descente contrôlée.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": "vertical_pull",
+    "is_regression": false,
     "target_programs": [
       "program_bodyweight",
       "program_muscle_building",
@@ -5063,6 +5242,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Prise supination (paumes vers soi). Plus de recrutement biceps. Facilite la connexion esprit-muscle sur le dorsal pour débutants.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": "vertical_pull",
+    "is_regression": false,
     "target_programs": [
       "program_bodyweight",
       "program_muscle_building",
@@ -5105,6 +5286,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Monter en sautant ou sur une box, puis descente excentrique lente (4-6s). Construit la force nécessaire avant les tractions complètes.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": "vertical_pull",
+    "is_regression": true,
     "target_programs": [
       "program_bodyweight",
       "program_muscle_building",
@@ -5147,6 +5330,8 @@ export const EXERCISES: Exercise[] = [
     "description": "En dead hang, rétraction scapulaire pure sans fléchir les coudes. Activation des fixateurs de l'omoplate. Base de santé épaule / posture.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": "vertical_pull",
+    "is_regression": true,
     "target_programs": [
       "program_bodyweight",
       "program_lactate",
@@ -5190,6 +5375,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Pendlay ou Yates row. Buste ~45°, barre tirée vers le bas du sternum. Rétraction scapulaire en fin de mouvement. Base du programme de force.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": "horizontal_pull",
+    "is_regression": false,
     "target_programs": [
       "program_muscle_building",
       "program_strength"
@@ -5232,6 +5419,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Barre insérée dans un angle ou support landmine. Position légèrement plus upright que le barbell row. Prise neutre si poignée V-bar.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": "horizontal_pull",
+    "is_regression": false,
     "target_programs": [
       "program_muscle_building",
       "program_strength"
@@ -5274,6 +5463,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Corps quasi horizontal sous barre fixe ou TRX. Tire la poitrine vers la barre. Régression utile avant pull-ups. Volume élevé possible.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": "horizontal_pull",
+    "is_regression": false,
     "target_programs": [
       "program_bodyweight",
       "program_lactate",
@@ -5318,6 +5509,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Appui sur un banc, bras libre tire l'haltère vers la hanche. Focus sur rétraction finale et légère rotation du torse. Amplitude maximale.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": "horizontal_pull",
+    "is_regression": false,
     "target_programs": [
       "program_muscle_building"
     ],
@@ -5359,6 +5552,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Câble à hauteur des yeux ou plus. Tirer vers le visage en ouvrant les coudes. Rotation externe en fin de mouvement. Santé épaule prioritaire.",
     "exercise_type": "isolation",
     "movement_pattern": null,
+    "movement_family": "rear_delt",
+    "is_regression": false,
     "target_programs": [
       "program_lactate",
       "program_muscle_building"
@@ -5401,6 +5596,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Allongé face contre banc incliné. Y : bras en V vers le haut. W : coudes fléchis, rotation externe. Disques très légers. Référence physiothérapie épaule.",
     "exercise_type": "isolation",
     "movement_pattern": null,
+    "movement_family": "rear_delt",
+    "is_regression": false,
     "target_programs": [
       "program_lactate",
       "program_muscle_building"
@@ -5443,6 +5640,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Sur tapis, position prone. Simulation du mouvement de paddle surf : bras alternés en arc horizontal, torse légèrement soulevé. Pour surfeurs.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": "horizontal_pull",
+    "is_regression": false,
     "target_programs": [
       "program_bodyweight",
       "program_lactate",
@@ -5482,6 +5681,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Câble ou élastique haut, bras tendus (légère flexion coude). Descendre les bras vers les hanches en gardant les coudes fixes. Isole le dorsal sans biceps.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": "pullover",
+    "is_regression": false,
     "target_programs": [
       "program_muscle_building"
     ],
@@ -5521,6 +5722,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Tirage horizontal aux anneaux, corps gainé en planche. Plus les pieds avancent, plus c'est lourd. Serrer les omoplates en fin de tirage.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": "horizontal_pull",
+    "is_regression": false,
     "target_programs": [
       "program_bodyweight",
       "program_muscle_building",
@@ -5565,6 +5768,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Allongé sur le banc, barre saisie en prise large. Descente contrôlée jusqu'au sternum, coudes à 45-75°. Poussée explosive en expirant.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": "horizontal_push",
+    "is_regression": false,
     "target_programs": [
       "program_muscle_building",
       "program_strength"
@@ -5606,6 +5811,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Même schéma que la barre mais amplitude plus grande. Permet une rotation naturelle des poignets. Instabilité utile pour activation stabilisatrice.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": "horizontal_push",
+    "is_regression": false,
     "target_programs": [
       "program_muscle_building"
     ],
@@ -5647,6 +5854,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Dips sur anneaux — instabilité maximale. Corps légèrement incliné vers l'avant pour cibler pectoraux. Anneaux tournés vers l'extérieur en haut.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": "dip",
+    "is_regression": false,
     "target_programs": [
       "program_bodyweight",
       "program_strength",
@@ -5689,6 +5898,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Barres parallèles. Descente jusqu'à 90° de coude minimum. Variation triceps : corps vertical. Variation pec : légère inclinaison avant.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": "dip",
+    "is_regression": false,
     "target_programs": [
       "program_bodyweight",
       "program_muscle_building",
@@ -5732,6 +5943,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Barre fixe basse ou parallèles. Mouvement de bascule vers l'avant, pression sur la barre en prise pronation. Transition vers muscle-up possible.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": "dip",
+    "is_regression": false,
     "target_programs": [
       "program_bodyweight",
       "program_strength",
@@ -5774,6 +5987,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Barre au niveau de la clavicule, prise légèrement plus large que les épaules. Pousser verticalement, tête en arrière au passage, verrouillage en haut.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": "vertical_push",
+    "is_regression": false,
     "target_programs": [
       "program_muscle_building",
       "program_strength"
@@ -5811,6 +6026,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Appuis au sol, mains à largeur d'épaules. Séries longues (20-50 reps), rythme constant. Gainage actif tout au long. Objectif : densité de reps.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": "horizontal_push",
+    "is_regression": false,
     "target_programs": [
       "program_bodyweight",
       "program_lactate",
@@ -5856,6 +6073,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Prise serrée (~30 cm), coudes près du corps. Focus sur extension triceps. Moins de mobilisation pectorale que bench classique.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": "horizontal_push",
+    "is_regression": false,
     "target_programs": [
       "program_muscle_building",
       "program_strength"
@@ -5892,6 +6111,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Mains sous les épaules, coudes plaqués au corps. Variante accessible du close grip bench. Bon finisher ou exercice de remplissage.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": "horizontal_push",
+    "is_regression": false,
     "target_programs": [
       "program_bodyweight",
       "program_lactate",
@@ -5938,6 +6159,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Descente lente depuis la position de support sur anneaux vers le bas du pull. Bande élastique sous les pieds pour assistance. Temps de descente : 4-6s.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": "muscle_up",
+    "is_regression": false,
     "target_programs": [
       "program_bodyweight",
       "program_strength"
@@ -5980,6 +6203,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Même mouvement sans assistance. Point de départ : support au-dessus de la barre. Descente excentrique maximale. Renforce le schéma moteur complet.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": "muscle_up",
+    "is_regression": false,
     "target_programs": [
       "program_bodyweight",
       "program_strength"
@@ -6021,6 +6246,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Position de support statique sur anneaux, bras tendus, anneaux tournés vers l'extérieur. Gainage total. Base des progressions aux anneaux (dips, muscle-up).",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": "dip",
+    "is_regression": false,
     "target_programs": [
       "program_bodyweight"
     ],
@@ -6056,6 +6283,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Version allégée du push-up. Genou au sol, corps en ligne droite de genou à tête. Idéal débutant ou récupération active.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": "horizontal_push",
+    "is_regression": true,
     "target_programs": [
       "program_bodyweight",
       "program_lactate",
@@ -6100,6 +6329,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Buste incliné à ~30° vers l'avant sur banc incliné pour pré-étirer le faisceau latéral. Élévations strictes, sans élan. Isole mieux que la version debout droite.",
     "exercise_type": "isolation",
     "movement_pattern": null,
+    "movement_family": "shoulder_isolation",
+    "is_regression": false,
     "target_programs": [
       "program_lactate",
       "program_muscle_building"
@@ -6138,6 +6369,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Bassin haut, tronc proche de la verticale, tête entre les mains. Descendre le sommet du crâne vers le sol. Plus les pieds sont hauts, plus la charge passe sur les épaules. Progression vers le handstand.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": "vertical_push",
+    "is_regression": false,
     "target_programs": [
       "program_bodyweight",
       "program_muscle_building",
@@ -6179,6 +6412,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Pompes aux anneaux, mains libres de tourner. L'instabilité recrute les stabilisateurs de l'épaule. Anneaux bas pour commencer, plus hauts pour alléger.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": "horizontal_push",
+    "is_regression": false,
     "target_programs": [
       "program_bodyweight",
       "program_muscle_building",
@@ -6218,6 +6453,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Pompes bras très écartés : on descend sur un bras, l'autre reste tendu au sol. Charge unilatérale, étape vers la pompe à un bras.",
     "exercise_type": "compound",
     "movement_pattern": null,
+    "movement_family": "horizontal_push",
+    "is_regression": false,
     "target_programs": [
       "program_bodyweight",
       "program_muscle_building",
@@ -6258,6 +6495,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Pour Squat / Leg. Position 90/90 au sol, bascule d'un côté à l'autre. 60s chaque côté. Ouvre la capsule de hanche avant squat profond.",
     "exercise_type": null,
     "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [],
     "video_url": null,
     "image_url": null,
@@ -6294,6 +6533,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Pour Squat / Leg. Pied près du mur, genou poussé vers l'avant. 10×/côté. Améliore la dorsiflexion = squat plus profond.",
     "exercise_type": null,
     "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [],
     "video_url": null,
     "image_url": null,
@@ -6333,6 +6574,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Pour Squat / Single leg. En appui sur une jambe, rotation du bassin. 8/côté. Contrôle pelvien avant squat unipodal.",
     "exercise_type": null,
     "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [],
     "video_url": null,
     "image_url": null,
@@ -6374,6 +6617,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Pour Squat. 3×3 descente lente 3s, pause 2s sur la box, remontée. Groove le pattern squat. Référence Squat University.",
     "exercise_type": null,
     "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [],
     "video_url": null,
     "image_url": null,
@@ -6409,6 +6654,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Pour Deadlift. 10 reps lentes, cycle flexion-extension vertébrale. Mobilise les vertèbres thoraciques et lombaires.",
     "exercise_type": null,
     "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [],
     "video_url": null,
     "image_url": null,
@@ -6445,6 +6692,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Pour Deadlift. Fesse contre le mur, 10 reps. Groove le schéma de charnière de hanche sans charge. Fondamental Starting Strength.",
     "exercise_type": null,
     "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [],
     "video_url": null,
     "image_url": null,
@@ -6485,6 +6734,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Pour Deadlift. Bande sur les épaules, 10 reps légères. Activation de la chaîne postérieure avant DL.",
     "exercise_type": null,
     "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [],
     "video_url": null,
     "image_url": null,
@@ -6527,6 +6778,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Pour Push / Bench. Bande à hauteur des yeux, tirer en écartant les bras. 3×15. Activation rétracteurs scapulaires avant press.",
     "exercise_type": null,
     "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [],
     "video_url": null,
     "image_url": null,
@@ -6563,6 +6816,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Pour Push / Bench. Push-up normal puis protraction maximale de l'omoplate en haut. Active le serratus souvent inhibé.",
     "exercise_type": null,
     "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [],
     "video_url": null,
     "image_url": null,
@@ -6599,6 +6854,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Pour Push / OHP. Rotations articulaires contrôlées en amplitude maximale. 5 reps chaque sens. Référence FRC / physiothérapie.",
     "exercise_type": null,
     "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [],
     "video_url": null,
     "image_url": null,
@@ -6639,6 +6896,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Pour OHP. Row → rotation externe → press. 2×10. Warmup spécifique OHP qui active toute la coiffe des rotateurs.",
     "exercise_type": null,
     "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [],
     "video_url": null,
     "image_url": null,
@@ -6680,6 +6939,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Pour Pull. 30s en suspension passive. Décompression vertébrale. Étirement grand dorsal et capsule inférieure.",
     "exercise_type": null,
     "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [],
     "video_url": null,
     "image_url": null,
@@ -6719,6 +6980,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Pour Pull. En suspension, rétraction et dépression des omoplates sans fléchir les coudes. 2×10. Base santé épaule.",
     "exercise_type": null,
     "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [],
     "video_url": null,
     "image_url": null,
@@ -6760,6 +7023,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Pour Pull / OHP. Bande tenue large devant, passer derrière la tête et retour. Amplitude overhead maximale.",
     "exercise_type": null,
     "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [],
     "video_url": null,
     "image_url": null,
@@ -6800,6 +7065,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Pour OHP / All. Foam roller sous la thoracique, extension par gravité. Libère le segment T4-T8. 10 reps par position.",
     "exercise_type": null,
     "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [],
     "video_url": null,
     "image_url": null,
@@ -6838,6 +7105,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Pour OHP / Push. Dos et bras contre un mur, glisser les bras vers le haut. Scapulas collées au mur. 3×10. Corrige impingement.",
     "exercise_type": null,
     "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [],
     "video_url": null,
     "image_url": null,
@@ -6877,6 +7146,8 @@ export const EXERCISES: Exercise[] = [
     "description": "Pour Pull / OHP. Coude à 90°, rotation externe avec disque léger. Renforcement coiffe des rotateurs. 2×12/bras.",
     "exercise_type": null,
     "movement_pattern": null,
+    "movement_family": null,
+    "is_regression": false,
     "target_programs": [],
     "video_url": null,
     "image_url": null,

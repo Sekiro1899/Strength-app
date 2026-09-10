@@ -14,6 +14,8 @@ class WorkoutRequest(BaseModel):
     energy_level: int = Field(default=3, ge=1, le=5)
     # Lieu déclaré en début de séance — décide du matériel disponible.
     location: str = "gym"
+    # Créneau annoncé — décide de la mise en superset des compounds.
+    time_budget: str = "standard"
     available_equipment: list[str] = []
 
 
@@ -22,6 +24,8 @@ class ExerciseBlock(BaseModel):
     name: str
     sets: int
     reps: int | None = None
+    # Borne haute quand la prescription est une plage (10-12 plutôt que 11).
+    reps_max: int | None = None
     duration_sec: int | None = None
     load_pct_1rm: int | None = None
     rest_sec: int | None = None

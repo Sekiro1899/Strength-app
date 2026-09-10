@@ -94,6 +94,8 @@ def select_exercises(
     allow_universal: bool = False,
     exclude_ids: set[str] | None = None,
     arm_group_only: str | None = None,
+    exclude_regressions: bool = False,
+    warmup_pool: bool = False,
 ) -> list[dict]:
     """Retourne les exercices de la bibliothèque satisfaisant tous les critères."""
     exclude_ids = exclude_ids or set()
@@ -105,7 +107,16 @@ def select_exercises(
             continue
         if not _matches_program(ex, program_id, allow_universal):
             continue
-        if categories and ex.get("category") not in categories:
+        if warmup_pool:
+            # Pool d'échauffement : la catégorie `warmup`, plus tout exercice
+            # portant une cible d'échauffement. L'Air Squat sert d'abord à ça.
+            if ex.get("category") != "warmup" and not (ex.get("warmup_target") or []):
+                continue
+        elif categories and ex.get("category") not in categories:
+            continue
+        # Une variante allégée n'a sa place dans le bloc principal que chez un
+        # débutant ou un pratiquant âgé.
+        if exclude_regressions and ex.get("is_regression"):
             continue
         # Restreint la catégorie `arms` à un seul groupe (jours push / pull).
         if arm_group_only and ex.get("category") == "arms" \
@@ -161,7 +172,7 @@ def pick(
     return order_by_freshness(pool, rng, recent_ids)[:count]
 
 
-def group_by(pool: list[dict], key) -> list[list[dict]]:
+def group_by(pool: list[dict], key) -> list[tuple[str, list[dict]]]:
     """Répartit un pool en sous-groupes ; les exercices sans clé sont écartés."""
     groups: dict[str, list[dict]] = {}
     for ex in pool:
@@ -169,14 +180,16 @@ def group_by(pool: list[dict], key) -> list[list[dict]]:
         if not k:
             continue
         groups.setdefault(k, []).append(ex)
-    return list(groups.values())
+    return list(groups.items())
 
 
 def pick_balanced(
-    groups: list[list[dict]],
+    groups: list[tuple[str, list[dict]]],
     count: int,
     rng: random.Random,
     recent_ids: set[str] | None = None,
+    priority_key: str | None = None,
+    strict_families: bool = False,
 ) -> list[dict]:
     """
     Tire `count` exercices en gardant chaque sous-groupe représenté.
@@ -190,23 +203,58 @@ def pick_balanced(
         return []
     # L'ordre de passage des groupes est lui-même tiré : sinon le premier
     # sous-groupe serait toujours servi en premier.
-    queues = [g for g in groups if g]
-    rng.shuffle(queues)
-    queues = [order_by_freshness(g, rng, recent_ids) for g in queues]
+    ordered = [(k, items) for k, items in groups if items]
+    rng.shuffle(ordered)
+    if priority_key:
+        # Le compound en trop d'une séance chargée revient au groupe mis en
+        # avant ce jour-là : deux push aujourd'hui, deux pull la prochaine fois.
+        ordered.sort(key=lambda g: g[0] != priority_key)
+    queues = [order_by_freshness(items, rng, recent_ids) for _, items in ordered]
 
     out: list[dict] = []
     taken: set[str] = set()
-    while len(out) < count and any(queues):
-        for queue in queues:
-            if len(out) >= count:
-                break
-            if not queue:
-                continue
-            nxt = queue.pop(0)
-            if nxt["id"] not in taken:
-                taken.add(nxt["id"])
-                out.append(nxt)
+    families: set[str] = set()
+
+    def drain(strict: bool) -> None:
+        progress = True
+        while len(out) < count and progress:
+            progress = False
+            for queue in queues:
+                if len(out) >= count:
+                    break
+                index = None
+                for i, ex in enumerate(queue):
+                    if ex["id"] in taken:
+                        continue
+                    fam = ex.get("movement_family")
+                    if strict and fam and fam in families:
+                        continue
+                    index = i
+                    break
+                if index is None:
+                    continue
+                chosen = queue.pop(index)
+                taken.add(chosen["id"])
+                if chosen.get("movement_family"):
+                    families.add(chosen["movement_family"])
+                out.append(chosen)
+                progress = True
+
+    # `strict` interdit deux exercices de la même famille de mouvement — c'est
+    # ce qui évite d'enchaîner tractions et tractions négatives.
+    drain(True)
+    # Sur le bloc principal la contrainte ne se relâche pas : mieux vaut un
+    # exercice de moins (compensé en séries) que deux fois le même patron.
+    if not strict_families:
+        drain(False)
     return out
+
+
+def compensate(sets: int, wanted: int, actual: int) -> int:
+    """Reporte sur les séries le volume perdu quand un exercice manque."""
+    if actual >= wanted or actual < 1:
+        return sets
+    return min(-(-sets * wanted // actual), sets + 3)
 
 
 # ─── Élargissement du plafond de niveau ───

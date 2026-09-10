@@ -379,6 +379,9 @@ CREATE TABLE sessions (
     -- Lieu déclaré en début de séance : filtre le matériel disponible
     location                    VARCHAR(20)     DEFAULT 'gym'
                                     CHECK (location IN ('gym','home','outdoor')),
+    -- Créneau annoncé : décide de la mise en superset des compounds.
+    time_budget                 VARCHAR(10)     DEFAULT 'standard'
+                                    CHECK (time_budget IN ('short','standard','long')),
     warmup_block                JSONB,
     main_block                  JSONB,
     core_block                  JSONB,

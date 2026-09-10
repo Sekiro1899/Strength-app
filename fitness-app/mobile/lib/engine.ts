@@ -22,6 +22,7 @@
  */
 
 import { EXERCISES } from "./fixtures";
+import type { Profile } from "./profile";
 import type {
   Exercise,
   ExerciseBlock,
@@ -29,6 +30,7 @@ import type {
   Focus,
   Program,
   ProgramPhase,
+  TimeBudget,
   TrainingLocation,
 } from "./types";
 
@@ -135,11 +137,16 @@ function pick(
   return orderByFreshness(pool, rng, recentIds).slice(0, count);
 }
 
+interface Group {
+  key: string;
+  items: Exercise[];
+}
+
 /** Répartit un pool en sous-groupes ; les exercices sans clé sont écartés. */
 function groupByKey(
   pool: Exercise[],
   key: (e: Exercise) => string | null | undefined,
-): Exercise[][] {
+): Group[] {
   const groups = new Map<string, Exercise[]>();
   for (const ex of pool) {
     const k = key(ex);
@@ -148,7 +155,7 @@ function groupByKey(
     if (g) g.push(ex);
     else groups.set(k, [ex]);
   }
-  return [...groups.values()];
+  return [...groups.entries()].map(([k, items]) => ({ key: k, items }));
 }
 
 /**
@@ -160,31 +167,60 @@ function groupByKey(
  * tourniquet, chacun dans son propre ordre fraîcheur-d'abord.
  */
 function pickBalanced(
-  groups: Exercise[][],
+  groups: Group[],
   count: number,
   rng: () => number,
   recentIds: Set<string>,
+  opts: { priorityKey?: string | null; strictFamilies?: boolean } = {},
 ): Exercise[] {
   if (count <= 0) return [];
+  const { priorityKey, strictFamilies } = opts;
   // L'ordre de passage des groupes est lui-même tiré : sinon le premier
   // sous-groupe serait toujours servi en premier.
-  const queues = shuffle(
-    groups.filter((g) => g.length > 0),
-    rng,
-  ).map((g) => orderByFreshness(g, rng, recentIds));
+  let ordered = shuffle(groups.filter((g) => g.items.length > 0), rng);
+  if (priorityKey) {
+    // Le compound en trop d'une séance chargée revient au groupe mis en avant
+    // ce jour-là : deux push aujourd'hui, deux pull la prochaine fois.
+    ordered = [
+      ...ordered.filter((g) => g.key === priorityKey),
+      ...ordered.filter((g) => g.key !== priorityKey),
+    ];
+  }
+  const queues = ordered.map((g) => orderByFreshness(g.items, rng, recentIds));
 
   const out: Exercise[] = [];
   const taken = new Set<string>();
-  while (out.length < count && queues.some((q) => q.length > 0)) {
-    for (const queue of queues) {
-      if (out.length >= count) break;
-      const next = queue.shift();
-      if (next && !taken.has(next.id)) {
-        taken.add(next.id);
-        out.push(next);
+  const families = new Set<string>();
+
+  // `strict` interdit deux exercices de la même famille de mouvement — c'est
+  // ce qui évite d'enchaîner tractions et tractions négatives, qui sollicitent
+  // exactement la même chose. On relâche la contrainte au second passage,
+  // faute de quoi un pool étroit rendrait un bloc incomplet.
+  const drain = (strict: boolean) => {
+    let progress = true;
+    while (out.length < count && progress) {
+      progress = false;
+      for (const queue of queues) {
+        if (out.length >= count) break;
+        const index = queue.findIndex((ex) => {
+          if (taken.has(ex.id)) return false;
+          if (!strict) return true;
+          return !ex.movement_family || !families.has(ex.movement_family);
+        });
+        if (index === -1) continue;
+        const [chosen] = queue.splice(index, 1);
+        taken.add(chosen.id);
+        if (chosen.movement_family) families.add(chosen.movement_family);
+        out.push(chosen);
+        progress = true;
       }
     }
-  }
+  };
+
+  drain(true);
+  // Sur le bloc principal la contrainte ne se relâche pas : mieux vaut un
+  // exercice de moins (compensé en séries) que deux fois le même patron.
+  if (!strictFamilies) drain(false);
   return out;
 }
 
@@ -235,6 +271,13 @@ interface SelectOptions {
   excludeIds?: Set<string>;
   /** Restreint la catégorie `arms` à un seul groupe (jours push / pull). */
   armGroup?: "triceps" | "biceps";
+  /** Écarte les variantes allégées — tout le monde sauf débutants et 60+. */
+  excludeRegressions?: boolean;
+  /**
+   * Pool d'échauffement : la catégorie `warmup`, plus tout exercice portant
+   * une cible d'échauffement. L'Air Squat sert d'abord à ça.
+   */
+  warmupPool?: boolean;
 }
 
 function selectExercises(programId: string, opts: SelectOptions): Exercise[] {
@@ -254,7 +297,12 @@ function selectExercises(programId: string, opts: SelectOptions): Exercise[] {
     // Le lieu déclaré en début de séance décide du matériel disponible.
     if (!(ex.locations ?? ["gym"]).includes(opts.location)) return false;
 
-    if (opts.categories && !opts.categories.includes(ex.category)) return false;
+    if (opts.warmupPool) {
+      if (ex.category !== "warmup" && !(ex.warmup_target ?? []).length) return false;
+    } else if (opts.categories && !opts.categories.includes(ex.category)) {
+      return false;
+    }
+    if (opts.excludeRegressions && ex.is_regression) return false;
     if (opts.armGroup && ex.category === "arms" && armGroup(ex) !== opts.armGroup) {
       return false;
     }
@@ -329,10 +377,54 @@ function fitToPool(
   return { count: capacity, sets: Math.min(Math.ceil((sets * wanted) / capacity), sets + 3) };
 }
 
+// Chaînes antagonistes : on n'apparie en superset qu'un tirage avec une
+// poussée. Deux squats enchaînés ne feraient qu'épuiser les mêmes jambes.
+const PUSH_FAMILIES = new Set(["horizontal_push", "vertical_push", "dip", "muscle_up"]);
+const PULL_FAMILIES = new Set(["vertical_pull", "horizontal_pull", "pullover"]);
+
+/**
+ * Apparie les blocs deux à deux et les rend ADJACENTS : l'écran de séance
+ * reconnaît un superset en regardant le bloc suivant. Le repos passe après
+ * la paire, il n'y en a pas entre les deux mouvements.
+ */
+function applySupersets(
+  blocks: ExerciseBlock[],
+  canPair: (a: ExerciseBlock, b: ExerciseBlock) => boolean,
+): ExerciseBlock[] {
+  const remaining = [...blocks];
+  const out: ExerciseBlock[] = [];
+  while (remaining.length) {
+    const first = remaining.shift()!;
+    const index = remaining.findIndex((b) => canPair(first, b));
+    if (index === -1) {
+      out.push(first);
+      continue;
+    }
+    const [second] = remaining.splice(index, 1);
+    first.superset_with = second.exercise_id;
+    second.rest_sec = first.rest_sec;
+    first.rest_sec = 0;
+    out.push(first, second);
+  }
+  return out;
+}
+
+/** Reporte sur les séries le volume perdu quand un exercice manque. */
+function compensate(sets: number, wanted: number, actual: number): number {
+  if (actual >= wanted || actual < 1) return sets;
+  return Math.min(Math.ceil((sets * wanted) / actual), sets + 3);
+}
+
 export interface BuildContext {
   program: Program;
   phase: ProgramPhase | null;
   focus: Focus;
+  /** Profil du pratiquant — plafond de niveau et tolérance aux régressions. */
+  profile: Profile;
+  /** Numéro de séance : fait tourner l'accent d'une séance à l'autre. */
+  dayNumber: number;
+  /** Créneau annoncé — décide de la mise en superset. */
+  timeBudget: TimeBudget;
   levelMax: string;
   energy: number;
   location: TrainingLocation;
@@ -353,14 +445,14 @@ export function buildWarmup(ctx: BuildContext): ExerciseBlock[] {
   const policy = volumeForEnergy(ctx.energy);
 
   let pool = selectExercises(ctx.program.id, {
-    categories: ["warmup"],
+    warmupPool: true,
     warmupTargets: FOCUS_WARMUP_TARGET_MAP[ctx.focus] ?? ["all"],
     location: ctx.location,
     allowUniversal: true,
   });
   if (pool.length < policy.warmup) {
     pool = selectExercises(ctx.program.id, {
-      categories: ["warmup"],
+      warmupPool: true,
       location: ctx.location,
       allowUniversal: true,
     });
@@ -475,6 +567,9 @@ export function buildMain(ctx: BuildContext): ExerciseBlock[] {
   const base = {
     levelMax: ctx.levelMax,
     location: ctx.location,
+    // Une variante allégée n'a sa place dans le bloc principal que chez un
+    // débutant ou un pratiquant âgé. Pour les autres : goblet squat ou barre.
+    excludeRegressions: !ctx.profile.allowRegressions,
     ...(ctx.focus === "push"
       ? { armGroup: "triceps" as const }
       : ctx.focus === "pull"
@@ -484,20 +579,29 @@ export function buildMain(ctx: BuildContext): ExerciseBlock[] {
 
   // Chaque catégorie du focus doit être représentée avant qu'une seule ne
   // soit servie deux fois — d'où le tirage en tourniquet plutôt qu'à plat.
+  // Un full body sort ainsi 1 push, 1 pull, 1 leg avant tout doublon.
   const compoundPool = selectVaried(
     ctx.program.id,
     { ...base, categories, exerciseTypes: ["compound"] },
     policy.compounds,
   );
   const compoundFit = fitToPool(compoundPool.length, policy.compounds, setsCompounds);
-  const compounds = shuffle(
-    pickBalanced(
-      groupByKey(compoundPool, (ex) => ex.category),
-      compoundFit.count,
-      ctx.rng,
-      ctx.recentIds,
-    ),
+  const compoundGroups = groupByKey(compoundPool, (ex) => ex.category);
+
+  // Quand l'énergie autorise un compound de plus, il ne doit pas retomber
+  // toujours sur le même patron. L'accent tourne avec le numéro de séance :
+  // deux push cette fois, deux pull la suivante.
+  const rotation = compoundGroups.map((g) => g.key).sort();
+  const emphasis = rotation.length
+    ? rotation[ctx.dayNumber % rotation.length]
+    : null;
+
+  const compounds = pickBalanced(
+    compoundGroups,
+    compoundFit.count,
     ctx.rng,
+    ctx.recentIds,
+    { priorityKey: emphasis, strictFamilies: true },
   );
   const used = new Set(compounds.map((e) => e.id));
 
@@ -507,41 +611,85 @@ export function buildMain(ctx: BuildContext): ExerciseBlock[] {
     policy.isolations,
   );
   const isolationFit = fitToPool(isolationPool.length, policy.isolations, setsIsolation);
-  const isolations = shuffle(
-    pickBalanced(
-      groupByKey(isolationPool, (ex) => ex.category),
-      isolationFit.count,
-      ctx.rng,
-      ctx.recentIds,
-    ),
+  const isolations = pickBalanced(
+    groupByKey(isolationPool, (ex) => ex.category),
+    isolationFit.count,
     ctx.rng,
+    ctx.recentIds,
+    { strictFamilies: true },
   );
 
-  const reps = Math.round((repMin + repMax) / 2);
-  const isoReps = Math.min(reps + 2, repMax + 2);
+  // La contrainte de famille peut rendre moins d'exercices que demandé : on
+  // reporte le volume manquant sur les séries, comme pour un pool étroit.
+  const compoundSets = compensate(compoundFit.sets, compoundFit.count, compounds.length);
+  const isolationSets = compensate(isolationFit.sets, isolationFit.count, isolations.length);
 
-  return [
-    ...compounds.map((ex) => ({
-      exercise_id: ex.id,
-      name: ex.name,
-      sets: compoundFit.sets,
-      reps,
-      ...(bodyweightOnly ? {} : { load_pct_1rm: load }),
-      rest_sec: rest,
-      notes: `Compound — ${compoundFit.sets}x${reps}`,
-      log_results: true,
-    })),
-    ...isolations.map((ex) => ({
-      exercise_id: ex.id,
-      name: ex.name,
-      sets: isolationFit.sets,
-      reps: isoReps,
-      ...(bodyweightOnly ? {} : { load_pct_1rm: Math.max(load - 10, 40) }),
-      rest_sec: Math.max(rest - 15, 30),
-      notes: `Isolation — ${isolationFit.sets}x${isoReps}`,
-      log_results: true,
-    })),
-  ];
+  // Une prescription centrée sur 11 se lit mal : on rend la plage dont 11 est
+  // le milieu. Une phase qui impose un nombre sec (5x5) n'est pas élargie.
+  const spread = repMax > repMin ? 1 : 0;
+  const mid = Math.round((repMin + repMax) / 2);
+  const reps = Math.max(repMin, mid - spread);
+  const repsMax = spread ? Math.min(repMax, mid + spread) : undefined;
+  const isoMid = Math.min(mid + 2, repMax + 2);
+  const isoReps = isoMid - spread;
+  const isoRepsMax = spread ? isoMid + spread : undefined;
+
+  const range = (lo: number, hi?: number) => (hi && hi !== lo ? `${lo}-${hi}` : `${lo}`);
+
+  const compoundBlocks: ExerciseBlock[] = compounds.map((ex) => ({
+    exercise_id: ex.id,
+    name: ex.name,
+    sets: compoundSets,
+    reps,
+    ...(repsMax ? { reps_max: repsMax } : {}),
+    ...(bodyweightOnly ? {} : { load_pct_1rm: load }),
+    rest_sec: rest,
+    notes: `Compound — ${compoundSets}x${range(reps, repsMax)}`,
+    // Seuls les compounds portent la progression : c'est là que la charge se
+    // suit d'une séance à l'autre.
+    log_results: true,
+  }));
+
+  const isolationBlocks: ExerciseBlock[] = isolations.map((ex) => ({
+    exercise_id: ex.id,
+    name: ex.name,
+    sets: isolationSets,
+    reps: isoReps,
+    ...(isoRepsMax ? { reps_max: isoRepsMax } : {}),
+    ...(bodyweightOnly ? {} : { load_pct_1rm: Math.max(load - 10, 40) }),
+    rest_sec: Math.max(rest - 15, 30),
+    notes: `Isolation — ${isolationSets}x${range(isoReps, isoRepsMax)}`,
+    // Pas de saisie de charge sur l'isolation : on coche la série et on
+    // enchaîne. La progression se mesure sur les compounds.
+    log_results: false,
+  }));
+
+  // Deux règles distinctes. L'isolation s'apparie toujours : c'est léger, les
+  // familles sont déjà différentes, et ça n'entame pas la qualité du travail.
+  // Le compound ne s'apparie que si le créneau manque — sur du lourd, le
+  // superset coûte en charge, on ne le paie que pour tenir dans le temps.
+  const familyOf = new Map<string, string | null>(
+    [...compounds, ...isolations].map((ex) => [ex.id, ex.movement_family]),
+  );
+  const antagonists = (a: ExerciseBlock, b: ExerciseBlock) => {
+    const fa = familyOf.get(a.exercise_id) ?? "";
+    const fb = familyOf.get(b.exercise_id) ?? "";
+    return (
+      (PUSH_FAMILIES.has(fa) && PULL_FAMILIES.has(fb)) ||
+      (PULL_FAMILIES.has(fa) && PUSH_FAMILIES.has(fb))
+    );
+  };
+
+  // Créneau court : on apparie aussi les compounds, mais uniquement
+  // antagonistes — un tirage avec une poussée, jamais deux fois la même chaîne.
+  const finalCompounds =
+    ctx.timeBudget === "short"
+      ? applySupersets(compoundBlocks, antagonists)
+      : compoundBlocks;
+
+  const finalIsolations = applySupersets(isolationBlocks, () => true);
+
+  return [...finalCompounds, ...finalIsolations];
 }
 
 export function buildCore(ctx: BuildContext): ExerciseBlock[] {
@@ -550,7 +698,12 @@ export function buildCore(ctx: BuildContext): ExerciseBlock[] {
 
   const pool = selectVaried(
     ctx.program.id,
-    { exerciseTypes: ["core"], levelMax: ctx.levelMax, location: ctx.location },
+    {
+      exerciseTypes: ["core"],
+      levelMax: ctx.levelMax,
+      location: ctx.location,
+      excludeRegressions: !ctx.profile.allowRegressions,
+    },
     policy.core,
   );
 

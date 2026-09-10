@@ -489,6 +489,17 @@ export async function startSession(
   return generateWorkout(request);
 }
 
+/**
+ * Lien de démonstration d'un exercice, s'il en a un d'indexé.
+ *
+ * Lu dans les fixtures et non en base : la bibliothèque d'exercices est de la
+ * donnée de référence, livrée avec l'app et identique dans les deux modes.
+ * Ça évite un aller-retour réseau par exercice pendant une séance.
+ */
+export function exerciseVideoUrl(exerciseId: string): string | null {
+  return EXERCISES.find((e) => e.id === exerciseId)?.video_url ?? null;
+}
+
 export async function fetchSession(
   sessionId: string,
 ): Promise<WorkoutSession | null> {

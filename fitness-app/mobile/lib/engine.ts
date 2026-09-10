@@ -436,13 +436,20 @@ function buildCircuitMain(ctx: BuildContext): ExerciseBlock[] {
     ctx.recentIds,
   ).map((ex, i) => {
     const isCardio = ex.exercise_type === "cardio";
+    // Un benchmark porte son propre format : 20 min d'AMRAP ne se découpent
+    // pas en 4 séries de 40 s.
+    const imposed = ex.prescribed_duration_sec !== null;
     return {
       exercise_id: ex.id,
       name: ex.name,
-      sets: fit.sets,
-      ...(isCardio ? { duration_sec: 40 } : { reps, load_pct_1rm: load }),
+      sets: imposed ? (ex.prescribed_sets ?? 1) : fit.sets,
+      ...(imposed
+        ? { duration_sec: ex.prescribed_duration_sec! }
+        : isCardio
+          ? { duration_sec: 40 }
+          : { reps, load_pct_1rm: load }),
       rest_sec: rest,
-      notes: `Circuit — tour ${i + 1}`,
+      notes: imposed ? "Circuit — format imposé" : `Circuit — tour ${i + 1}`,
       log_results: true,
     };
   });

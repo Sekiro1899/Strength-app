@@ -209,6 +209,14 @@ export interface Exercise {
   exercise_type: ExerciseType | null;
   /** Non-null sur les exercices de core — pilote la diversité du bloc. */
   movement_pattern: MovementPattern | null;
+  /** Démonstration YouTube. Null = repli sur une recherche par nom. */
+  video_url: string | null;
+  /**
+   * Format imposé par l'exercice lui-même — un AMRAP 20 min ou un EMOM 30 ne
+   * se découpe pas en séries standard. Null = prescription du programme.
+   */
+  prescribed_sets: number | null;
+  prescribed_duration_sec: number | null;
   /** Vide = universel (warmups et finishers servent tous les programmes). */
   target_programs: string[];
   image_url: string | null;

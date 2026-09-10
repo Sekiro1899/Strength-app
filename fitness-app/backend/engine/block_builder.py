@@ -140,15 +140,18 @@ def _build_circuit_main(ctx: BuildContext) -> list[ExerciseBlock]:
     )
     for i, ex in enumerate(selection):
         is_cardio = ex.get("exercise_type") == "cardio"
+        # Un benchmark porte son propre format : 20 min d'AMRAP ne se découpent
+        # pas en 4 séries de 40 s.
+        imposed = ex.get("prescribed_duration_sec")
         blocks.append(ExerciseBlock(
             exercise_id=ex["id"],
             name=ex["name"],
-            sets=sets,
-            reps=None if is_cardio else reps,
-            duration_sec=40 if is_cardio else None,
-            load_pct_1rm=None if is_cardio else load,
+            sets=(ex.get("prescribed_sets") or 1) if imposed else sets,
+            reps=None if (is_cardio or imposed) else reps,
+            duration_sec=imposed if imposed else (40 if is_cardio else None),
+            load_pct_1rm=None if (is_cardio or imposed) else load,
             rest_sec=rest,
-            notes=f"Circuit — tour {i + 1}",
+            notes="Circuit — format imposé" if imposed else f"Circuit — tour {i + 1}",
             log_results=True,
         ))
     return blocks

@@ -214,6 +214,10 @@ CREATE TABLE exercises (
     locations                   TEXT[]          DEFAULT '{gym}',
     video_url                   TEXT,
     image_url                   TEXT,
+    -- Format imposé par l'exercice (AMRAP, EMOM, circuit à tours fixes) :
+    -- prime sur la prescription du programme. Null = prescription standard.
+    prescribed_sets             SMALLINT,
+    prescribed_duration_sec     INTEGER,
     is_custom                   BOOLEAN         DEFAULT FALSE,
     created_by_user_id          UUID            REFERENCES users(id),
     created_at                  TIMESTAMPTZ     DEFAULT NOW()

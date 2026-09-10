@@ -1,0 +1,541 @@
+{
+  "_comment": "Colle une URL YouTube dans `url` pour indexer la démonstration d'un exercice, puis relance python3 docs/exercise_videos.py. Sans URL, l'app propose une recherche YouTube sur le nom de l'exercice.",
+  "videos": {
+    "ARM-028": {
+      "name": "Biceps Curls (Barbell)",
+      "url": null
+    },
+    "ARM-029": {
+      "name": "Alternate Biceps Curls (DB)",
+      "url": null
+    },
+    "ARM-030": {
+      "name": "EZ Bar Curls (Alternating Width)",
+      "url": null
+    },
+    "ARM-031": {
+      "name": "Hammer Curls",
+      "url": null
+    },
+    "ARM-032": {
+      "name": "Zottman Curls",
+      "url": null
+    },
+    "ARM-033": {
+      "name": "Triceps Pushdown (Cable)",
+      "url": null
+    },
+    "ARM-034": {
+      "name": "Triceps Overhead (Cable)",
+      "url": null
+    },
+    "ARM-035": {
+      "name": "Triceps Pushdown (Pronation Grip)",
+      "url": null
+    },
+    "ARM-036": {
+      "name": "Skullcrushers (EZ Bar)",
+      "url": null
+    },
+    "ARM-037": {
+      "name": "Bench Dips",
+      "url": null
+    },
+    "COM-074": {
+      "name": "DB Squat to Push Press",
+      "url": null
+    },
+    "COM-075": {
+      "name": "DB Romanian Deadlift to Alternate Biceps Curls",
+      "url": null
+    },
+    "COM-076": {
+      "name": "DB Hang Clean to Front Squat to Push Press",
+      "url": null
+    },
+    "COM-077": {
+      "name": "Renegade Row + Push-up",
+      "url": null
+    },
+    "COM-078": {
+      "name": "KB Turkish Get-Up",
+      "url": null
+    },
+    "COM-079": {
+      "name": "DB Reverse Lunge to Biceps Curl",
+      "url": null
+    },
+    "COM-080": {
+      "name": "KB Swing to Goblet Squat",
+      "url": null
+    },
+    "CON-081": {
+      "name": "Jump Squat → Fentes Sautées → KB Swing",
+      "url": null
+    },
+    "CON-082": {
+      "name": "Barbell Bear Complex",
+      "url": null
+    },
+    "CON-083": {
+      "name": "DB Thruster → Renegade Row → Farmer Carry",
+      "url": null
+    },
+    "CON-084": {
+      "name": "Burpee Pull-up → Jump Squat → Explosive Push-up (AMRAP)",
+      "url": null
+    },
+    "CON-131": {
+      "name": "Cindy (AMRAP 20 min)",
+      "url": null
+    },
+    "CON-132": {
+      "name": "Circuit Jump Squat → Pompes → Fentes alternées (3 tours)",
+      "url": null
+    },
+    "CON-133": {
+      "name": "Chelsea (EMOM 30 min)",
+      "url": null
+    },
+    "CON-134": {
+      "name": "Circuit Spiderman → Burpees → Tractions australiennes (4 tours)",
+      "url": null
+    },
+    "COR-055": {
+      "name": "Leg Raises (Roman Chair)",
+      "url": null
+    },
+    "COR-056": {
+      "name": "Leg Raises (Bar)",
+      "url": null
+    },
+    "COR-057": {
+      "name": "Ab Wheel Rollout",
+      "url": null
+    },
+    "COR-058": {
+      "name": "Landmine Twists",
+      "url": null
+    },
+    "COR-059": {
+      "name": "Kneeling Cable Crunch",
+      "url": null
+    },
+    "COR-060": {
+      "name": "Seated Good Morning",
+      "url": null
+    },
+    "COR-061": {
+      "name": "Hip Flexor KB Raises",
+      "url": null
+    },
+    "COR-062": {
+      "name": "Starfish Crunch",
+      "url": null
+    },
+    "COR-063": {
+      "name": "Russian Twist (HIIT)",
+      "url": null
+    },
+    "COR-064": {
+      "name": "Mountain Climbers",
+      "url": null
+    },
+    "COR-065": {
+      "name": "Plank to Downward Dog",
+      "url": null
+    },
+    "COR-066": {
+      "name": "Bicycle Crunches",
+      "url": null
+    },
+    "COR-067": {
+      "name": "Bear Crawl",
+      "url": null
+    },
+    "COR-110": {
+      "name": "Weighted Plank",
+      "url": null
+    },
+    "COR-111": {
+      "name": "Weighted Dead Bug",
+      "url": null
+    },
+    "COR-112": {
+      "name": "Kneeling Cable Fallout",
+      "url": null
+    },
+    "COR-113": {
+      "name": "Weighted Crunch",
+      "url": null
+    },
+    "COR-114": {
+      "name": "Weighted Decline Crunch",
+      "url": null
+    },
+    "COR-115": {
+      "name": "Cable Reverse Crunch",
+      "url": null
+    },
+    "COR-116": {
+      "name": "Half-Kneeling Pallof Press",
+      "url": null
+    },
+    "COR-117": {
+      "name": "Cable Woodchopper (High to Low)",
+      "url": null
+    },
+    "COR-118": {
+      "name": "Suitcase Carry",
+      "url": null
+    },
+    "COR-119": {
+      "name": "Weighted Side Plank",
+      "url": null
+    },
+    "COR-120": {
+      "name": "Weighted Hanging Leg Raise",
+      "url": null
+    },
+    "COR-121": {
+      "name": "Weighted Hollow Body Hold",
+      "url": null
+    },
+    "EXP-068": {
+      "name": "EMOM KB Swings",
+      "url": null
+    },
+    "EXP-069": {
+      "name": "Box Squat into Jump (Barbell)",
+      "url": null
+    },
+    "EXP-070": {
+      "name": "Hex Bar Jump Deadlift",
+      "url": null
+    },
+    "EXP-071": {
+      "name": "Alternating Rotational Swings",
+      "url": null
+    },
+    "EXP-072": {
+      "name": "EMOM KB Snatch",
+      "url": null
+    },
+    "EXP-073": {
+      "name": "Jump Rope",
+      "url": null
+    },
+    "FIN-102": {
+      "name": "Burpees",
+      "url": null
+    },
+    "FIN-103": {
+      "name": "Jump Squats",
+      "url": null
+    },
+    "FIN-104": {
+      "name": "Fentes Sautées",
+      "url": null
+    },
+    "FIN-105": {
+      "name": "Jump Rope",
+      "url": null
+    },
+    "FIN-106": {
+      "name": "KB Swings (Finisher)",
+      "url": null
+    },
+    "FIN-107": {
+      "name": "KB Snatch (Finisher)",
+      "url": null
+    },
+    "FIN-108": {
+      "name": "Battle Rope (Alternating)",
+      "url": null
+    },
+    "FIN-109": {
+      "name": "Farmer Carry",
+      "url": null
+    },
+    "LEG-038": {
+      "name": "Goblet Squat",
+      "url": null
+    },
+    "LEG-039": {
+      "name": "Barbell Squat",
+      "url": null
+    },
+    "LEG-040": {
+      "name": "Single Leg Romanian Deadlift",
+      "url": null
+    },
+    "LEG-041": {
+      "name": "Goblet Sumo Squat",
+      "url": null
+    },
+    "LEG-042": {
+      "name": "Barbell Sumo Squat",
+      "url": null
+    },
+    "LEG-043": {
+      "name": "Hip Thrust (Barbell)",
+      "url": null
+    },
+    "LEG-044": {
+      "name": "Deadlift (Conventional)",
+      "url": null
+    },
+    "LEG-045": {
+      "name": "Sumo Deadlift",
+      "url": null
+    },
+    "LEG-046": {
+      "name": "Suitcase Deadlift",
+      "url": null
+    },
+    "LEG-047": {
+      "name": "Zercher Squat",
+      "url": null
+    },
+    "LEG-048": {
+      "name": "Landmine Deadlift",
+      "url": null
+    },
+    "LEG-049": {
+      "name": "Bulgarian Split Squat",
+      "url": null
+    },
+    "LEG-050": {
+      "name": "Seated Calf Raises",
+      "url": null
+    },
+    "LEG-051": {
+      "name": "Calf Raises (Standing)",
+      "url": null
+    },
+    "LEG-052": {
+      "name": "Single Leg Bridges",
+      "url": null
+    },
+    "LEG-053": {
+      "name": "Frog Hip Thrust",
+      "url": null
+    },
+    "LEG-054": {
+      "name": "Side Leg Raises",
+      "url": null
+    },
+    "LEG-126": {
+      "name": "Air Squat",
+      "url": null
+    },
+    "LEG-127": {
+      "name": "Walking Lunges (Poids de corps)",
+      "url": null
+    },
+    "LEG-128": {
+      "name": "Step-ups (Banc)",
+      "url": null
+    },
+    "LEG-129": {
+      "name": "Pistol Squat (Assisté)",
+      "url": null
+    },
+    "LEG-130": {
+      "name": "Nordic Hamstring Curl",
+      "url": null
+    },
+    "PUL-015": {
+      "name": "Pull-over (DB)",
+      "url": null
+    },
+    "PUL-016": {
+      "name": "Pull-ups (Pronation)",
+      "url": null
+    },
+    "PUL-017": {
+      "name": "Chin-ups (Supination)",
+      "url": null
+    },
+    "PUL-018": {
+      "name": "Negative Pull-ups",
+      "url": null
+    },
+    "PUL-019": {
+      "name": "Scapular Pull-ups",
+      "url": null
+    },
+    "PUL-020": {
+      "name": "Barbell Rows",
+      "url": null
+    },
+    "PUL-021": {
+      "name": "T-Bar / Landmine Rows",
+      "url": null
+    },
+    "PUL-022": {
+      "name": "Australian Pull-ups / TRX Rows",
+      "url": null
+    },
+    "PUL-023": {
+      "name": "Single Arm Dumbbell Row",
+      "url": null
+    },
+    "PUL-024": {
+      "name": "Face Pulls",
+      "url": null
+    },
+    "PUL-025": {
+      "name": "Y Raises & W Raises (Plates)",
+      "url": null
+    },
+    "PUL-026": {
+      "name": "Prone Paddle Simulator",
+      "url": null
+    },
+    "PUL-027": {
+      "name": "Straight Arm Lat Pulldown",
+      "url": null
+    },
+    "PUL-125": {
+      "name": "Ring Rows",
+      "url": null
+    },
+    "PUS-001": {
+      "name": "Barbell Bench Press",
+      "url": null
+    },
+    "PUS-002": {
+      "name": "Dumbbell Bench Press",
+      "url": null
+    },
+    "PUS-003": {
+      "name": "Ring Dips",
+      "url": null
+    },
+    "PUS-004": {
+      "name": "Dips",
+      "url": null
+    },
+    "PUS-005": {
+      "name": "Straight Bar Dips",
+      "url": null
+    },
+    "PUS-006": {
+      "name": "Overhead Press (Barbell)",
+      "url": null
+    },
+    "PUS-007": {
+      "name": "Push-ups (Endurance Reps)",
+      "url": null
+    },
+    "PUS-008": {
+      "name": "Close Grip Bench Press",
+      "url": null
+    },
+    "PUS-009": {
+      "name": "Close Grip Push-ups",
+      "url": null
+    },
+    "PUS-010": {
+      "name": "Ring Negative Muscle-ups (Band)",
+      "url": null
+    },
+    "PUS-011": {
+      "name": "Negative Muscle-ups",
+      "url": null
+    },
+    "PUS-012": {
+      "name": "Ring Support Hold",
+      "url": null
+    },
+    "PUS-013": {
+      "name": "Knee Push-ups",
+      "url": null
+    },
+    "PUS-014": {
+      "name": "Lateral Raises (Incline Posture)",
+      "url": null
+    },
+    "PUS-122": {
+      "name": "Pike Push-ups",
+      "url": null
+    },
+    "PUS-123": {
+      "name": "Ring Push-ups",
+      "url": null
+    },
+    "PUS-124": {
+      "name": "Archer Push-ups",
+      "url": null
+    },
+    "WAR-085": {
+      "name": "90/90 Hip Stretch",
+      "url": null
+    },
+    "WAR-086": {
+      "name": "Ankle Mobilization (Wall)",
+      "url": null
+    },
+    "WAR-087": {
+      "name": "Hip Airplanes",
+      "url": null
+    },
+    "WAR-088": {
+      "name": "Pause Box Squat (Empty Bar)",
+      "url": null
+    },
+    "WAR-089": {
+      "name": "Cat-Camel",
+      "url": null
+    },
+    "WAR-090": {
+      "name": "Hip Hinge Wall Drill",
+      "url": null
+    },
+    "WAR-091": {
+      "name": "Banded Good Morning",
+      "url": null
+    },
+    "WAR-092": {
+      "name": "Band Pull-Aparts",
+      "url": null
+    },
+    "WAR-093": {
+      "name": "Serratus Push-ups",
+      "url": null
+    },
+    "WAR-094": {
+      "name": "Shoulder CARs",
+      "url": null
+    },
+    "WAR-095": {
+      "name": "Cuban Press (Light)",
+      "url": null
+    },
+    "WAR-096": {
+      "name": "Dead Hang Passif",
+      "url": null
+    },
+    "WAR-097": {
+      "name": "Scapular Retractions (Dead Hang)",
+      "url": null
+    },
+    "WAR-098": {
+      "name": "Band Dislocates",
+      "url": null
+    },
+    "WAR-099": {
+      "name": "Thoracic Extension (Foam Roller)",
+      "url": null
+    },
+    "WAR-100": {
+      "name": "Wall Slides",
+      "url": null
+    },
+    "WAR-101": {
+      "name": "L-Raises with Disk",
+      "url": null
+    }
+  }
+}

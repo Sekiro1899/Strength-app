@@ -13,8 +13,14 @@ import {
   ProgressBar,
   Screen,
 } from "../components/ui";
+import { ExerciseVideo } from "../components/ExerciseVideo";
 import { ACCENT_GRADIENT, COLORS, GRADIENT_DIRECTION } from "../lib/theme";
-import { completeSession, fetchDashboard, fetchSession } from "../lib/data";
+import {
+  completeSession,
+  exerciseVideoUrl,
+  fetchDashboard,
+  fetchSession,
+} from "../lib/data";
 import type { BlockType, ExerciseBlock, WorkoutSession } from "../lib/types";
 
 const BLOCK_ORDER: { field: keyof WorkoutSession; type: BlockType; name: string }[] = [
@@ -211,6 +217,12 @@ export default function TrackingScreen() {
                 : ""}
             </Text>
           </View>
+
+          {/* Démonstration : la forme du mouvement avant de le charger. */}
+          <ExerciseVideo
+            name={current.block.name}
+            videoUrl={exerciseVideoUrl(current.block.exercise_id)}
+          />
 
           {/* Bloc sans saisie : on valide, on ne mesure pas. */}
           {logResults ? null : (

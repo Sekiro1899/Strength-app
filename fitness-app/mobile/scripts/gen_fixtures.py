@@ -95,7 +95,8 @@ for q in quest["questions"]:
 EX_KEYS = ["id","category","name","muscles_primary","muscles_secondary","intent","level",
            "bodyweight_compatible","material_required","equipment_tags","locations",
            "warmup_target","description",
-           "exercise_type","movement_pattern","target_programs","image_url"]
+           "exercise_type","movement_pattern","target_programs",
+           "video_url","image_url","prescribed_sets","prescribed_duration_sec"]
 ex_out = [{k: e.get(k) for k in EX_KEYS} for e in exercises]
 
 # ---- Feedback poll : questions + options aplaties ----

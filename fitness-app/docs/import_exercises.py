@@ -184,6 +184,19 @@ MOVEMENT_PATTERNS = {
 }
 
 
+# ─── Formats imposés par l'exercice ───
+
+# Un benchmark porte son propre format : 20 minutes d'AMRAP ne se découpent pas
+# en séries standard. (tours, durée en secondes)
+PRESCRIPTIONS = {
+    "CON-084": (1, 600),    # Burpee Pull-up → Jump Squat → Push-up (AMRAP)
+    "CON-131": (1, 1200),   # Cindy — AMRAP 20 min
+    "CON-132": (3, 180),    # Circuit 3 tours
+    "CON-133": (1, 1800),   # Chelsea — EMOM 30 min
+    "CON-134": (4, 200),    # Circuit Spiderman 4 tours
+}
+
+
 def convert(row) -> dict:
     raw_cat = cell(row, C_CAT).lower()
     category = CATEGORIES.get(raw_cat)
@@ -218,6 +231,8 @@ def convert(row) -> dict:
         "target_programs": targets,
         "exercise_type": TYPES.get(cell(row, C_TYPE).lower()),
         "movement_pattern": MOVEMENT_PATTERNS.get(cell(row, C_ID)),
+        "prescribed_sets": PRESCRIPTIONS.get(cell(row, C_ID), (None, None))[0],
+        "prescribed_duration_sec": PRESCRIPTIONS.get(cell(row, C_ID), (None, None))[1],
         "warmup_target": [slug(w) for w in split_list(cell(row, C_WARMUP), ",")],
         "video_url": cell(row, C_VIDEO) or None,
         "image_url": None,  # rempli par docs/fetch_exercise_images.py
@@ -257,6 +272,9 @@ def main() -> None:
                 # image_url est rempli par un script séparé : ne pas le perdre.
                 if old.get("image_url") and not by_id[old["id"]].get("image_url"):
                     by_id[old["id"]]["image_url"] = old["image_url"]
+                # video_url est maintenu dans data/09_exercise_videos.json.
+                if old.get("video_url") and not by_id[old["id"]].get("video_url"):
+                    by_id[old["id"]]["video_url"] = old["video_url"]
             else:
                 exercises.append(old)
                 kept += 1

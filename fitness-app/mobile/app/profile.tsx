@@ -15,7 +15,7 @@ import {
 } from "../components/ui";
 import { BodyWeightCard } from "../components/BodyWeightCard";
 import { fetchAdminAccess } from "../lib/admin";
-import { fetchProfile, signOut, updateBodyWeight } from "../lib/data";
+import { fetchProfile, isDemoMode, resetDemoAccount, signOut, updateBodyWeight } from "../lib/data";
 import type { ProfileView } from "../lib/data";
 import { AGE_LABELS, LEVEL_LABELS } from "../lib/profile";
 import { PERSONA_COLORS } from "../lib/theme";
@@ -102,6 +102,20 @@ export default function ProfileScreen() {
               label="Administration"
               variant="ghost"
               onPress={() => router.push("/admin")}
+            />
+          ) : null}
+          {/* Le profil de démo survit aux déploiements : sans ce bouton, on
+              reteste l'onboarding sur un compte créé sous d'anciennes règles
+              et on lit un programme que le moteur actuel n'attribuerait plus. */}
+          {isDemoMode() ? (
+            <Button
+              label="Recommencer le profilage"
+              variant="ghost"
+              onPress={() => {
+                resetDemoAccount();
+                refresh();
+                router.replace("/");
+              }}
             />
           ) : null}
           <Button

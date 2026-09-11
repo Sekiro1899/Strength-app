@@ -79,6 +79,7 @@ async def generate_workout(request: WorkoutRequest) -> WorkoutResponse:
         week_number=request.week_number,
         objective=profile["objective"],
         strength_oriented=profile["strength_oriented"],
+        avoids_finisher=profile["avoids_finisher"],
         age_band=profile["age_band"],
         session_minutes_max=profile["session_minutes_max"],
         sessions_per_week=profile["sessions_per_week"],
@@ -196,6 +197,9 @@ def _fetch_profile(user_id: str, persona: dict) -> dict:
         # Vient chercher de la charge et de la masse, pas de la sueur : un
         # objectif de musculation (q3) ET un refus de l'intensité cardio (q9).
         # À ce profil, un finisher en AMRAP n'apporte rien qu'il ait demandé.
+        # Refuser le cardio est une réponse à soi seule (q9), indépendante de
+        # l'objectif déclaré.
+        "avoids_finisher": intensity_style == "prefers_strength_style",
         "strength_oriented": (
             objective in ("aesthetics", "strength")
             and intensity_style == "prefers_strength_style"

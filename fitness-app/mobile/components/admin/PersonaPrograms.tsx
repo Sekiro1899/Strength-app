@@ -16,7 +16,7 @@ import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { MonoLabel } from "../ui";
 import { PERSONAS, PROGRAMS, PROGRAM_PHASES } from "../../lib/fixtures";
-import { cycleWeeks, scalePhases } from "../../lib/plan";
+import { cycleSessions, cycleWeeks, phaseSpan, scalePhases } from "../../lib/plan";
 import { resolveRouting } from "../../lib/router";
 import type { Objective } from "../../lib/profile";
 import { PERSONA_COLORS } from "../../lib/theme";
@@ -43,11 +43,6 @@ const CONTEXTS = [
 
 const programName = (id: string) => PROGRAMS.find((p) => p.id === id)?.name ?? id;
 
-/** « 45 à 60 min », mais « 60 min » quand les deux bornes se rejoignent. */
-function range(min: number, max: number, unit = ""): string {
-  return (min === max ? `${min} ${unit}` : `${min} à ${max} ${unit}`).trim();
-}
-
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <View className="flex-row items-baseline justify-between py-2 border-b border-line/50">
@@ -70,7 +65,7 @@ function CycleTable({ program }: { program: Program }) {
         {FREQUENCIES.map((frequency) => {
           const weeks = cycleWeeks(program, frequency);
           const phases = PROGRAM_PHASES.filter((p) => p.program_id === program.id);
-          const scaled = scalePhases(phases, program.duration_weeks ?? weeks, weeks);
+          const scaled = scalePhases(phases, phaseSpan(phases, weeks), weeks);
           return (
             <View
               key={frequency}
@@ -87,9 +82,8 @@ function CycleTable({ program }: { program: Program }) {
         })}
       </View>
       <Text className="font-body text-[10px] text-muted mt-1.5">
-        {program.session_structure === "circuit"
-          ? "Structure en circuit : la durée suit directement la fréquence."
-          : "Structure en split : le nombre total de séances reste constant, la durée s'ajuste."}
+        {cycleSessions(program)} séances dans tous les cas — c'est la durée qui
+        s'étire ou se resserre, jamais le volume.
       </Text>
     </View>
   );
@@ -153,26 +147,10 @@ function ProgramCard({ program }: { program: Program }) {
             <Row label="Identifiant" value={program.id} />
             <Row label="Objectif" value={program.objective} />
             <Row label="Structure" value={program.session_structure} />
-            <Row
-              label="Durée de référence"
-              value={`${program.duration_weeks ?? "—"} semaines`}
-            />
-            <Row
-              label="Fréquence"
-              value={range(
-                program.frequency_per_week_min,
-                program.frequency_per_week_max,
-                "par semaine",
-              )}
-            />
-            <Row
-              label="Séance"
-              value={range(
-                program.session_duration_min,
-                program.session_duration_max,
-                "min",
-              )}
-            />
+            {/* Ni durée, ni fréquence, ni durée de séance : un programme
+                n'en porte plus. Ce qu'il porte, c'est un ARC — le nombre de
+                séances nécessaire pour traverser ses phases. */}
+            <Row label="Arc du cycle" value={`${cycleSessions(program)} séances`} />
             <Row
               label="Répétitions"
               value={
@@ -259,9 +237,10 @@ export function PersonaPrograms() {
   return (
     <View>
       <Text className="font-body text-[12px] text-muted mb-4">
-        Le programme se déduit des réponses au questionnaire. La durée affichée
-        n'est pas celle de la fiche programme : c'est celle que le planificateur
-        produit réellement, fréquence par fréquence.
+        Un programme porte une NATURE — structure, fourchettes de répétitions,
+        arc de phases. Ni durée, ni rythme, ni durée de séance : ceux-là
+        viennent du questionnaire, et les écrans du pratiquant n'affichent
+        jamais autre chose que son propre plan.
       </Text>
 
       <RoutingTable />

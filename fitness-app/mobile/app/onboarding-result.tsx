@@ -59,17 +59,17 @@ export default function OnboardingResultScreen() {
     );
   }
 
-  const { persona, program, scores, cycleWeeks, routingReason } = result;
+  const { persona, program, scores, cycleWeeks, routingReason, sessionsPerWeek, sessionMinutesMax } =
+    result;
   const tint = personaColor(persona.code);
   const gradient = personaGradient(persona.code);
   const maxScore = Math.max(...Object.values(scores), 1);
 
-  // Le cycle réellement planifié : il dépend de la fréquence annoncée.
+  // Les trois pastilles décrivent le PLAN DU PRATIQUANT, pas la fiche du
+  // programme. Afficher « 3×/sem » à quelqu'un qui vient de répondre « 4 à 5 »
+  // le contredit sur l'écran même où on lui annonce son programme.
   const duration = program.is_continuous ? "Continu" : `${cycleWeeks} sem`;
-  const frequency =
-    program.frequency_per_week_min === program.frequency_per_week_max
-      ? `${program.frequency_per_week_min}×`
-      : `${program.frequency_per_week_min}-${program.frequency_per_week_max}×`;
+  const frequency = `${sessionsPerWeek}×`;
 
   return (
     <Screen
@@ -126,11 +126,14 @@ export default function OnboardingResultScreen() {
         <View className="flex-row gap-2.5">
           <MetaPill label="Durée" value={duration} />
           <MetaPill label="Fréq" value={`${frequency}/sem`} />
-          <MetaPill
-            label="Séance"
-            value={`${program.session_duration_min}′`}
-          />
+          <MetaPill label="Séance" value={`${sessionMinutesMax}′ max`} />
         </View>
+
+        {/* Pourquoi ce programme. Un choix qu'on ne comprend pas se lit comme
+            une erreur — et c'en est parfois une. */}
+        <Text className="font-body text-[12px] text-muted mt-4 leading-4">
+          {routingReason}
+        </Text>
       </Card>
 
       {/* Détail du scoring — rend l'attribution lisible et débuggable */}

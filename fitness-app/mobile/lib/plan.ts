@@ -89,19 +89,32 @@ export function phaseForWeek(
  * adaptations cardio sont rapides mais la lassitude aussi, et la courbe n'y
  * suit pas le simple produit semaines x séances.
  */
-const CIRCUIT_WEEKS_BY_FREQUENCY: Record<number, number> = {
-  2: 10,
-  3: 7,
-  4: 4,
-  5: 4,
+/**
+ * Volume d'un cycle, compté en SÉANCES.
+ *
+ * Un programme ne porte plus de durée. « Strength Focus, 14 semaines » était
+ * une promesse que rien ne tenait : la durée réelle dépend du rythme, et
+ * l'afficher comme une propriété du programme contredisait la réponse du
+ * pratiquant sur l'écran même où on la lui annonçait.
+ *
+ * Ce qu'un programme porte, c'est un ARC : un nombre de séances nécessaire
+ * pour traverser ses phases et faire monter la charge. C'est cet arc qui est
+ * fixe ; la durée en semaines s'en déduit.
+ *
+ * Les valeurs viennent des durées historiques ramenées à trois séances par
+ * semaine, arrondies. La force demande le plus de séances — la charge maximale
+ * monte lentement et chaque palier doit être répété ; le cardio le moins, les
+ * adaptations y sont rapides et la lassitude aussi.
+ */
+const CYCLE_SESSIONS_BY_OBJECTIVE: Record<string, number> = {
+  max_strength: 36,
+  hypertrophy: 30,
+  bodyweight_hypertrophy: 27,
+  athletic_performance: 24,
+  cardio_efficiency: 21,
 };
 
-/**
- * Les durées inscrites sur les programmes en split supposent trois séances par
- * semaine. C'est la référence à partir de laquelle le cycle s'étire ou se
- * resserre.
- */
-const REFERENCE_SESSIONS_PER_WEEK = 3;
+const DEFAULT_CYCLE_SESSIONS = 27;
 
 /**
  * Une séance par semaine ne construit rien : le temps de récupération dépasse
@@ -113,19 +126,31 @@ export const MIN_SESSIONS_PER_WEEK = 2;
 const MIN_CYCLE_WEEKS = 4;
 const MAX_CYCLE_WEEKS = 16;
 
+/** Le nombre de séances que le cycle contient, quel que soit le rythme. */
+export function cycleSessions(program: Program): number {
+  return CYCLE_SESSIONS_BY_OBJECTIVE[program.objective] ?? DEFAULT_CYCLE_SESSIONS;
+}
+
+/**
+ * La durée du cycle en semaines : l'arc du programme divisé par le rythme que
+ * le pratiquant s'est dit prêt à tenir. Rien d'autre.
+ */
 export function cycleWeeks(program: Program, sessionsPerWeek: number): number {
   const perWeek = Math.max(sessionsPerWeek, MIN_SESSIONS_PER_WEEK);
-
-  if (program.session_structure === "circuit") {
-    const table = CIRCUIT_WEEKS_BY_FREQUENCY;
-    return table[Math.min(perWeek, 5)] ?? table[5];
-  }
-
-  // Ailleurs, le volume total du cycle est conservé : autant de séances,
-  // réparties sur autant de semaines qu'il en faut.
-  const totalSessions = (program.duration_weeks ?? 8) * REFERENCE_SESSIONS_PER_WEEK;
-  const weeks = Math.round(totalSessions / perWeek);
+  const weeks = Math.round(cycleSessions(program) / perWeek);
   return Math.min(Math.max(weeks, MIN_CYCLE_WEEKS), MAX_CYCLE_WEEKS);
+}
+
+/**
+ * Longueur d'origine de l'arc, lue sur les phases elles-mêmes.
+ *
+ * On s'appuyait sur `program.duration_weeks` — la propriété qu'on vient
+ * justement de retirer du vocabulaire. Les phases portent déjà leur durée :
+ * leur somme EST l'arc, sans détour.
+ */
+export function phaseSpan(phases: ProgramPhase[], fallback: number): number {
+  const span = phases.reduce((sum, p) => sum + (p.duration_weeks ?? 0), 0);
+  return span > 0 ? span : fallback;
 }
 
 export function scalePhases(
@@ -172,7 +197,7 @@ export function buildSessionPlan(
   );
   const weeks = cycleWeeks(program, perWeek);
   // Le cycle raccourci garde toutes ses phases, comprimées.
-  const scaled = scalePhases(phases, program.duration_weeks ?? weeks, weeks);
+  const scaled = scalePhases(phases, phaseSpan(phases, weeks), weeks);
   const pattern = WEEKDAYS[perWeek] ?? WEEKDAYS[3];
 
   const anchor = mondayOf(startDate);
@@ -248,8 +273,8 @@ export function overdueCount(
 
 /** Réglages de durée de cycle, exposés au référentiel de l'admin. */
 export const PLAN_TUNING = {
-  circuitWeeksByFrequency: CIRCUIT_WEEKS_BY_FREQUENCY,
-  referenceSessionsPerWeek: REFERENCE_SESSIONS_PER_WEEK,
+  cycleSessionsByObjective: CYCLE_SESSIONS_BY_OBJECTIVE,
+  defaultCycleSessions: DEFAULT_CYCLE_SESSIONS,
   minSessionsPerWeek: MIN_SESSIONS_PER_WEEK,
   minCycleWeeks: MIN_CYCLE_WEEKS,
   maxCycleWeeks: MAX_CYCLE_WEEKS,

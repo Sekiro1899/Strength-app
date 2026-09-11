@@ -1297,7 +1297,10 @@ export function buildFinisher(ctx: BuildContext): ExerciseBlock[] {
   // Ce profil a répondu que transpirer n'était pas son sujet, et qu'il
   // préférait la contraction et les temps de repos (q9). Un finisher en AMRAP
   // ne lui apporte rien qu'il soit venu chercher — on lui rend le temps.
-  if (ctx.profile.strengthOriented) return [];
+  // Le pratiquant a dit que transpirer n'était pas son sujet : un AMRAP en
+  // fin de séance ne lui apporte rien qu'il ait demandé. Sa réponse suffit —
+  // on ne lui demande pas en plus d'avoir le « bon » objectif.
+  if (ctx.profile.avoidsFinisher) return [];
 
   const policy = sessionPolicy(ctx);
   // Énergie au plus bas : on supprime le finisher plutôt que de le bâcler.

@@ -118,6 +118,24 @@ export async function signIn(
   };
 }
 
+/**
+ * Efface le compte de démo et tout ce qui s'y rattache.
+ *
+ * Existe parce que l'état de démo vit en `localStorage` et SURVIT aux
+ * déploiements : un compte créé sous une version antérieure garde le
+ * programme que cette version lui avait attribué, et continue de l'afficher
+ * même après un changement de règles. Sans ce bouton, il faut vider le
+ * stockage du navigateur à la main pour retester l'onboarding.
+ *
+ * Sans effet hors mode démo — en live, on ne détruit pas un compte depuis un
+ * écran de profil.
+ */
+export function resetDemoAccount(): boolean {
+  if (!isDemoMode()) return false;
+  demo.resetDemo();
+  return true;
+}
+
 export async function signOut(): Promise<void> {
   if (isDemoMode()) {
     demo.demoSignOut();
@@ -208,6 +226,8 @@ export async function submitQuestionnaire(
       routingReason: resolveRouting(
         routingInputFromProfile(profile, environmentsFromAnswers(answers)),
       ).reason,
+      sessionsPerWeek: profile.sessionsPerWeek,
+      sessionMinutesMax: profile.sessionMinutesMax,
     };
   }
 
@@ -278,6 +298,8 @@ export async function submitQuestionnaire(
     scores,
     cycleWeeks: cycleWeeks(program as Program, liveProfile.sessionsPerWeek),
     routingReason: routing.reason,
+    sessionsPerWeek: liveProfile.sessionsPerWeek,
+    sessionMinutesMax: liveProfile.sessionMinutesMax,
   };
 }
 
@@ -302,6 +324,8 @@ export async function fetchOnboardingResult(
       routingReason: resolveRouting(
         routingInputFromProfile(profile, environmentsFromAnswers(user.questionnaire_answers ?? {})),
       ).reason,
+      sessionsPerWeek: profile.sessionsPerWeek,
+      sessionMinutesMax: profile.sessionMinutesMax,
     };
   }
 
@@ -336,6 +360,8 @@ export async function fetchOnboardingResult(
     routingReason: resolveRouting(
       routingInputFromProfile(profile, environmentsFromAnswers(user.questionnaire_answers ?? {})),
     ).reason,
+    sessionsPerWeek: profile.sessionsPerWeek,
+    sessionMinutesMax: profile.sessionMinutesMax,
   };
 }
 
@@ -436,6 +462,8 @@ export async function fetchDashboard(
       previewExercises: await previewExerciseNames(nextSession.focus, program.id),
       totalPlanned: plan.length,
       cycleWeeks: cycleWeeks(program, profileFromUser(demo.demoCurrentUser()).sessionsPerWeek),
+      sessionsPerWeek: profileFromUser(demo.demoCurrentUser()).sessionsPerWeek,
+      sessionMinutesMax: profileFromUser(demo.demoCurrentUser()).sessionMinutesMax,
       cycleComplete: demo.demoCycleComplete(),
       overdue: overdueCount(plan, done, now),
     };
@@ -473,6 +501,7 @@ export async function fetchDashboard(
   if (programRes.error) throw new Error(programRes.error.message);
 
   const program = programRes.data as Program;
+  const dashProfile = profileFromUser(await getCurrentUser(userId));
   const nextSession = previewFromPlan(null, userProgram, program);
 
   return {
@@ -488,7 +517,9 @@ export async function fetchDashboard(
     completedCount: userProgram.total_sessions_completed,
     previewExercises: await previewExerciseNames(nextSession.focus, program.id),
     totalPlanned: userProgram.total_sessions_planned ?? 0,
-    cycleWeeks: cycleWeeks(program, profileFromUser(await getCurrentUser(userId)).sessionsPerWeek),
+    cycleWeeks: cycleWeeks(program, dashProfile.sessionsPerWeek),
+    sessionsPerWeek: dashProfile.sessionsPerWeek,
+    sessionMinutesMax: dashProfile.sessionMinutesMax,
     cycleComplete: userProgram.status === "completed",
     overdue: 0,
   };

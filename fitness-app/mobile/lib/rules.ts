@@ -228,6 +228,11 @@ export const RULE_SECTIONS: RuleSection[] = [
         source: "textbook.TEXTBOOK_PROGRAMS · engine.buildTextbookMain",
       },
       {
+        title: "Le finisher cardio suit la réponse, pas l'étiquette",
+        text: "Avoir répondu « transpirer, pas vraiment mon truc » (q9) suffit à supprimer le finisher. C'était auparavant conditionné à un objectif de musculation EN PLUS : quelqu'un visant la performance et refusant le cardio recevait quand même un AMRAP en fin de séance.",
+        source: "profile.avoidsFinisher · engine.buildFinisher",
+      },
+      {
         title: "À qui ils sont proposés",
         text: "Aux profils orientés musculation qui ont répondu que transpirer n'était pas leur sujet. Plus souvent aux jeunes et aux débutants, à qui ces programmes rendent le plus service. Chez eux, le finisher saute.",
         values: [
@@ -332,25 +337,23 @@ export const RULE_SECTIONS: RuleSection[] = [
     key: "cycle",
     title: "Durée du cycle",
     intro:
-      "Un programme n'a pas une durée fixe : il a un VOLUME. La durée en découle selon la disponibilité déclarée. Une séance par semaine n'est plus planifiable.",
+      "Un programme ne porte NI durée, NI rythme, NI durée de séance. Il porte une nature — une structure, des fourchettes de répétitions, un arc de phases. Tout le reste vient du questionnaire.",
     rules: [
       {
-        title: "Programmes cardio et circuits",
-        text: "Repos courts, sollicitation métabolique : le cycle est plus court et suit directement la fréquence.",
-        values: Object.entries(PLAN_TUNING.circuitWeeksByFrequency).map(([freq, weeks]) => ({
-          label: `${freq} séances/semaine`,
-          value: `${weeks} semaines`,
-        })),
-        source: "plan.cycleWeeks",
+        title: "Le cycle se compte en séances, pas en semaines",
+        text: "« Strength Focus, 14 semaines » était une promesse que rien ne tenait : la durée réelle dépend du rythme. Ce qui est fixe, c'est le nombre de séances nécessaire pour traverser les phases et faire monter la charge. La force en demande le plus — la charge maximale monte lentement, chaque palier doit être répété ; le cardio le moins, les adaptations y sont rapides et la lassitude aussi.",
+        values: Object.entries(PLAN_TUNING.cycleSessionsByObjective).map(
+          ([objective, sessions]) => ({
+            label: objective,
+            value: `${sessions} séances`,
+          }),
+        ),
+        source: "plan.cycleSessions",
       },
       {
-        title: "Programmes en split",
-        text: "Le nombre total de séances du cycle est constant ; c'est la durée qui s'étire ou se resserre pour le contenir.",
+        title: "La durée s'en déduit",
+        text: "Semaines = séances de l'arc ÷ rythme déclaré. Rien d'autre n'entre dans le calcul.",
         values: [
-          {
-            label: "Référence",
-            value: `durée d'origine × ${PLAN_TUNING.referenceSessionsPerWeek} séances/semaine`,
-          },
           { label: "Plancher", value: `${PLAN_TUNING.minCycleWeeks} semaines` },
           { label: "Plafond", value: `${PLAN_TUNING.maxCycleWeeks} semaines` },
           {
@@ -361,8 +364,18 @@ export const RULE_SECTIONS: RuleSection[] = [
         source: "plan.cycleWeeks",
       },
       {
+        title: "Le rythme et le créneau sont ceux du pratiquant",
+        text: "q6 donne la fréquence, q5 le créneau. Aucun programme ne les impose, et aucun écran n'affiche les valeurs de la fiche à leur place — c'était la cause des « 3×/sem » annoncés à quelqu'un qui venait de répondre « 4 à 5 ».",
+        source: "profile.sessionsPerWeek · profile.sessionMinutesMax",
+      },
+      {
+        title: "Le routeur ne regarde pas la fréquence",
+        text: "Écarter un programme parce qu'il « est écrit pour trois séances » reviendrait à réintroduire la contrainte qu'on vient de retirer. L'objectif, le lieu et le créneau choisissent ; le rythme s'applique ensuite, quel que soit le programme.",
+        source: "router.resolveRouting",
+      },
+      {
         title: "Aucune phase n'est amputée",
-        text: "Raccourcir un cycle comprimait les dernières phases hors du calendrier : le deload et les semaines de pic n'étaient jamais atteints. Les durées de phase sont désormais redistribuées au prorata, une semaine minimum chacune.",
+        text: "Raccourcir un cycle comprimait les dernières phases hors du calendrier : le deload et les semaines de pic n'étaient jamais atteints. Les durées de phase sont redistribuées au prorata, une semaine minimum chacune.",
         source: "plan.scalePhases",
       },
     ],

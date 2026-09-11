@@ -174,9 +174,12 @@ export default function FeedbackScreen() {
                     : `${redirected.duration_weeks} sem`
                 }
               />
+              {/* « type » comme pour la durée : ce programme n'est pas encore
+                  planifié. Son rythme réel sera celui que le pratiquant a
+                  déclaré pouvoir tenir, pas celui de la fiche. */}
               <MetaPill
                 dark
-                label="Fréq"
+                label="Fréq type"
                 value={`${redirected.frequency_per_week_min}-${redirected.frequency_per_week_max}×`}
               />
             </View>

@@ -14,7 +14,12 @@
  *   q3 objectif     — ce qu'il vient chercher. C'est le critère premier.
  *   q8 lieu         — sans salle, un programme à la barre est inapplicable.
  *   q5 durée        — quarante-cinq minutes excluent les séances longues.
- *   q6 fréquence    — sert d'arbitrage quand deux programmes conviennent.
+ *
+ * La FRÉQUENCE n'entre pas ici, et c'est voulu : un programme ne porte plus de
+ * rythme. Il porte une nature — une structure, des fourchettes, un arc de
+ * phases — et le rythme est celui que le pratiquant a déclaré. Écarter un
+ * programme parce qu'il « est écrit pour trois séances » reviendrait à
+ * réintroduire la contrainte qu'on vient de retirer.
  *
  * Le persona garde son rôle d'identité : il est scoré, affiché, et n'a plus
  * aucun pouvoir sur la génération.
@@ -73,42 +78,37 @@ function hasEquipment(environments: string[]): boolean {
   return environments.some((e) => LOADED_ENVIRONMENTS.has(e));
 }
 
-/**
- * Résout le programme. Toujours une réponse : l'absence d'objectif déclaré
- * retombe sur l'hypertrophie, qui est le cas le plus fréquent et le moins
- * spécialisé — pas sur une erreur, qui bloquerait l'onboarding.
- */
-export function resolveRouting(input: RoutingInput): Routing {
-  const equipped = hasEquipment(input.environments);
-  const pressed = input.sessionMinutesMax <= SHORT_SESSION_MINUTES;
+/** Une liste de candidats, du plus pertinent au moins, pour un contexte donné. */
+interface Candidates {
+  order: string[];
+  reason: string;
+}
 
+function candidatesFor(input: RoutingInput, equipped: boolean, pressed: boolean): Candidates {
   // ── Efficacité : peu de temps, priorité au cardio ──
   if (input.objective === "efficiency") {
     return {
-      programId: PROGRAM_LACTATE,
+      order: [PROGRAM_LACTATE, PROGRAM_ATHLETIC, NO_EQUIPMENT_PROGRAM],
       reason:
-        "Tu cherches à optimiser ta santé et ton cardio en un minimum de temps : Lactate Focus travaille en circuits courts, à repos serrés.",
-      alternatives: [PROGRAM_ATHLETIC, NO_EQUIPMENT_PROGRAM],
+        "Tu cherches à optimiser ta santé et ton cardio en un minimum de temps : les circuits courts à repos serrés sont ce qui t'en donne le plus.",
     };
   }
 
-  // ── Performance et polyvalence : circuits et explosivité ──
+  // ── Performance et polyvalence ──
   if (input.objective === "performance" || input.objective === "complete_athlete") {
-    // Un créneau de quarante-cinq minutes s'accommode mieux d'un circuit
-    // dense que d'une préparation athlétique complète.
     if (pressed) {
       return {
-        programId: PROGRAM_LACTATE,
+        order: [PROGRAM_LACTATE, PROGRAM_ATHLETIC],
         reason:
-          "Tu vises la performance, mais tu disposes de moins de 45 minutes : Lactate Focus t'en donne la densité sans la durée.",
-        alternatives: [PROGRAM_ATHLETIC],
+          "Tu vises la performance, mais tu disposes de moins de 45 minutes : un circuit dense t'en donne la densité sans la durée.",
       };
     }
     return {
-      programId: PROGRAM_ATHLETIC,
+      order: equipped
+        ? [PROGRAM_ATHLETIC, PROGRAM_MUSCLE, PROGRAM_LACTATE]
+        : [PROGRAM_ATHLETIC, NO_EQUIPMENT_PROGRAM, PROGRAM_LACTATE],
       reason:
-        "Tu vises l'explosivité et le fonctionnel : Préparation Athlétique enchaîne complexes et travail explosif.",
-      alternatives: [PROGRAM_LACTATE, PROGRAM_MUSCLE],
+        "Tu vises l'explosivité et le fonctionnel : complexes et travail explosif sont au cœur du programme.",
     };
   }
 
@@ -116,36 +116,57 @@ export function resolveRouting(input: RoutingInput): Routing {
   if (input.objective === "strength") {
     if (!equipped) {
       return {
-        programId: NO_EQUIPMENT_PROGRAM,
+        order: [NO_EQUIPMENT_PROGRAM, PROGRAM_STRENGTH],
         reason:
-          "Tu veux soulever lourd, mais tu t'entraînes sans charges : Body weight Focus construit la force sur des mouvements lestables — tractions, dips.",
-        alternatives: [PROGRAM_STRENGTH],
+          "Tu veux soulever lourd, mais tu t'entraînes sans charges : on construit la force sur des mouvements lestables — tractions, dips.",
       };
     }
     return {
-      programId: PROGRAM_STRENGTH,
+      order: [PROGRAM_STRENGTH, PROGRAM_MUSCLE, NO_EQUIPMENT_PROGRAM],
       reason:
-        "Tu veux devenir fort : Strength Focus travaille en séries courtes et lourdes, avec des repos complets.",
-      alternatives: [PROGRAM_MUSCLE, NO_EQUIPMENT_PROGRAM],
+        "Tu veux devenir fort : séries courtes et lourdes, avec des repos complets.",
     };
   }
 
   // ── Esthétique, et le repli par défaut ──
   if (!equipped) {
     return {
-      programId: NO_EQUIPMENT_PROGRAM,
+      order: [NO_EQUIPMENT_PROGRAM, PROGRAM_MUSCLE],
       reason:
-        "Tu veux sculpter ton corps sans matériel : Body weight Focus fait monter le volume au poids du corps.",
-      alternatives: [PROGRAM_MUSCLE],
+        "Tu veux sculpter ton corps sans matériel : le volume se construit au poids du corps.",
     };
   }
   return {
-    programId: PROGRAM_MUSCLE,
+    order: [PROGRAM_MUSCLE, PROGRAM_STRENGTH, NO_EQUIPMENT_PROGRAM],
     reason:
       input.objective === "aesthetics"
-        ? "Tu veux prendre du muscle : Muscle Building Focus tient le volume et la surcharge progressive."
-        : "Sans objectif plus précis, Muscle Building Focus est le point de départ le plus polyvalent.",
-    alternatives: [PROGRAM_STRENGTH, NO_EQUIPMENT_PROGRAM],
+        ? "Tu veux prendre du muscle : volume et surcharge progressive."
+        : "Sans objectif plus précis, on part sur le point d'entrée le plus polyvalent.",
+  };
+}
+
+/**
+ * Résout le programme.
+ *
+ * Deux étapes, et la seconde manquait : l'OBJECTIF ordonne les candidats, puis
+ * la FRÉQUENCE annoncée écarte ceux qui ne savent pas l'absorber. Sans elle,
+ * quelqu'un se déclarant disponible cinq fois par semaine recevait un
+ * programme bâti pour trois — et l'écran lui affichait « 3×/sem », en
+ * contradiction directe avec ce qu'il venait de répondre.
+ *
+ * Toujours une réponse : si aucun candidat n'absorbe la fréquence, on garde le
+ * premier — l'objectif prime sur le rythme, et le planificateur sait de toute
+ * façon étaler ou resserrer le cycle.
+ */
+export function resolveRouting(input: RoutingInput): Routing {
+  const equipped = hasEquipment(input.environments);
+  const pressed = input.sessionMinutesMax <= SHORT_SESSION_MINUTES;
+  const { order, reason } = candidatesFor(input, equipped, pressed);
+
+  return {
+    programId: order[0],
+    reason: `${reason} Tu le tiendras à ton rythme : ${input.sessionsPerWeek} séances par semaine, ${input.sessionMinutesMax} minutes par séance.`,
+    alternatives: order.slice(1),
   };
 }
 

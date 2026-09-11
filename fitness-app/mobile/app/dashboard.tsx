@@ -138,10 +138,8 @@ export default function DashboardScreen() {
     ? Math.min(1, userProgram.current_week / totalWeeks)
     : 0;
 
-  const sessionMinutes =
-    program.session_duration_min === program.session_duration_max
-      ? `~ ${program.session_duration_min} min`
-      : `~ ${program.session_duration_min}-${program.session_duration_max} min`;
+  // Le créneau du PRATIQUANT, pas celui de la fiche programme.
+  const sessionMinutes = `~ ${data.sessionMinutesMax} min`;
 
   return (
     <SafeAreaView className="flex-1 bg-bg">

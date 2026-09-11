@@ -487,6 +487,17 @@ export interface OnboardingResult {
   cycleWeeks: number;
   /** Pourquoi ce programme — une phrase, issue du routeur. */
   routingReason: string;
+  /**
+   * Le rythme et le créneau du PRATIQUANT, tels qu'il les a déclarés.
+   *
+   * Les écrans affichaient `program.frequency_per_week` et
+   * `program.session_duration` — la fiche du programme. Quelqu'un répondant
+   * « 4 à 5 séances » lisait donc « 3×/sem », et quelqu'un répondant
+   * « 1 à 2 » lisait « 3-5×/sem » : l'écran contredisait la réponse qu'il
+   * venait de donner. Ces deux champs sont ce qui est réellement planifié.
+   */
+  sessionsPerWeek: number;
+  sessionMinutesMax: number;
 }
 
 export interface DashboardData {
@@ -502,6 +513,9 @@ export interface DashboardData {
   totalPlanned: number;
   /** Durée du cycle réellement planifié — jamais `program.duration_weeks`. */
   cycleWeeks: number;
+  /** Rythme et créneau du pratiquant — jamais ceux de la fiche programme. */
+  sessionsPerWeek: number;
+  sessionMinutesMax: number;
   /** Toutes les séances sont faites -> écran de fin de cycle + feedback. */
   cycleComplete: boolean;
   /** Séances dont la date est passée sans avoir été réalisées. */

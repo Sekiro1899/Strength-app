@@ -54,6 +54,16 @@ export interface Profile {
    */
   strengthOriented: boolean;
   /**
+   * Ne veut pas de finisher cardio. Réponse q9 seule.
+   *
+   * C'était jusqu'ici un effet de bord de `strengthOriented`, qui exige AUSSI
+   * un objectif de musculation : quelqu'un visant la performance et ayant
+   * pourtant répondu « transpirer, pas vraiment mon truc » recevait quand même
+   * un AMRAP en fin de séance. Le questionnaire doit primer — c'est la réponse
+   * qui décide, pas la case dans laquelle on l'a rangé.
+   */
+  avoidsFinisher: boolean;
+  /**
    * Temps annoncé à l'onboarding pour UNE séance (q5), en minutes.
    *
    * Plafond du cycle, distinct du créneau du jour : répondre « j'ai le temps »
@@ -156,6 +166,7 @@ export const DEFAULT_PROFILE: Profile = {
   objective: null,
   intensityStyle: null,
   strengthOriented: false,
+  avoidsFinisher: false,
   sessionMinutesMax: DEFAULT_SESSION_MINUTES,
   avoidsImpact: false,
   sessionsPerWeek: DEFAULT_SESSIONS_PER_WEEK,
@@ -192,6 +203,7 @@ export function profileFromAnswers(
     strengthOriented:
       (objective === "aesthetics" || objective === "strength") &&
       intensityStyle === "prefers_strength_style",
+    avoidsFinisher: intensityStyle === "prefers_strength_style",
     sessionMinutesMax:
       SESSION_MINUTES[rawSessionTime ?? ""] ?? DEFAULT_SESSION_MINUTES,
     avoidsImpact:

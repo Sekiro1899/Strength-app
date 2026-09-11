@@ -47,6 +47,7 @@ class BuildContext:
                  time_budget: str = "standard", persona_id: str | None = None,
                  user_program_id: str = "", week_number: int = 1,
                  objective: str | None = None, strength_oriented: bool = False,
+                 avoids_finisher: bool = False,
                  age_band: str | None = None, session_minutes_max: int = 60,
                  sessions_per_week: int = 3, avoids_impact: bool = False,
                  needs_gentle_progression: bool = False):
@@ -88,6 +89,7 @@ class BuildContext:
         self.needs_gentle_progression = needs_gentle_progression
         # Vient chercher de la charge et de la masse, pas de la sueur (q3 + q9).
         self.strength_oriented = strength_oriented
+        self.avoids_finisher = avoids_finisher
         # Trois plafonds successifs : l'énergie propose, le créneau du jour
         # plafonne, la fréquence hebdomadaire allège.
         self.policy = apply_frequency(
@@ -862,7 +864,9 @@ def build_finisher_block(ctx: BuildContext) -> list[ExerciseBlock]:
     # Ce profil a répondu que transpirer n'était pas son sujet, et qu'il
     # préférait la contraction et les temps de repos (q9). Un finisher en AMRAP
     # ne lui apporte rien qu'il soit venu chercher — on lui rend le temps.
-    if ctx.strength_oriented:
+    # Le pratiquant a dit que transpirer n'était pas son sujet : sa réponse
+    # suffit. On ne lui demande pas en plus d'avoir le « bon » objectif.
+    if ctx.avoids_finisher:
         return []
 
     # Énergie au plus bas : on supprime le finisher plutôt que de le bâcler.

@@ -1,6 +1,10 @@
 /**
  * Scoring persona — fonction pure, sans I/O.
  *
+ * Le persona ne choisit PLUS le programme : c'est le rôle de lib/router, qui
+ * lit directement les réponses. Ce module ne produit donc plus qu'une
+ * identité — celle qu'on affiche au pratiquant.
+ *
  * Référence : docs/data/04_questionnaire_initial.json → scoring_algorithm
  *   - méthode  : additive, result = argmax
  *   - tiebreak : CR > SMB > AW > BF > SAV (sécurité débutant)
@@ -10,9 +14,7 @@
  */
 
 import type {
-  Persona,
   PersonaCode,
-  PersonaProgramEligibility,
   PersonaScores,
   QuestionnaireOption,
   ScoringResult,
@@ -93,34 +95,6 @@ export function toggleMultiChoice(
     questionOptions.filter((o) => o.is_exclusive).map((o) => o.value),
   );
   return [...current.filter((v) => !exclusiveValues.has(v)), value];
-}
-
-/**
- * Résout le programme à assigner pour un persona.
- *
- * SAV a `primary_program_id: null` en seed (il fonctionne en rotation
- * hebdomadaire sur les 5 programmes). Comme `user_programs.program_id` est
- * NOT NULL, on retombe sur la matrice d'éligibilité triée par rank_order —
- * qui donne program_strength (rank_order 1, lundi) comme point d'entrée.
- *
- * @returns l'id du programme, ou null si rien n'est résolvable
- */
-export function resolveProgramId(
-  persona: Pick<Persona, "id" | "primary_program_id" | "secondary_program_id">,
-  eligibility: PersonaProgramEligibility[],
-): string | null {
-  if (persona.primary_program_id) return persona.primary_program_id;
-
-  const ranked = eligibility
-    .filter(
-      (e) =>
-        e.persona_id === persona.id && e.eligibility_rank === "primary",
-    )
-    .sort((a, b) => (a.rank_order ?? 99) - (b.rank_order ?? 99));
-
-  if (ranked.length > 0) return ranked[0].program_id;
-
-  return persona.secondary_program_id ?? null;
 }
 
 /**

@@ -164,6 +164,22 @@ def apply_frequency(policy: dict, sessions_per_week: int,
 # s'effondre d'une série à l'autre et où la prescription ne veut plus rien dire.
 COMPOUND_REST_FLOOR = 120
 COMPOUND_REST_SHORT = 90
+
+# Repos entre séries sur un gros mouvement, en programme de PURE FORCE.
+#
+# Sous 80 % du 1RM, la phosphocréatine n'est pas reconstituée en deux minutes,
+# et la série suivante se fait à charge égale mais à qualité moindre. C'est
+# toute la différence entre un travail de force et un travail d'hypertrophie
+# déguisé.
+#
+# Réservé aux intermédiaires et aux avancés — un débutant progresse sur la
+# technique, pas sur la charge maximale — et seulement quand le pratiquant a
+# dit avoir le temps : chez quelqu'un de pressé, ces repos videraient la
+# séance de la moitié de ses mouvements.
+HEAVY_REST_STRENGTH = 180
+
+# Programmes dont l'objet est la charge maximale.
+MAX_STRENGTH_OBJECTIVES = {"max_strength"}
 ISOLATION_REST = 75
 ISOLATION_REST_SHORT = 60
 
@@ -228,8 +244,14 @@ STRENGTH_PROTOCOLS = [
     {"label": "5×3 force maximale", "sets": 5, "reps": 3, "load_delta": 22, "rest_sec": 210},
 ]
 
-# Personas orientés charge : barème complet, sur les deux premiers compounds.
-STRENGTH_PERSONAS = {"persona_smb", "persona_bf"}
+# Objectifs qui appellent le barème COMPLET — les trois protocoles en rotation,
+# sur les deux premiers compounds au lieu d'un seul.
+#
+# C'était auparavant attaché à deux personas. Mais le persona naît d'un score
+# sur les mêmes réponses : passer par lui ajoutait un intermédiaire opaque, et
+# deux pratiquants au même objectif déclaré recevaient des séances différentes
+# selon un calcul qu'ils n'avaient pas vu.
+DEDICATED_STRENGTH_OBJECTIVES = {"aesthetics", "strength"}
 
 # Objectifs qui justifient de charger. Le 5x5 sert à prendre du muscle ET de la
 # force ; sur un objectif d'efficacité ou de performance athlétique, il mange le
@@ -265,17 +287,17 @@ def _strength_plan(ctx: "BuildContext") -> dict | None:
     if ctx.level_max == "debutant":
         return None
 
-    dedicated = ctx.persona_id in STRENGTH_PERSONAS
-    # Hors des deux personas de force, encore faut-il que la charge fasse
-    # partie de ce que le pratiquant est venu chercher.
+    dedicated = ctx.objective in DEDICATED_STRENGTH_OBJECTIVES
+    # Hors de ces objectifs-là, encore faut-il que la charge fasse partie de ce
+    # que le pratiquant est venu chercher.
     if not dedicated and ctx.objective not in STRENGTH_OBJECTIVES:
         return None
     if ctx.day_number % STRENGTH_EVERY != 0:
         return None
     cycle = ctx.day_number // STRENGTH_EVERY
     return {
-        # Ailleurs que chez les deux personas de force, on s'en tient au 5x5 :
-        # c'est le schéma que tout le monde reconnaît.
+        # Ailleurs, on s'en tient au 5x5 : c'est le schéma que tout le monde
+        # reconnaît.
         "protocol": (STRENGTH_PROTOCOLS[cycle % len(STRENGTH_PROTOCOLS)]
                      if dedicated else STRENGTH_PROTOCOLS[0]),
         "lifts": 2 if dedicated else 1,
@@ -382,6 +404,29 @@ def build_warmup_block(ctx: BuildContext) -> list[ExerciseBlock]:
     return blocks
 
 
+def _strength_rest(ctx: BuildContext, ex: dict, base: int) -> int:
+    """
+    Élève le repos à trois minutes sur les gros mouvements d'un programme de
+    force. Ne descend jamais en dessous du plancher reçu : c'est un
+    relèvement, pas un remplacement.
+    """
+    if ctx.time_budget != "standard":
+        return base
+    if ctx.level_max == "debutant":
+        return base
+    if ctx.program.get("objective") not in MAX_STRENGTH_OBJECTIVES:
+        return base
+    if ex.get("exercise_type") != "compound":
+        return base
+    # Un mouvement unilatéral s'enchaîne côté par côté : la règle ne s'y
+    # applique pas, et lui imposer trois minutes contredirait l'autre.
+    if ex.get("unilateral"):
+        return base
+    if (ex.get("movement_family") or "") not in HEAVY_FAMILIES:
+        return base
+    return max(base, HEAVY_REST_STRENGTH)
+
+
 def _build_circuit_main(ctx: BuildContext) -> list[ExerciseBlock]:
     """
     Programmes en circuit (Préparation Athlétique, Lactate Focus).
@@ -398,8 +443,13 @@ def _build_circuit_main(ctx: BuildContext) -> list[ExerciseBlock]:
         exclude_high_impact=ctx.avoids_impact,
         location=ctx.location,
     )
-    reps = round(
-        ((ctx.phase.get("rep_range_min") or 8) + (ctx.phase.get("rep_range_max") or 10)) / 2
+    # Même règle qu'en split : une fourchette se lit et s'exécute, une moyenne
+    # arrondie ne veut rien dire. Un circuit prescrivait « 9 » là où le bloc
+    # principal d'un programme en split disait déjà « 8-10 ».
+    reps, reps_top = rep_window(
+        ctx.phase.get("rep_range_min") or 8,
+        ctx.phase.get("rep_range_max") or 10,
+        ctx.day_number,
     )
     rest = ctx.phase.get("rest_sec_min") or 60
     load = max(_resolve_load_pct(ctx.phase) + ctx.policy["load_delta"], 40)
@@ -420,6 +470,7 @@ def _build_circuit_main(ctx: BuildContext) -> list[ExerciseBlock]:
             name=ex["name"],
             sets=(ex.get("prescribed_sets") or 1) if imposed else sets,
             reps=None if (is_cardio or imposed) else reps,
+            reps_max=None if (is_cardio or imposed or reps_top <= reps) else reps_top,
             duration_sec=imposed if imposed else (40 if is_cardio else None),
             load_pct_1rm=None if (is_cardio or imposed) else load,
             rest_sec=_rest_for(ex, rest),
@@ -604,8 +655,18 @@ def build_main_block(ctx: BuildContext) -> list[ExerciseBlock]:
 
     # Chaque catégorie du focus doit être représentée avant qu'une seule ne
     # soit servie deux fois — d'où le tirage en tourniquet plutôt qu'à plat.
-    compound_pool = select_varied(ctx.program["id"], ctx.policy["compounds"],
-                                  categories=categories, exercise_types=["compound"], **common)
+    # Sur un programme de force pure, le bloc principal doit porter des
+    # mouvements faits pour la charge. Sans cette préférence, un jour « push »
+    # pouvait sortir pompes, pompes serrées et pompes en pike — trois
+    # mouvements légitimes, mais prescrits à 82 % d'un 1RM qui ne veut alors
+    # rien dire.
+    strength_program = ctx.program.get("objective") in MAX_STRENGTH_OBJECTIVES
+    compound_pool = select_varied(
+        ctx.program["id"], ctx.policy["compounds"],
+        categories=categories, exercise_types=["compound"],
+        **({"require_intent": "force"} if strength_program else {}),
+        **common,
+    )
     n_compounds, sets_compounds = fit_to_pool(
         len(compound_pool), ctx.policy["compounds"], sets_compounds
     )
@@ -661,7 +722,7 @@ def build_main_block(ctx: BuildContext) -> list[ExerciseBlock]:
             reps=reps,
             reps_max=reps_max,
             load_pct_1rm=None if bodyweight_only else load,
-            rest_sec=_rest_for(ex, rest),
+            rest_sec=_rest_for(ex, _strength_rest(ctx, ex, rest)),
             unilateral=bool(ex.get("unilateral")),
             notes=f"Compound — {sets_compounds}x{rng_label(reps, reps_max)}",
             # Sur des tractions ou des dips, la prescription seule ne suffit

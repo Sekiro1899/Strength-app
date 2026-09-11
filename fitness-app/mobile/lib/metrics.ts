@@ -309,6 +309,179 @@ export function logsThisWeek(logs: SessionLog[], now: Date): SessionLog[] {
 }
 
 // ─────────────────────────────────────────────
+// Découpage pour les graphiques
+// ─────────────────────────────────────────────
+
+/** Horizon d'observation choisi par le pratiquant. */
+export type Horizon = "week" | "program" | "all";
+
+export const HORIZONS: { key: Horizon; label: string; hint: string }[] = [
+  { key: "week", label: "Cette semaine", hint: "Lundi → dimanche" },
+  { key: "program", label: "Ce programme", hint: "Depuis le début du cycle" },
+  { key: "all", label: "Depuis le début", hint: "Tout l'historique" },
+];
+
+/** Début de la période, ou null quand elle n'a pas de borne. */
+export function horizonStart(
+  horizon: Horizon,
+  now: Date,
+  programStart: string | null,
+): Date | null {
+  if (horizon === "week") return startOfWeek(now);
+  if (horizon === "program" && programStart) return new Date(`${programStart}T00:00:00`);
+  return null;
+}
+
+export function logsInHorizon(
+  logs: SessionLog[],
+  horizon: Horizon,
+  now: Date,
+  programStart: string | null,
+): SessionLog[] {
+  const from = horizonStart(horizon, now, programStart);
+  if (!from) return logs;
+  const t = from.getTime();
+  return logs.filter((l) => new Date(l.completed_at).getTime() >= t);
+}
+
+/** Une colonne du graphique de volume. */
+export interface Bucket {
+  /** Étiquette courte sous la barre : « lun », « S12 ». */
+  label: string;
+  /** Étiquette longue, affichée à la sélection. */
+  full: string;
+  tonnageKg: number;
+  sessions: number;
+}
+
+const DAY_MS = 86_400_000;
+const DAY_LABELS = ["lun", "mar", "mer", "jeu", "ven", "sam", "dim"];
+
+/**
+ * Répartit le tonnage dans le temps.
+ *
+ * Par JOUR sur une semaine — sept colonnes, dont les creux se lisent. Par
+ * SEMAINE au-delà : quatre-vingt-dix colonnes d'un jour chacune ne dessinent
+ * rien qu'un bruit.
+ */
+export function bucketTonnage(
+  logs: SessionLog[],
+  exercisesById: Map<string, Exercise>,
+  bodyWeightKg: number,
+  horizon: Horizon,
+  now: Date,
+  programStart: string | null,
+): Bucket[] {
+  const weight = bodyWeightKg > 0 ? bodyWeightKg : DEFAULT_BODY_WEIGHT_KG;
+
+  if (horizon === "week") {
+    const monday = startOfWeek(now);
+    return DAY_LABELS.map((label, i) => {
+      const from = monday.getTime() + i * DAY_MS;
+      const dayLogs = logs.filter((l) => {
+        const t = new Date(l.completed_at).getTime();
+        return t >= from && t < from + DAY_MS;
+      });
+      const date = new Date(from);
+      return {
+        label,
+        full: date.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "short" }),
+        tonnageKg: computeStats(dayLogs, exercisesById, weight).tonnageKg,
+        sessions: dayLogs.length,
+      };
+    });
+  }
+
+  // Regroupement par semaine calendaire, de la plus ancienne à la plus récente.
+  const byWeek = new Map<number, SessionLog[]>();
+  for (const log of logs) {
+    const key = startOfWeek(new Date(log.completed_at)).getTime();
+    if (!byWeek.has(key)) byWeek.set(key, []);
+    byWeek.get(key)!.push(log);
+  }
+  const keys = [...byWeek.keys()].sort((a, b) => a - b);
+  return keys.map((key, i) => {
+    const date = new Date(key);
+    return {
+      label: `S${i + 1}`,
+      full: `Semaine du ${date.toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}`,
+      tonnageKg: computeStats(byWeek.get(key)!, exercisesById, weight).tonnageKg,
+      sessions: byWeek.get(key)!.length,
+    };
+  });
+}
+
+/**
+ * Familles de travail, dans l'ordre fixe de la palette.
+ *
+ * Volontairement cinq : c'est ce que la palette garantit comme distinguable,
+ * y compris en vision daltonienne. Les catégories restantes (explosif,
+ * complexes, conditionnement) tombent dans « Gainage & circuits » plutôt que
+ * de créer une sixième couleur que personne ne pourrait séparer des autres.
+ */
+export const WORK_GROUPS = [
+  { key: "push", label: "Poussée" },
+  { key: "pull", label: "Tirage" },
+  { key: "legs", label: "Jambes" },
+  { key: "arms", label: "Bras" },
+  { key: "other", label: "Gainage & circuits" },
+] as const;
+
+export type WorkGroup = (typeof WORK_GROUPS)[number]["key"];
+
+function workGroup(exercise: Exercise | undefined): WorkGroup {
+  switch (exercise?.category) {
+    case "push":
+      return "push";
+    case "pull":
+      return "pull";
+    case "legs":
+      return "legs";
+    case "arms":
+      return "arms";
+    default:
+      return "other";
+  }
+}
+
+export interface GroupShare {
+  key: WorkGroup;
+  label: string;
+  tonnageKg: number;
+  /** Part du total, entre 0 et 1. */
+  share: number;
+}
+
+/** Répartition du tonnage par famille de travail, ordre de palette conservé. */
+export function tonnageByGroup(
+  logs: SessionLog[],
+  exercisesById: Map<string, Exercise>,
+  bodyWeightKg: number,
+): GroupShare[] {
+  const weight = bodyWeightKg > 0 ? bodyWeightKg : DEFAULT_BODY_WEIGHT_KG;
+  const totals = new Map<WorkGroup, number>(WORK_GROUPS.map((g) => [g.key, 0]));
+
+  for (const log of logs) {
+    for (const set of log.sets) {
+      if (!set.completed) continue;
+      const count = set.reps ?? 0;
+      if (count <= 0) continue;
+      const exercise = exercisesById.get(set.exercise_id);
+      const key = workGroup(exercise);
+      totals.set(key, totals.get(key)! + count * repLoadKg(set, exercise, weight));
+    }
+  }
+
+  const total = [...totals.values()].reduce((a, b) => a + b, 0);
+  return WORK_GROUPS.map((g) => ({
+    key: g.key,
+    label: g.label,
+    tonnageKg: totals.get(g.key)!,
+    share: total > 0 ? totals.get(g.key)! / total : 0,
+  }));
+}
+
+// ─────────────────────────────────────────────
 // Infographie — rendre un nombre abstrait palpable
 // ─────────────────────────────────────────────
 
@@ -428,3 +601,52 @@ export const METRICS_TUNING = {
   defaultBodyWeightKg: DEFAULT_BODY_WEIGHT_KG,
   secondsPerRep: SECONDS_PER_REP,
 } as const;
+
+// ─────────────────────────────────────────────
+// Équivalents alimentaires
+// ─────────────────────────────────────────────
+
+/**
+ * Ce que la dépense représente dans l'assiette.
+ *
+ * Les valeurs sont des portions courantes, pas des chiffres de laboratoire —
+ * une pizza margherita entière tourne autour de 900 kcal, un burger simple
+ * autour de 500. L'ordre va du plus léger au plus lourd, même règle de choix
+ * que pour le tonnage : le repère le plus consistant qui reste lisible.
+ */
+const FOOD_LANDMARKS: { kcal: number; one: string; noun: string; many: string; emoji: string }[] = [
+  { kcal: 50, one: "un carré de chocolat", noun: "carré de chocolat", many: "carrés de chocolat", emoji: "🍫" },
+  { kcal: 90, one: "une banane", noun: "banane", many: "bananes", emoji: "🍌" },
+  { kcal: 150, one: "une bière", noun: "bière", many: "bières", emoji: "🍺" },
+  { kcal: 250, one: "un croissant", noun: "croissant", many: "croissants", emoji: "🥐" },
+  { kcal: 300, one: "une part de pizza", noun: "part de pizza", many: "parts de pizza", emoji: "🍕" },
+  { kcal: 500, one: "un burger", noun: "burger", many: "burgers", emoji: "🍔" },
+  { kcal: 900, one: "une pizza entière", noun: "pizza entière", many: "pizzas entières", emoji: "🍕" },
+];
+
+const FOOD_MAX_COUNT = 30;
+
+/** Même forme que `Landmark`, pour que l'écran traite les deux pareil. */
+export function caloriesLandmark(kcal: number): Landmark | null {
+  if (kcal < FOOD_LANDMARKS[0].kcal) return null;
+
+  const pick =
+    [...FOOD_LANDMARKS]
+      .reverse()
+      .find((l) => kcal / l.kcal >= 1 && kcal / l.kcal <= FOOD_MAX_COUNT) ??
+    FOOD_LANDMARKS[FOOD_LANDMARKS.length - 1];
+
+  const raw = kcal / pick.kcal;
+  const count = raw < 10 ? Math.round(raw * 10) / 10 : Math.round(raw);
+  const label = count >= 2 ? pick.many : pick.noun;
+
+  return {
+    count,
+    label,
+    emoji: pick.emoji,
+    sentence:
+      count === 1
+        ? `Tu as brûlé l'équivalent ${liaison(pick.one)}.`
+        : `Tu as brûlé l'équivalent de ${formatCount(count)} ${label}.`,
+  };
+}

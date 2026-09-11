@@ -38,7 +38,7 @@ type Tab = "library" | "personas" | "rules";
 
 const TABS: { key: Tab; label: string }[] = [
   { key: "library", label: "Bibliothèque" },
-  { key: "personas", label: "Personae" },
+  { key: "personas", label: "Programmes" },
   { key: "rules", label: "Règles" },
 ];
 

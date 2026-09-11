@@ -130,7 +130,10 @@ export default function DashboardScreen() {
   const gradient = personaGradient(
     userProgram.persona_id?.replace("persona_", "").toUpperCase(),
   );
-  const totalWeeks = program.duration_weeks;
+  // La durée du CYCLE PLANIFIÉ, pas la durée de référence du programme :
+  // à cinq séances par semaine un cycle de « 14 semaines » en compte huit,
+  // et la barre de progression n'atteignait jamais son terme.
+  const totalWeeks = data.cycleWeeks;
   const progress = totalWeeks
     ? Math.min(1, userProgram.current_week / totalWeeks)
     : 0;
@@ -224,13 +227,8 @@ export default function DashboardScreen() {
             />
             <GlassBanner
               label="Mes entraînements"
-              detail="Poids soulevé, dépense, puissance — semaine et cumul"
+              detail={`Poids soulevé, dépense, répartition · ${completedCount} séance${completedCount > 1 ? "s" : ""}`}
               onPress={() => router.push("/training")}
-            />
-            <GlassBanner
-              label="Mes séances"
-              detail={`${completedCount} terminée${completedCount > 1 ? "s" : ""} · historique complet`}
-              onPress={() => router.push("/sessions")}
             />
           </View>
 

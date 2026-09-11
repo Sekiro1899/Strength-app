@@ -59,14 +59,13 @@ export default function OnboardingResultScreen() {
     );
   }
 
-  const { persona, program, scores } = result;
+  const { persona, program, scores, cycleWeeks, routingReason } = result;
   const tint = personaColor(persona.code);
   const gradient = personaGradient(persona.code);
   const maxScore = Math.max(...Object.values(scores), 1);
 
-  const duration = program.is_continuous
-    ? "Continu"
-    : `${program.duration_weeks} sem`;
+  // Le cycle réellement planifié : il dépend de la fréquence annoncée.
+  const duration = program.is_continuous ? "Continu" : `${cycleWeeks} sem`;
   const frequency =
     program.frequency_per_week_min === program.frequency_per_week_max
       ? `${program.frequency_per_week_min}×`

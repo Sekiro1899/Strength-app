@@ -49,6 +49,28 @@ export const PERSONA_GRADIENTS: Record<PersonaCode, [string, string]> = {
 
 export const ACCENT_GRADIENT: [string, string] = ["#e3ff5c", "#c4e045"];
 
+/**
+ * Palette catégorielle des graphiques.
+ *
+ * Les couleurs de marque (lime #e3ff5c, rose #ff5fa8, vert #4ade80) ne
+ * conviennent PAS à cet usage : elles sont trop claires pour le fond des
+ * cartes et deux d'entre elles deviennent indistinguables en vision
+ * deutéranope. Ces cinq-là sont les mêmes teintes ramenées dans la bande de
+ * clarté du mode sombre (OKLCH L ∈ [0,48 ; 0,67]).
+ *
+ * Vérifiées : bande de clarté, plancher de chroma, séparation daltonienne
+ * (ΔE ≥ 10 sur les paires voisines), lisibilité en vision normale, contraste
+ * contre la surface #1c1c28. L'ORDRE EST FIXE — une série garde sa couleur
+ * quand une autre disparaît du filtre.
+ */
+export const CHART_COLORS: string[] = [
+  "#037ef0", // bleu
+  "#e40087", // magenta
+  "#798b01", // olive
+  "#a538ff", // violet
+  "#0290a4", // cyan
+];
+
 /** Angle 135° en coordonnées LinearGradient. */
 export const GRADIENT_DIRECTION = {
   start: { x: 0, y: 0 },

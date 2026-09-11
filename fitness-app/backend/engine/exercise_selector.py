@@ -110,6 +110,7 @@ def select_exercises(
     exclude_regressions: bool = False,
     exclude_high_impact: bool = False,
     warmup_pool: bool = False,
+    require_intent: str | None = None,
 ) -> list[dict]:
     """Retourne les exercices de la bibliothèque satisfaisant tous les critères."""
     exclude_ids = exclude_ids or set()
@@ -131,6 +132,11 @@ def select_exercises(
         # Une variante allégée n'a sa place dans le bloc principal que chez un
         # débutant ou un pratiquant âgé.
         if exclude_regressions and ex.get("is_regression"):
+            continue
+        # Sert aux programmes de force : « Push-ups (Endurance Reps) » est un
+        # compound de poussée valide, mais le prescrire à 82 % d'un 1RM n'a
+        # aucun sens. PRÉFÉRENCE, pas filtre dur — voir select_varied.
+        if require_intent and require_intent not in (ex.get("intent") or []):
             continue
         # Saut, réception au sol ou barre rattrapée en mouvement : écarté
         # quand les articulations sont à ménager. Ce n'est pas un plafond de
@@ -298,6 +304,15 @@ def select_varied(program_id: str, count: int, **opts) -> list[dict]:
     """
     level_max = opts.pop("level_max", "avance")
     pool = select_exercises(program_id, level_max=level_max, **opts)
+
+    # L'intention demandée passe avant le niveau, mais après la faisabilité :
+    # en plein air sans barre, exiger « force » peut ne laisser personne. On la
+    # relâche alors — une séance imparfaite vaut mieux qu'un bloc vide.
+    if opts.get("require_intent") and len(pool) < count:
+        relaxed = dict(opts)
+        relaxed.pop("require_intent")
+        pool = select_exercises(program_id, level_max=level_max, **relaxed)
+        opts = relaxed
     try:
         start = LEVEL_LADDER.index(level_max)
     except ValueError:

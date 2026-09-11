@@ -127,6 +127,27 @@ const SETS_COMPOUND_SHORT = 3;
  * report ne conserve plus le volume, il rend la séance infaisable — mieux vaut
  * la perdre un peu.
  */
+/**
+ * Repos entre séries sur un gros mouvement, en programme de PURE FORCE.
+ *
+ * Trois minutes ne sont pas du confort : sous 80 % du 1RM, la
+ * phosphocréatine n'est pas reconstituée en deux minutes, et la série
+ * suivante se fait à charge égale mais à qualité moindre. C'est toute la
+ * différence entre un travail de force et un travail d'hypertrophie déguisé.
+ *
+ * Réservé aux intermédiaires et aux avancés : un débutant progresse sur la
+ * technique et le lien nerveux, pas sur la charge maximale, et trois minutes
+ * de pause à chaque série rallongent sa séance sans rien lui apporter.
+ *
+ * Et seulement quand le pratiquant a dit avoir le temps. Chez quelqu'un de
+ * pressé, ces repos videraient la séance de la moitié de ses mouvements : on
+ * garde alors le plancher normal de deux minutes.
+ */
+const HEAVY_REST_STRENGTH = 180;
+
+/** Programmes dont l'objet est la charge maximale. */
+const MAX_STRENGTH_OBJECTIVES = new Set(["max_strength"]);
+
 const MAX_SETS_COMPOUND = 5;
 const MAX_SETS_ISOLATION = 4;
 
@@ -432,6 +453,15 @@ interface SelectOptions {
    * une cible d'échauffement. L'Air Squat sert d'abord à ça.
    */
   warmupPool?: boolean;
+  /**
+   * N'accepte que les exercices portant cette intention.
+   *
+   * Sert aux programmes de force : « Push-ups (Endurance Reps) » est un
+   * compound de poussée parfaitement valide, mais le prescrire à 82 % d'un 1RM
+   * n'a aucun sens. C'est une PRÉFÉRENCE, pas un filtre dur — voir
+   * `selectVaried`, qui l'abandonne plutôt que de rendre un pool trop maigre.
+   */
+  requireIntent?: string;
 }
 
 function selectExercises(programId: string, opts: SelectOptions): Exercise[] {
@@ -458,6 +488,9 @@ function selectExercises(programId: string, opts: SelectOptions): Exercise[] {
       return false;
     }
     if (opts.excludeRegressions && ex.is_regression) return false;
+    if (opts.requireIntent && !(ex.intent ?? []).includes(opts.requireIntent)) {
+      return false;
+    }
     if (opts.armGroup && ex.category === "arms" && armGroup(ex) !== opts.armGroup) {
       return false;
     }
@@ -501,6 +534,14 @@ function selectVaried(
 ): Exercise[] {
   const start = LEVEL_LADDER.indexOf(opts.levelMax ?? "avance");
   let pool = selectExercises(programId, opts);
+
+  // L'intention demandée passe avant le niveau, mais après la faisabilité :
+  // en plein air sans barre, exiger « force » peut ne laisser personne. On la
+  // relâche alors — une séance imparfaite vaut mieux qu'un bloc vide.
+  if (opts.requireIntent && pool.length < count) {
+    pool = selectExercises(programId, { ...opts, requireIntent: undefined });
+  }
+
   for (
     let i = (start < 0 ? LEVEL_LADDER.length : start) + 1;
     i < LEVEL_LADDER.length && pool.length < count * POOL_VARIETY_FACTOR;
@@ -648,8 +689,17 @@ const STRENGTH_PROTOCOLS: StrengthProtocol[] = [
   { label: "5×3 force maximale", sets: 5, reps: 3, loadDelta: 22, rest_sec: 210 },
 ];
 
-/** Personas orientés charge : barème complet, sur les deux premiers compounds. */
-const STRENGTH_PERSONAS = new Set(["persona_smb", "persona_bf"]);
+/**
+ * Objectifs qui appellent le barème COMPLET — les trois protocoles en
+ * rotation, sur les deux premiers compounds au lieu d'un seul.
+ *
+ * C'était auparavant attaché à deux personas (Summer Muscle Builder et Brut
+ * Force). Mais le persona naît d'un score sur ces mêmes réponses : passer par
+ * lui ajoutait un intermédiaire opaque, et deux pratiquants au même objectif
+ * déclaré recevaient des séances différentes selon un calcul qu'ils n'avaient
+ * pas vu. L'objectif déclaré décide, directement.
+ */
+const DEDICATED_STRENGTH_OBJECTIVES = new Set<Objective>(["aesthetics", "strength"]);
 
 /**
  * Objectifs qui justifient de charger. Le 5x5 sert à prendre du muscle ET de
@@ -698,17 +748,19 @@ function strengthPlan(ctx: BuildContext): StrengthPlan | null {
   // séances textbook, pas d'une série lourde greffée sur une séance ordinaire.
   if (ctx.profile.level === "debutant") return null;
 
-  const dedicated = STRENGTH_PERSONAS.has(ctx.personaId ?? "");
-  // Hors des deux personas de force, encore faut-il que la charge fasse
-  // partie de ce que le pratiquant est venu chercher.
+  const dedicated = DEDICATED_STRENGTH_OBJECTIVES.has(
+    ctx.profile.objective as Objective,
+  );
+  // Hors de ces objectifs-là, encore faut-il que la charge fasse partie de ce
+  // que le pratiquant est venu chercher.
   if (!dedicated && !STRENGTH_OBJECTIVES.has(ctx.profile.objective as Objective)) {
     return null;
   }
   if (ctx.dayNumber % STRENGTH_EVERY !== 0) return null;
   const cycle = Math.floor(ctx.dayNumber / STRENGTH_EVERY);
   return {
-    // Ailleurs que chez les deux personas de force, on s'en tient au 5x5 :
-    // c'est le schéma que tout le monde reconnaît.
+    // Ailleurs, on s'en tient au 5x5 : c'est le schéma que tout le monde
+    // reconnaît.
     protocol: dedicated
       ? STRENGTH_PROTOCOLS[cycle % STRENGTH_PROTOCOLS.length]
       : STRENGTH_PROTOCOLS[0],
@@ -759,6 +811,23 @@ function applyStrength(
  * 1RM : un échauffement présenté comme du travail.
  */
 const DEFAULT_LOAD_PCT = 65;
+
+/**
+ * Élève le repos à trois minutes sur les gros mouvements d'un programme de
+ * force. Ne descend jamais en dessous du plancher reçu : c'est un relèvement,
+ * pas un remplacement.
+ */
+function strengthRest(ctx: BuildContext, ex: Exercise, base: number): number {
+  if (ctx.timeBudget !== "standard") return base;
+  if (ctx.profile.level === "debutant") return base;
+  if (!MAX_STRENGTH_OBJECTIVES.has(ctx.program.objective)) return base;
+  if (ex.exercise_type !== "compound") return base;
+  // Un mouvement unilatéral s'enchaîne côté par côté : la règle ne s'y
+  // applique pas, et lui imposer trois minutes contredirait l'autre.
+  if (ex.unilateral) return base;
+  if (!HEAVY_FAMILIES.has(ex.movement_family ?? "")) return base;
+  return Math.max(base, HEAVY_REST_STRENGTH);
+}
 
 function resolveLoadPct(phase: ProgramPhase | null): number {
   return phase?.load_pct_1rm ?? DEFAULT_LOAD_PCT;
@@ -848,8 +917,13 @@ function buildCircuitMain(ctx: BuildContext): ExerciseBlock[] {
     count,
   );
 
-  const reps = Math.round(
-    ((ctx.phase?.rep_range_min ?? 8) + (ctx.phase?.rep_range_max ?? 10)) / 2,
+  // Même règle qu'en split : une fourchette se lit et s'exécute, une moyenne
+  // arrondie ne veut rien dire. Un circuit prescrivait « 9 » là où le bloc
+  // principal d'un programme en split disait déjà « 8-10 ».
+  const [reps, repsTop] = repWindow(
+    ctx.phase?.rep_range_min ?? 8,
+    ctx.phase?.rep_range_max ?? 10,
+    ctx.dayNumber,
   );
   const rest = ctx.phase?.rest_sec_min ?? 60;
   const load = Math.max(resolveLoadPct(ctx.phase) + policy.loadDelta, 40);
@@ -873,7 +947,7 @@ function buildCircuitMain(ctx: BuildContext): ExerciseBlock[] {
         ? { duration_sec: ex.prescribed_duration_sec! }
         : isCardio
           ? { duration_sec: 40 }
-          : { reps, load_pct_1rm: load }),
+          : { reps, ...(repsTop > reps ? { reps_max: repsTop } : {}), load_pct_1rm: load }),
       rest_sec: restFor(ex, rest),
       ...unilateralFields(ex),
       notes: imposed ? "Circuit — format imposé" : `Circuit — tour ${i + 1}`,
@@ -1028,9 +1102,19 @@ export function buildMain(ctx: BuildContext): ExerciseBlock[] {
   // Chaque catégorie du focus doit être représentée avant qu'une seule ne
   // soit servie deux fois — d'où le tirage en tourniquet plutôt qu'à plat.
   // Un full body sort ainsi 1 push, 1 pull, 1 leg avant tout doublon.
+  // Sur un programme de force pure, le bloc principal doit porter des
+  // mouvements faits pour la charge. Sans cette préférence, un jour « push »
+  // pouvait sortir pompes, pompes serrées et pompes en pike — trois mouvements
+  // légitimes, mais prescrits à 82 % d'un 1RM qui ne veut alors rien dire.
+  const strengthProgram = MAX_STRENGTH_OBJECTIVES.has(ctx.program.objective);
   const compoundPool = selectVaried(
     ctx.program.id,
-    { ...base, categories, exerciseTypes: ["compound"] },
+    {
+      ...base,
+      categories,
+      exerciseTypes: ["compound"],
+      ...(strengthProgram ? { requireIntent: "force" } : {}),
+    },
     policy.compounds,
   );
   const compoundFit = fitToPool(compoundPool.length, policy.compounds, setsCompounds);
@@ -1096,7 +1180,7 @@ export function buildMain(ctx: BuildContext): ExerciseBlock[] {
     reps,
     ...(repsMax ? { reps_max: repsMax } : {}),
     ...(bodyweightOnly ? {} : { load_pct_1rm: load }),
-    rest_sec: restFor(ex, rest),
+    rest_sec: restFor(ex, strengthRest(ctx, ex, rest)),
     ...unilateralFields(ex),
     notes: `Compound — ${compoundSets}x${range(reps, repsMax)}`,
     // Sur des tractions ou des dips, la prescription seule ne suffit pas :
@@ -1394,6 +1478,8 @@ export const ENGINE_TUNING = {
   restIsolation: ISOLATION_REST,
   restIsolationShort: ISOLATION_REST_SHORT,
   restCore: CORE_REST,
+  restHeavyStrength: HEAVY_REST_STRENGTH,
+  maxStrengthObjectives: [...MAX_STRENGTH_OBJECTIVES],
   restUnilateralCompound: UNILATERAL_REST,
   restUnilateralIsolation: UNILATERAL_REST_ISOLATION,
   setsCompoundShort: SETS_COMPOUND_SHORT,
@@ -1404,7 +1490,7 @@ export const ENGINE_TUNING = {
   gentleLoadDelta: GENTLE_LOAD_DELTA,
   strengthProtocols: STRENGTH_PROTOCOLS,
   strengthEvery: STRENGTH_EVERY,
-  strengthPersonas: [...STRENGTH_PERSONAS],
+  strengthObjectivesDedicated: [...DEDICATED_STRENGTH_OBJECTIVES],
   strengthObjectives: [...STRENGTH_OBJECTIVES],
   textbookOdds: TEXTBOOK_ODDS,
   textbookOddsYoungOrNovice: TEXTBOOK_ODDS_YOUNG_OR_NOVICE,

@@ -15,6 +15,9 @@ import { ENGINE_TUNING } from "./engine";
 import { METRICS_TUNING } from "./metrics";
 import { PLAN_TUNING } from "./plan";
 import { PROFILE_TUNING } from "./profile";
+import type { Objective } from "./profile";
+import { resolveRouting } from "./router";
+import { PROGRAMS } from "./fixtures";
 import { LEARNING_LOAD_PCT, LEARNING_WEEKS, TEXTBOOK_PROGRAMS } from "./textbook";
 import { SCALING } from "./scaling";
 
@@ -42,6 +45,33 @@ export interface RuleSection {
 
 const s = (n: number) => `${n} s`;
 const min = (n: number) => `${n} min`;
+
+/**
+ * La table de routage, DÉRIVÉE du routeur lui-même plutôt que recopiée : elle
+ * ne peut donc pas décrire un comportement que le code n'a plus.
+ */
+const ROUTING_OBJECTIVES: { key: Objective; label: string }[] = [
+  { key: "aesthetics", label: "Esthétique" },
+  { key: "strength", label: "Force pure" },
+  { key: "performance", label: "Performance" },
+  { key: "complete_athlete", label: "Athlète complet" },
+  { key: "efficiency", label: "Efficacité" },
+];
+
+const ROUTING_TABLE: RuleValue[] = ROUTING_OBJECTIVES.map(({ key, label }) => ({
+  label,
+  value:
+    PROGRAMS.find(
+      (p) =>
+        p.id ===
+        resolveRouting({
+          objective: key,
+          sessionsPerWeek: 3,
+          sessionMinutesMax: 60,
+          environments: ["gym"],
+        }).programId,
+    )?.name ?? "—",
+}));
 
 export const RULE_SECTIONS: RuleSection[] = [
   {
@@ -109,6 +139,22 @@ export const RULE_SECTIONS: RuleSection[] = [
         source: "engine.buildMain",
       },
       {
+        title: "Trois minutes sur les gros mouvements de force",
+        text: "Sous 80 % du 1RM, la phosphocréatine n'est pas reconstituée en deux minutes : la série suivante se fait à charge égale mais à qualité moindre. C'est toute la différence entre un travail de force et un travail d'hypertrophie déguisé. Squat, soulevé de terre, développé couché, développé militaire, tractions, dips — sur les programmes de force pure uniquement.",
+        values: [
+          { label: "Repos", value: s(ENGINE_TUNING.restHeavyStrength) },
+          { label: "Programmes", value: ENGINE_TUNING.maxStrengthObjectives.join(", ") },
+          { label: "Niveau", value: "intermédiaire et avancé" },
+          { label: "Créneau", value: "« j'ai le temps » seulement" },
+        ],
+        source: "engine.strengthRest",
+      },
+      {
+        title: "Un programme de force sert des mouvements faits pour la charge",
+        text: "« Push-ups (Endurance Reps) » est un compound de poussée valide, mais le prescrire à 82 % d'un 1RM ne veut rien dire. Sur un programme de force pure, le bloc principal exige l'intention « force ». La préférence se relâche si le lieu ne laisse pas assez de mouvements — une séance imparfaite vaut mieux qu'un bloc vide.",
+        source: "engine.selectVaried · exercises.intent",
+      },
+      {
         title: "Unilatéral : pas de repos entre les côtés",
         text: "Le côté qui attend récupère pendant que l'autre travaille. La pause se prend après la paire, jamais entre les deux — et sur une isolation unilatérale, pas du tout.",
         values: [
@@ -136,8 +182,8 @@ export const RULE_SECTIONS: RuleSection[] = [
       },
       {
         title: "Les répétitions se prescrivent en fourchette",
-        text: "« 8-10 » ou « 10-12 » se lit et s'exécute ; un « 11 » sec n'est qu'une moyenne calculée. La fenêtre tourne d'une séance à l'autre pour varier le stimulus.",
-        source: "engine.repWindow",
+        text: "« 8-10 » ou « 10-12 » se lit et s'exécute ; un « 11 » sec n'est qu'une moyenne calculée. La fenêtre tourne d'une séance à l'autre pour varier le stimulus. Vaut pour les programmes en split ET en circuit — ces derniers prescrivaient encore une moyenne arrondie.",
+        source: "engine.repWindow · buildMain · buildCircuitMain",
       },
     ],
   },
@@ -149,7 +195,7 @@ export const RULE_SECTIONS: RuleSection[] = [
     rules: [
       {
         title: "Barème de force sur un compound",
-        text: "Une séance sur trois, le premier compound éligible passe sous un barème de force — le reste de la séance garde le tempo normal. Réservé aux intermédiaires et avancés : un débutant n'a pas la technique pour charger à ce niveau.",
+        text: "Une séance sur trois, le premier compound éligible passe sous un barème de force — le reste de la séance garde le tempo normal. Réservé aux intermédiaires et avancés : un débutant n'a pas la technique pour charger à ce niveau. C'est l'OBJECTIF DÉCLARÉ qui ouvre le barème, plus le persona : celui-ci naissait des mêmes réponses et n'ajoutait qu'un détour opaque.",
         values: ENGINE_TUNING.strengthProtocols.map((p) => ({
           label: p.label,
           value: `${p.sets}×${p.reps} · +${p.loadDelta} pts de charge · ${s(p.rest_sec)}`,
@@ -161,8 +207,14 @@ export const RULE_SECTIONS: RuleSection[] = [
         text: "Assez rare pour rester un temps fort, assez régulier pour progresser.",
         values: [
           { label: "Une séance sur", value: String(ENGINE_TUNING.strengthEvery) },
-          { label: "Personas concernés", value: ENGINE_TUNING.strengthPersonas.join(", ") },
-          { label: "Objectifs concernés", value: ENGINE_TUNING.strengthObjectives.join(", ") },
+          {
+            label: "Barème complet (3 protocoles, 2 mouvements)",
+            value: ENGINE_TUNING.strengthObjectivesDedicated.join(", "),
+          },
+          {
+            label: "Barème simple (5×5, 1 mouvement)",
+            value: ENGINE_TUNING.strengthObjectives.join(", "),
+          },
         ],
         source: "engine.strengthPlan",
       },
@@ -243,6 +295,36 @@ export const RULE_SECTIONS: RuleSection[] = [
         text: "Sur les tractions, chin-ups et dips, la prescription seule ne suffit pas : la séance indique comment monter (lest) et comment descendre (élastique, variante assistée), avec une démonstration.",
         values: Object.keys(SCALING).map((id) => ({ label: id, value: "indication affichée" })),
         source: "scaling.SCALING · components/ScalingNote",
+      },
+    ],
+  },
+  {
+    key: "programme",
+    title: "Choix du programme",
+    intro:
+      "Le programme se déduit des réponses au questionnaire, plus du persona. Celui-ci naissait lui-même d'un score sur ces mêmes réponses et portait en chemin des contraintes que le moteur ne lisait jamais : il reste une identité affichée, sans pouvoir sur la génération.",
+    rules: [
+      {
+        title: "Quatre réponses décident",
+        text: "L'objectif est le critère premier. Le lieu peut le rediriger — un programme à la barre est inapplicable sans barre. La durée annoncée écarte les programmes à repos longs. La fréquence n'intervient qu'en arbitrage.",
+        values: [
+          { label: "q3 · objectif", value: "critère premier" },
+          { label: "q8 · lieu", value: "redirige vers le poids de corps" },
+          { label: "q5 · durée", value: "≤ 45 min écarte les repos longs" },
+          { label: "q6 · fréquence", value: "arbitrage" },
+        ],
+        source: "router.resolveRouting",
+      },
+      {
+        title: "Ce que chaque objectif donne",
+        text: "Avec accès aux charges. Sans salle ni matériel, force et esthétique basculent sur Body weight Focus.",
+        values: ROUTING_TABLE,
+        source: "router.resolveRouting",
+      },
+      {
+        title: "Le persona n'a plus de pouvoir",
+        text: "Il est toujours calculé et affiché — « Brut Force » dit quelque chose que « max_strength » ne dit pas. Mais ni le programme ni le barème de force ne passent plus par lui.",
+        source: "scoring.scoreAnswers · router.resolveRouting",
       },
     ],
   },

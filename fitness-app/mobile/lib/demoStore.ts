@@ -31,7 +31,7 @@ import {
 } from "./plan";
 import type { PlannedSession } from "./plan";
 import { profileFromAnswers, profileFromUser } from "./profile";
-import { resolveProgramId } from "./scoring";
+import { resolveRouting, routingInputFromProfile } from "./router";
 import type {
   AppUser,
   PersonaScores,
@@ -203,21 +203,21 @@ export function demoCompleteOnboarding(
   const persona = PERSONAS.find((p) => p.id === personaId);
   if (!persona) throw new Error(`Persona inconnu : ${personaId}`);
 
-  const programId = resolveProgramId(persona, PERSONA_PROGRAM_ELIGIBILITY);
-  if (!programId) throw new Error(`Aucun programme éligible pour ${persona.code}`);
+  // Le programme se déduit des RÉPONSES, plus du persona : voir lib/router.
+  const profile = profileFromAnswers(answers);
+  const environments = Array.isArray(answers.q8)
+    ? answers.q8
+    : answers.q8
+      ? [answers.q8]
+      : [];
+  const { programId } = resolveRouting(routingInputFromProfile(profile, environments));
 
   const program = PROGRAMS.find((p) => p.id === programId)!;
   const phases = PROGRAM_PHASES.filter((ph) => ph.program_id === programId);
   const protocol: Protocol = program.default_protocol ?? "full_body";
 
   // La fréquence annoncée décide du rythme ET de la longueur du cycle.
-  const plan = buildSessionPlan(
-    program,
-    phases,
-    protocol,
-    today,
-    profileFromAnswers(answers).sessionsPerWeek,
-  );
+  const plan = buildSessionPlan(program, phases, protocol, today, profile.sessionsPerWeek);
 
   const user: AppUser = {
     ...(state.user ?? demoSignUp("demo@strength.app")),

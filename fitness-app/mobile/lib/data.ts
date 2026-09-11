@@ -25,17 +25,13 @@ import {
   QUESTIONNAIRE_QUESTIONS,
 } from "./fixtures";
 import { FOCUS_CATEGORY_MAP, buildSessionLabel, resolveFocus } from "./protocol";
-import { overdueCount } from "./plan";
-import {
-  DEFAULT_BODY_WEIGHT_KG,
-  computeStats,
-  logsThisWeek,
-} from "./metrics";
-import type { SessionLog, SetLog, TrainingStats } from "./metrics";
+import { cycleWeeks, overdueCount } from "./plan";
+import type { SessionLog, SetLog } from "./metrics";
 import type { PlannedSession } from "./plan";
-import { profileFromUser } from "./profile";
+import { profileFromAnswers, profileFromUser } from "./profile";
 import type { Profile } from "./profile";
-import { computeStreak, resolveProgramId } from "./scoring";
+import { computeStreak } from "./scoring";
+import { resolveRouting, routingInputFromProfile } from "./router";
 import { isDemoMode, supabase } from "./supabase";
 import type {
   AppUser,
@@ -173,12 +169,21 @@ export async function fetchQuestionnaire(): Promise<{
   };
 }
 
+/** q8 est une question à choix multiple : la réponse peut être un tableau. */
+function environmentsFromAnswers(
+  answers: Record<string, string | string[]>,
+): string[] {
+  const value = answers.q8;
+  if (Array.isArray(value)) return value;
+  return value ? [value] : [];
+}
+
 /**
  * Persiste le résultat du questionnaire et crée le programme actif.
  *
- * Le persona SAV a `primary_program_id = null` (il tourne sur les 5 programmes) ;
- * `resolveProgramId` retombe alors sur la matrice d'éligibilité, sinon l'insert
- * échouerait sur la contrainte NOT NULL de user_programs.program_id.
+ * Le programme se déduit des RÉPONSES (voir lib/router), plus du persona.
+ * Celui-ci est toujours calculé et enregistré — il donne au pratiquant une
+ * identité à laquelle se rattacher — mais il ne décide plus de rien.
  */
 export async function submitQuestionnaire(
   userId: string,
@@ -193,10 +198,16 @@ export async function submitQuestionnaire(
       personaId,
       new Date(),
     );
+    const program = PROGRAMS.find((p) => p.id === userProgram.program_id)!;
+    const profile = profileFromAnswers(answers);
     return {
       persona: PERSONAS.find((p) => p.id === personaId)!,
-      program: PROGRAMS.find((p) => p.id === userProgram.program_id)!,
+      program,
       scores,
+      cycleWeeks: cycleWeeks(program, profile.sessionsPerWeek),
+      routingReason: resolveRouting(
+        routingInputFromProfile(profile, environmentsFromAnswers(answers)),
+      ).reason,
     };
   }
 
@@ -207,16 +218,14 @@ export async function submitQuestionnaire(
     .single();
   if (personaError) throw new Error(personaError.message);
 
-  const { data: eligibility, error: eligError } = await supabase
-    .from("persona_program_eligibility")
-    .select("*")
-    .eq("persona_id", personaId);
-  if (eligError) throw new Error(eligError.message);
-
-  const programId = resolveProgramId(persona as Persona, eligibility ?? []);
-  if (!programId) {
-    throw new Error(`Aucun programme éligible pour le persona ${personaId}.`);
-  }
+  // Le programme se déduit des RÉPONSES au questionnaire, pas du persona :
+  // celui-ci naissait lui-même d'un score sur ces mêmes réponses, et portait
+  // en chemin des contraintes que le moteur ne lisait jamais. Voir lib/router.
+  const liveProfile = profileFromAnswers(answers);
+  const routing = resolveRouting(
+    routingInputFromProfile(liveProfile, environmentsFromAnswers(answers)),
+  );
+  const programId = routing.programId;
 
   const { data: program, error: programError } = await supabase
     .from("programs")
@@ -267,6 +276,8 @@ export async function submitQuestionnaire(
     persona: persona as Persona,
     program: program as Program,
     scores,
+    cycleWeeks: cycleWeeks(program as Program, liveProfile.sessionsPerWeek),
+    routingReason: routing.reason,
   };
 }
 
@@ -281,10 +292,16 @@ export async function fetchOnboardingResult(
     const user = demo.demoCurrentUser();
     const up = demo.demoActiveProgram();
     if (!user?.persona_id || !up) return null;
+    const program = PROGRAMS.find((p) => p.id === up.program_id)!;
+    const profile = profileFromUser(user);
     return {
       persona: PERSONAS.find((p) => p.id === user.persona_id)!,
-      program: PROGRAMS.find((p) => p.id === up.program_id)!,
+      program,
       scores: user.questionnaire_scores ?? { SMB: 0, BF: 0, AW: 0, CR: 0, SAV: 0 },
+      cycleWeeks: cycleWeeks(program, profile.sessionsPerWeek),
+      routingReason: resolveRouting(
+        routingInputFromProfile(profile, environmentsFromAnswers(user.questionnaire_answers ?? {})),
+      ).reason,
     };
   }
 
@@ -310,10 +327,15 @@ export async function fetchOnboardingResult(
     .single();
   if (error) throw new Error(error.message);
 
+  const profile = profileFromUser(user);
   return {
     persona: personaRes.data as Persona,
     program: program as Program,
     scores: user.questionnaire_scores ?? { SMB: 0, BF: 0, AW: 0, CR: 0, SAV: 0 },
+    cycleWeeks: cycleWeeks(program as Program, profile.sessionsPerWeek),
+    routingReason: resolveRouting(
+      routingInputFromProfile(profile, environmentsFromAnswers(user.questionnaire_answers ?? {})),
+    ).reason,
   };
 }
 
@@ -413,6 +435,7 @@ export async function fetchDashboard(
       completedCount: up.total_sessions_completed,
       previewExercises: await previewExerciseNames(nextSession.focus, program.id),
       totalPlanned: plan.length,
+      cycleWeeks: cycleWeeks(program, profileFromUser(demo.demoCurrentUser()).sessionsPerWeek),
       cycleComplete: demo.demoCycleComplete(),
       overdue: overdueCount(plan, done, now),
     };
@@ -465,6 +488,7 @@ export async function fetchDashboard(
     completedCount: userProgram.total_sessions_completed,
     previewExercises: await previewExerciseNames(nextSession.focus, program.id),
     totalPlanned: userProgram.total_sessions_planned ?? 0,
+    cycleWeeks: cycleWeeks(program, profileFromUser(await getCurrentUser(userId)).sessionsPerWeek),
     cycleComplete: userProgram.status === "completed",
     overdue: 0,
   };
@@ -676,40 +700,71 @@ export async function completeSession(
 // Historique d'entraînement
 // ─────────────────────────────────────────────
 
-/** Ce que l'écran « Mes entraînements » affiche. */
+/**
+ * Ce que l'écran « Mes entraînements » affiche.
+ *
+ * On renvoie le JOURNAL BRUT plutôt que des totaux pré-calculés : l'écran
+ * laisse choisir l'horizon (semaine, cycle, tout), et refaire un aller-retour
+ * réseau à chaque bascule de filtre rendrait l'interaction poussive. Les
+ * agrégations vivent dans lib/metrics et se recalculent à l'affichage.
+ */
 export interface TrainingHistory {
-  /** Semaine calendaire en cours, lundi → dimanche. */
-  week: TrainingStats;
-  /** Depuis la toute première séance, tous programmes confondus. */
-  allTime: TrainingStats;
+  logs: SessionLog[];
   /** Poids de corps utilisé pour le calcul — null s'il n'est pas renseigné. */
   bodyWeightKg: number | null;
+  /** Début du cycle en cours (YYYY-MM-DD), pour l'horizon « ce programme ». */
+  programStart: string | null;
   /** Date de la première séance archivée, pour dater le cumul. */
   since: string | null;
+  /** Séances terminées, la plus récente d'abord — l'historique fusionné. */
+  sessions: WorkoutSession[];
 }
 
 export async function fetchTrainingHistory(
   userId: string,
-  now: Date,
+  _now: Date,
 ): Promise<TrainingHistory> {
   const user = await getCurrentUser(userId);
-  const declared = user?.body_weight_kg ?? null;
-  const weight = declared ?? DEFAULT_BODY_WEIGHT_KG;
-  const byId = new Map(EXERCISES.map((e) => [e.id, e]));
 
-  const logs = isDemoMode()
-    ? demo.demoSessionLogs()
-    : await fetchSessionLogs(userId);
+  if (isDemoMode()) {
+    const logs = [...demo.demoSessionLogs()].sort((a, b) =>
+      a.completed_at.localeCompare(b.completed_at),
+    );
+    return {
+      logs,
+      bodyWeightKg: user?.body_weight_kg ?? null,
+      programStart: demo.demoProgram()?.start_date ?? null,
+      since: logs[0]?.completed_at ?? null,
+      sessions: demo
+        .demoSessions()
+        .filter((s) => s.status === "completed")
+        .sort((a, b) => (b.completed_at ?? "").localeCompare(a.completed_at ?? "")),
+    };
+  }
 
-  const sorted = [...logs].sort((a, b) =>
-    a.completed_at.localeCompare(b.completed_at),
-  );
+  const [logs, upRes, sessionsRes] = await Promise.all([
+    fetchSessionLogs(userId),
+    supabase
+      .from("user_programs")
+      .select("start_date")
+      .eq("user_id", userId)
+      .eq("status", "active")
+      .maybeSingle(),
+    supabase
+      .from("sessions")
+      .select("*")
+      .eq("user_id", userId)
+      .eq("status", "completed")
+      .order("completed_at", { ascending: false }),
+  ]);
 
+  const sorted = [...logs].sort((a, b) => a.completed_at.localeCompare(b.completed_at));
   return {
-    week: computeStats(logsThisWeek(sorted, now), byId, weight),
-    allTime: computeStats(sorted, byId, weight),
-    bodyWeightKg: declared,
+    logs: sorted,
+    bodyWeightKg: user?.body_weight_kg ?? null,
+    programStart: upRes.data?.start_date ?? null,
     since: sorted[0]?.completed_at ?? null,
+    sessions: (sessionsRes.data ?? []) as WorkoutSession[],
   };
 }
 

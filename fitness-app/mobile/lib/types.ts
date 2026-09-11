@@ -106,7 +106,13 @@ export interface Persona {
   sessions_per_week_max: number | null;
   session_duration_min_min: number | null;
   session_duration_min_max: number | null;
-  /** null pour SAV — le programme se résout via persona_program_eligibility. */
+  /**
+   * Programme historiquement associé au persona.
+   *
+   * Plus lu par personne : le programme se déduit des réponses au
+   * questionnaire (voir lib/router). Conservé parce que la colonne existe en
+   * base et que le seed la remplit.
+   */
   primary_program_id: string | null;
   secondary_program_id: string | null;
   tertiary_program_id: string | null;
@@ -470,6 +476,17 @@ export interface OnboardingResult {
   persona: Persona;
   program: Program;
   scores: PersonaScores;
+  /**
+   * Durée du cycle RÉELLEMENT planifié, en semaines.
+   *
+   * Distincte de `program.duration_weeks`, qui est une durée de RÉFÉRENCE à
+   * trois séances par semaine. Les écrans affichaient cette référence : un
+   * pratiquant à cinq séances lisait « 14 semaines » alors que son plan en
+   * comptait huit.
+   */
+  cycleWeeks: number;
+  /** Pourquoi ce programme — une phrase, issue du routeur. */
+  routingReason: string;
 }
 
 export interface DashboardData {
@@ -483,6 +500,8 @@ export interface DashboardData {
   previewExercises: string[];
   /** Nombre total de séances du cycle. */
   totalPlanned: number;
+  /** Durée du cycle réellement planifié — jamais `program.duration_weeks`. */
+  cycleWeeks: number;
   /** Toutes les séances sont faites -> écran de fin de cycle + feedback. */
   cycleComplete: boolean;
   /** Séances dont la date est passée sans avoir été réalisées. */

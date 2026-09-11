@@ -97,11 +97,6 @@ export default function ProfileScreen() {
             variant="glass"
             onPress={() => router.push("/training")}
           />
-          <Button
-            label="Mes séances"
-            variant="ghost"
-            onPress={() => router.push("/sessions")}
-          />
           {isAdmin ? (
             <Button
               label="Administration"

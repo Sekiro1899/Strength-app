@@ -161,9 +161,13 @@ export default function FeedbackScreen() {
               </Text>
             ) : null}
             <View className="flex-row gap-2.5">
+              {/* « type » et non « Durée » : ce programme n'est pas encore
+                  planifié, sa durée réelle dépendra de la fréquence que le
+                  pratiquant tiendra. Promettre un chiffre ferme ici serait
+                  répéter l'erreur du tableau de bord. */}
               <MetaPill
                 dark
-                label="Durée"
+                label="Durée type"
                 value={
                   redirected.is_continuous
                     ? "Continu"
